@@ -1,34 +1,19 @@
 syntax = "proto3";
 
-package api.rebac.v1;
+package api.rebac;
 
-import "google/api/annotations.proto";
-
-option go_package = "ciam-rebac/api/rebac/v1;v1";
+option go_package = "helloworld/api/rebac;rebac";
 option java_multiple_files = true;
-option java_package = "api.rebac.v1";
+option java_package = "api.rebac";
 
 service Relationships {
-	rpc CreateRelationships (CreateRelationshipsRequest) returns (CreateRelationshipsResponse) {
-		option (google.api.http) = {
-			post: "/relationships"
-			body: "*"
-		};
-	};
-	rpc ReadRelationships (ReadRelationshipsRequest) returns (ReadRelationshipsResponse) {
-		option (google.api.http) = {
-			get: "/relationships"
-		};
-	};
-	rpc DeleteRelationships (DeleteRelationshipsRequest) returns (DeleteRelationshipsResponse) {
-		option (google.api.http) = {
-			delete: "/relationships"
-		};
-	};
+	rpc CreateRelationships (CreateRelationshipsRequest) returns (CreateRelationshipsResponse);
+	rpc ReadRelationships (ReadRelationshipsRequest) returns (ReadRelationshipsResponse);
+	rpc DeleteRelationships (DeleteRelationshipsRequest) returns (DeleteRelationshipsResponse);
 }
 
 message CreateRelationshipsRequest {
-	bool touch = 1;
+	optional bool touch = 1;
 	repeated Relationship relationships = 2;
 }
 message CreateRelationshipsResponse {}
@@ -47,14 +32,14 @@ message DeleteRelationshipsResponse {}
 
 message RelationshipFilter {
 	string object_type = 1;
-	string object_id = 2;
-	string relation = 3;
-	SubjectFilter subject_filter = 4;
+	optional string object_id = 2;
+	optional string relation = 3;
+	optional SubjectFilter subject_filter = 4;
 }
 
 message SubjectFilter {
-	string relation = 1;
-	string subject_id = 2;
+	optional string relation = 1;
+	optional string subject_id = 2;
 	string subject_type = 3;
 }
 
@@ -73,3 +58,5 @@ message ObjectReference {
 	string type = 1;
 	string id = 2;
 }
+
+

@@ -63,6 +63,31 @@ all:
 	make config;
 	make generate;
 
+
+db:
+	./spicedb/start-postgresql.sh
+.PHONY: db
+
+spicedb:
+	./spicedb/start-spicedb.sh
+.PHONY: spicedb
+
+rebac:
+	./spicedb/start-insights-rebac.sh
+.PHONY: rebac
+
+rebac/teardown:
+	./spicedb/teardownrebac.sh
+.PHONY: rebac/teardown
+
+spicedb/teardown:
+	./spicedb/teardown.sh
+.PHONY: spicedb/teardown
+
+kind/spicedb:
+	./spicedb-kind-setup/setup.sh
+.PHONY: kind/spicedb
+
 # show help
 help:
 	@echo ''

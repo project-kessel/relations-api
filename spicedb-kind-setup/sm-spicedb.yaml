@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: spicedb-cr-service-monitor
+  # Change this to the namespace the Prometheus instance is running in
+  # namespace: default
+  labels:
+    app: kube-prometheus-stack
+    release: kube-prometheus-stack
+spec:
+  jobLabel: job
+  namespaceSelector:
+    matchNames:
+    - spicedb
+  selector:
+    matchLabels:
+      authzed.com/cluster: spicedb-cr
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 15s

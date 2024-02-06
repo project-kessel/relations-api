@@ -1,0 +1,29 @@
+name: CI Build and Test
+
+on:
+  workflow_call:
+  pull_request:
+    branches: ['main']
+
+concurrency:
+  # Cancel in-progress runs on PR update
+  group: ci-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build & run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20.x'
+          cache: true
+      - name: Install dependencies
+        run: go get ./...
+      - name: Build
+        run: go build -tags release -v ./...
+      - name: Test
+        run: go test -v ./...

@@ -3,7 +3,7 @@ module ciam-rebac
 go 1.19
 
 require (
-	github.com/go-kratos/kratos/v2 v2.7.0
+	github.com/go-kratos/kratos/v2 v2.7.2
 	github.com/google/wire v0.5.0
 	go.uber.org/automaxprocs v1.5.3
 	google.golang.org/genproto/googleapis/api v0.0.0-20231106174013-bbf56f31fb17

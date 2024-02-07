@@ -1,4 +1,10 @@
-# Kratos Project Template
+# Rebac Service
+
+## Build
+`make build`
+
+## Run
+`make run`
 
 ## Install Kratos
 ```

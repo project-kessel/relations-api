@@ -1,6 +1,7 @@
 package server
 
 import (
+	h "ciam-rebac/api/health/v1"
 	v1 "ciam-rebac/api/rebac/v1"
 	"ciam-rebac/internal/conf"
 	"ciam-rebac/internal/service"
@@ -11,7 +12,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, health *service.HealthService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -29,5 +30,6 @@ func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, 
 	srv := http.NewServer(opts...)
 
 	v1.RegisterRelationshipsHTTPServer(srv, relationships)
+	h.RegisterHealthHTTPServer(srv, health)
 	return srv
 }

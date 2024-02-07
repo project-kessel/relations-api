@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package api.health.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "ciam-rebac/api/health/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.health.v1";
+
+service Health {
+	rpc GetLivez (GetLivezRequest) returns (GetLivezReply){
+		option (google.api.http) = {
+			get: "/livez"
+		};
+	};
+	rpc GetReadyz (GetReadyzRequest) returns (GetReadyzReply){
+		option (google.api.http) = {
+			get: "/readyz"
+		};
+	};
+}
+
+message GetLivezRequest {}
+message GetLivezReply {}
+
+message GetReadyzRequest {}
+message GetReadyzReply {}

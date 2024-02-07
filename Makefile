@@ -63,7 +63,6 @@ all:
 	make config;
 	make generate;
 
-
 db:
 	./spicedb/start-postgresql.sh
 .PHONY: db
@@ -87,6 +86,11 @@ spicedb/teardown:
 kind/spicedb:
 	./spicedb-kind-setup/setup.sh
 .PHONY: kind/spicedb
+
+.PHONY: run
+# run api locally
+run:
+	./bin/ciam-rebac -conf configs
 
 # show help
 help:

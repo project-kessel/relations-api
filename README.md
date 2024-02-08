@@ -40,6 +40,23 @@ cd cmd/server
 wire
 ```
 
+## Spicedb using docker/podman
+
+# Run the postgresql db
+`make db`
+
+## Run the spicedb
+`make spicedb`
+
+## Run the insights-rebac with docker compose
+`make rebac`
+
+## teardown spicedb and postgresql db
+`make spicedb/teardown`
+
+## Spicedb using kind/kubernetes
+`make kind/spicedb`
+
 ## Docker
 ```bash
 # build

@@ -48,9 +48,6 @@ wire
 
 ## Spicedb using docker/podman
 
-# Run the postgresql db
-`make db`
-
 ## Run the spicedb
 `make spicedb`
 

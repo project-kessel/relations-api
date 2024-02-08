@@ -96,22 +96,23 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter []*a
 	panic("implement me")
 }
 
-func createSpiceDbRelationshipFilter(filter *apiV1.RelationshipFilter) *v1.RelationshipFilter {
-	subject := &v1.SubjectFilter{
-		SubjectType:       filter.GetSubjectFilter().GetSubjectType(),
-		OptionalSubjectId: filter.GetSubjectFilter().GetSubjectId(),
-		OptionalRelation: &v1.SubjectFilter_RelationFilter{
-			Relation: filter.GetSubjectFilter().GetRelation(),
-		},
-	}
-
-	return &v1.RelationshipFilter{
-		ResourceType:          filter.GetObjectType(),
-		OptionalResourceId:    filter.GetObjectId(),
-		OptionalRelation:      filter.GetRelation(),
-		OptionalSubjectFilter: subject,
-	}
-}
+// TODO: below will be needed for Read and Delete
+//func createSpiceDbRelationshipFilter(filter *apiV1.RelationshipFilter) *v1.RelationshipFilter {
+//	subject := &v1.SubjectFilter{
+//		SubjectType:       filter.GetSubjectFilter().GetSubjectType(),
+//		OptionalSubjectId: filter.GetSubjectFilter().GetSubjectId(),
+//		OptionalRelation: &v1.SubjectFilter_RelationFilter{
+//			Relation: filter.GetSubjectFilter().GetRelation(),
+//		},
+//	}
+//
+//	return &v1.RelationshipFilter{
+//		ResourceType:          filter.GetObjectType(),
+//		OptionalResourceId:    filter.GetObjectId(),
+//		OptionalRelation:      filter.GetRelation(),
+//		OptionalSubjectFilter: subject,
+//	}
+//}
 
 func createSpiceDbRelationship(relationship *apiV1.Relationship) *v1.Relationship {
 	subject := &v1.SubjectReference{

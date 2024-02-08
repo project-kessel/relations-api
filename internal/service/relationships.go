@@ -22,7 +22,7 @@ func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelatio
 func (s *RelationshipsService) CreateRelationships(ctx context.Context, req *pb.CreateRelationshipsRequest) (*pb.CreateRelationshipsResponse, error) {
 	s.log.Infof("Create relationships request: %v", req)
 
-	s.createUsecase.CreateRelationships(ctx, req.Relationships, req.GetTouch())
+	_ = s.createUsecase.CreateRelationships(ctx, req.Relationships, req.GetTouch()) // TODO: implement error handling
 
 	return &pb.CreateRelationshipsResponse{}, nil
 }

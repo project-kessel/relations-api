@@ -3,9 +3,33 @@
 
 openapi: 3.0.3
 info:
-    title: Relationships API
+    title: ""
     version: 0.0.1
 paths:
+    /livez:
+        get:
+            tags:
+                - Health
+            operationId: Health_GetLivez
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.health.v1.GetLivezReply'
+    /readyz:
+        get:
+            tags:
+                - Health
+            operationId: Health_GetReadyz
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.health.v1.GetReadyzReply'
     /relationships:
         get:
             tags:
@@ -98,6 +122,12 @@ paths:
                                 $ref: '#/components/schemas/api.rebac.v1.DeleteRelationshipsResponse'
 components:
     schemas:
+        api.health.v1.GetLivezReply:
+            type: object
+            properties: {}
+        api.health.v1.GetReadyzReply:
+            type: object
+            properties: {}
         api.rebac.v1.CreateRelationshipsRequest:
             type: object
             properties:
@@ -144,4 +174,5 @@ components:
                 object:
                     $ref: '#/components/schemas/api.rebac.v1.ObjectReference'
 tags:
+    - name: Health
     - name: Relationships

@@ -23,8 +23,9 @@ import (
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
 	relationshipsService := service.NewRelationshipsService(logger)
-	grpcServer := server.NewGRPCServer(confServer, relationshipsService, logger)
-	httpServer := server.NewHTTPServer(confServer, relationshipsService, logger)
+	healthService := service.NewHealthService()
+	grpcServer := server.NewGRPCServer(confServer, relationshipsService, healthService, logger)
+	httpServer := server.NewHTTPServer(confServer, relationshipsService, healthService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 	}, nil

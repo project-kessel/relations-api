@@ -1,6 +1,7 @@
 package server
 
 import (
+	h "ciam-rebac/api/health/v1"
 	v1 "ciam-rebac/api/rebac/v1"
 	"ciam-rebac/internal/conf"
 	"ciam-rebac/internal/service"
@@ -11,7 +12,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, health *service.HealthService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -28,5 +29,6 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, logg
 	}
 	srv := grpc.NewServer(opts...)
 	v1.RegisterRelationshipsServer(srv, relations)
+	h.RegisterHealthServer(srv, health)
 	return srv
 }

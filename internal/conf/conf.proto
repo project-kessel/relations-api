@@ -26,16 +26,10 @@ message Server {
 }
 
 message Data {
-  message Database {
-    string driver = 1;
-    string source = 2;
+  message SpiceDb {
+    bool useTLS = 1;
+    string endpoint = 2;
+    string tokenFile = 3;
   }
-  message Redis {
-    string network = 1;
-    string addr = 2;
-    google.protobuf.Duration read_timeout = 3;
-    google.protobuf.Duration write_timeout = 4;
-  }
-  Database database = 1;
-  Redis redis = 2;
+  SpiceDb spiceDb = 1;
 }

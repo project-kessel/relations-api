@@ -6,7 +6,9 @@
 package main
 
 import (
+	"ciam-rebac/internal/biz"
 	"ciam-rebac/internal/conf"
+	"ciam-rebac/internal/data"
 	"ciam-rebac/internal/server"
 	"ciam-rebac/internal/service"
 
@@ -17,5 +19,5 @@ import (
 
 // wireApp init kratos application.
 func wireApp(*conf.Server, *conf.Data, log.Logger) (*kratos.App, func(), error) {
-	panic(wire.Build(server.ProviderSet, service.ProviderSet, newApp))
+	panic(wire.Build(server.ProviderSet, service.ProviderSet, biz.ProviderSet, data.ProviderSet, newApp))
 }

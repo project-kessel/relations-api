@@ -1,6 +1,7 @@
 package service
 
 import (
+	"ciam-rebac/internal/biz"
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -10,15 +11,19 @@ import (
 
 type RelationshipsService struct {
 	pb.UnimplementedRelationshipsServer
-	log *log.Helper
+	createUsecase *biz.CreateRelationshipsUsecase
+	log           *log.Helper
 }
 
-func NewRelationshipsService(logger log.Logger) *RelationshipsService {
-	return &RelationshipsService{log: log.NewHelper(logger)}
+func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelationshipsUsecase) *RelationshipsService {
+	return &RelationshipsService{log: log.NewHelper(logger), createUsecase: createUseCase}
 }
 
 func (s *RelationshipsService) CreateRelationships(ctx context.Context, req *pb.CreateRelationshipsRequest) (*pb.CreateRelationshipsResponse, error) {
 	s.log.Infof("Create relationships request: %v", req)
+
+	_ = s.createUsecase.CreateRelationships(ctx, req.Relationships, req.GetTouch()) // TODO: implement error handling
+
 	return &pb.CreateRelationshipsResponse{}, nil
 }
 func (s *RelationshipsService) ReadRelationships(ctx context.Context, req *pb.ReadRelationshipsRequest) (*pb.ReadRelationshipsResponse, error) {

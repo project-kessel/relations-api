@@ -63,10 +63,6 @@ all:
 	make config;
 	make generate;
 
-db:
-	./spicedb/start-postgresql.sh
-.PHONY: db
-
 spicedb:
 	./spicedb/start-spicedb.sh
 .PHONY: spicedb

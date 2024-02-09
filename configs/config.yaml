@@ -8,5 +8,5 @@ server:
 data:
   spiceDb:
     useTLS: false
-    endpoint: localhost:50051
-    tokenFile: spicedb_pre_shared
+    endpoint: spicedb:50051
+    tokenFile: /spicedb_pre_shared

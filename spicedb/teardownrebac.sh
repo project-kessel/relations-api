@@ -1,3 +1,3 @@
 #!/bin/bash
 set -e
-docker-compose --profile rebac -f ./spicedb/docker-compose.yaml down
+docker-compose --env-file ./spicedb/.env --profile rebac -f docker-compose.yaml down

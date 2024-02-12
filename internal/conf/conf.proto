@@ -29,7 +29,7 @@ message Data {
   message SpiceDb {
     bool useTLS = 1;
     string endpoint = 2;
-    string tokenFile = 3;
+    string token = 3;
   }
   SpiceDb spiceDb = 1;
 }

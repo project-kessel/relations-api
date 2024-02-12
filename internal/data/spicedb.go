@@ -12,7 +12,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"os"
 )
 
 // SpiceDbRepository .
@@ -27,9 +26,9 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithBlock()) // TODO: always did it this way with authz. Still the right option?
 
-	token, err := readToken(c.SpiceDb.TokenFile)
-	if err != nil {
-		err = fmt.Errorf("error extracting token from file: %w", err)
+	token := c.SpiceDb.Token
+	if token == "" {
+		err := fmt.Errorf("token is empty: %s", token)
 		log.NewHelper(logger).Error(err)
 		return nil, nil, err
 	}
@@ -133,13 +132,4 @@ func createSpiceDbRelationship(relationship *apiV1.Relationship) *v1.Relationshi
 		Relation: relationship.GetRelation(),
 		Subject:  subject,
 	}
-}
-
-func readToken(file string) (string, error) {
-	bytes, err := os.ReadFile(file)
-	if err != nil {
-		return "", err
-	}
-
-	return string(bytes), nil
 }

@@ -20,6 +20,7 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal:9.3
 COPY --from=builder /workspace/bin/ciam-rebac /usr/local/bin/
 COPY --from=builder /workspace/configs/config.yaml /usr/local/bin/
 
+ENV SPICEDB_PRESHARED $SPICEDB_PRESHARED
 EXPOSE 8000
 EXPOSE 9000
 

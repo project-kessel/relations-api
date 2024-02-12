@@ -9,4 +9,4 @@ data:
   spiceDb:
     useTLS: false
     endpoint: spicedb:50051
-    tokenFile: /spicedb_pre_shared
+    token: "${SPICEDB_PRESHARED:foobar}"

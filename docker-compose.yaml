@@ -3,8 +3,8 @@ version: "3.8"
 services:
   rebac:
     image: "quay.io/ciam_authz/insights-rebac:latest"
-    configs:
-      - spicedb_pre_shared
+    environment:
+      - "SPICEDB_PRESHARED=${SPICEDB_GRPC_PRESHARED_KEY}"
     build:
       dockerfile: Dockerfile
     profiles: ["rebac"]

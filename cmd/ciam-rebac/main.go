@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/go-kratos/kratos/v2/config/env"
 	"os"
 
 	"ciam-rebac/internal/conf"
@@ -60,6 +61,7 @@ func main() {
 	)
 	c := config.New(
 		config.WithSource(
+			env.NewSource("SPICEDB_"),
 			file.NewSource(flagconf),
 		),
 	)
@@ -72,6 +74,14 @@ func main() {
 	var bc conf.Bootstrap
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
+	}
+
+	preshared, err := c.Value("PRESHARED").String()
+	if err != nil {
+		log.NewHelper(logger).Errorf("Failed to read preshared key env %d", err)
+	}
+	if preshared != "" {
+		bc.Data.SpiceDb.Token = preshared
 	}
 
 	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)

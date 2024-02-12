@@ -85,9 +85,8 @@ kind/spicedb:
 
 .PHONY: run
 # run api locally
-run:
-	./bin/ciam-rebac -conf configs
-
+run: build
+	 ./bin/ciam-rebac -conf configs
 # show help
 help:
 	@echo ''

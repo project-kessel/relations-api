@@ -6,31 +6,7 @@ info:
     title: ""
     version: 0.0.1
 paths:
-    /livez:
-        get:
-            tags:
-                - Health
-            operationId: Health_GetLivez
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.health.v1.GetLivezReply'
-    /readyz:
-        get:
-            tags:
-                - Health
-            operationId: Health_GetReadyz
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.health.v1.GetReadyzReply'
-    /relationships:
+    /api/relationships:
         get:
             tags:
                 - Relationships
@@ -120,6 +96,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.rebac.v1.DeleteRelationshipsResponse'
+    /livez:
+        get:
+            tags:
+                - Health
+            operationId: Health_GetLivez
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.health.v1.GetLivezReply'
+    /readyz:
+        get:
+            tags:
+                - Health
+            operationId: Health_GetReadyz
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.health.v1.GetReadyzReply'
 components:
     schemas:
         api.health.v1.GetLivezReply:

@@ -4,6 +4,6 @@ source ./spicedb/check_docker_podman.sh
 
 set -e
 
-docker-compose --env-file ./spicedb/.env -f ./docker-compose.yaml down
+${DOCKER} compose --env-file ./spicedb/.env -f ./docker-compose.yaml down
 
 

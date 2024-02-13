@@ -1,7 +1,6 @@
 GOHOSTOS:=$(shell go env GOHOSTOS)
 GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
-DOCKER ?= podman
 
 DOCKER ?= docker
 DOCKER_CONFIG="${PWD}/.docker"
@@ -77,7 +76,6 @@ all:
 # run go linter with the repositories lint config
 .PHONY: lint
 lint:
-	@echo ""
 	@echo "Linting code."
 	@$(DOCKER) run -t --rm -v $(PWD):/app -w /app golangci/golangci-lint golangci-lint run -v
 
@@ -113,12 +111,6 @@ kind/spicedb:
 # run api locally
 run: build
 	 ./bin/ciam-rebac -conf configs
-
-# run go linter with the repositories lint config
-.PHONY: lint
-lint:
-	@echo "Linting code."
-	@$(DOCKER) run -t --rm -v $(PWD):/app -w /app golangci/golangci-lint golangci-lint run -v
 
 # show help
 help:

@@ -38,7 +38,7 @@ func TestMain(m *testing.M) {
 	os.Exit(result)
 }
 
-func TestWriteRelationship(t *testing.T) {
+func TestCreateRelationship(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -61,7 +61,7 @@ func TestWriteRelationship(t *testing.T) {
 	assert.True(t, exists)
 }
 
-func TestSecondWriteRelationshipFailsWithTouchFalse(t *testing.T) {
+func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -88,7 +88,7 @@ func TestSecondWriteRelationshipFailsWithTouchFalse(t *testing.T) {
 	assert.True(t, exists)
 }
 
-func TestSecondWriteRelationshipSucceedsWithTouchTrue(t *testing.T) {
+func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -116,7 +116,7 @@ func TestSecondWriteRelationshipSucceedsWithTouchTrue(t *testing.T) {
 	assert.True(t, exists)
 }
 
-func TestWriteRelationshipFailsWithBadSubjectType(t *testing.T) {
+func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -137,7 +137,7 @@ func TestWriteRelationshipFailsWithBadSubjectType(t *testing.T) {
 	assert.Contains(t, err.Error(), "object definition `"+badSubjectType+"` not found")
 }
 
-func TestWriteRelationshipFailsWithBadObjectType(t *testing.T) {
+func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()

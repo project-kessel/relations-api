@@ -164,7 +164,7 @@ func (l *LocalSpiceDbContainer) Close() {
 }
 
 // CheckForRelationship returns true if the given subject has the given relationship to the given resource, otherwise false
-func (l *LocalSpiceDbContainer) CheckForRelationship(client *authzed.Client, subjectID string, subjectType string, subjectRelationship string, relationship string, resourceType string, resourceID string) bool {
+func CheckForRelationship(client *authzed.Client, subjectID string, subjectType string, subjectRelationship string, relationship string, resourceType string, resourceID string) bool {
 	ctx := context.TODO()
 	resp, err := client.ReadRelationships(ctx, &v1.ReadRelationshipsRequest{
 		Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},

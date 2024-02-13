@@ -43,7 +43,7 @@ func TestWriteRelationship(t *testing.T) {
 	spiceDbRepo, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	preExisting := container.CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
+	preExisting := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
 	assert.False(t, preExisting)
 
 	rels := []*apiV1.Relationship{
@@ -55,7 +55,7 @@ func TestWriteRelationship(t *testing.T) {
 	err = spiceDbRepo.CreateRelationships(ctx, rels, semantics)
 	assert.NoError(t, err)
 
-	exists := container.CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
+	exists := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
 	assert.True(t, exists)
 }
 

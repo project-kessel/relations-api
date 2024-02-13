@@ -29,8 +29,8 @@ const (
 	SpicedbVersion = "v1.22.2"
 	// SpicedbSchemaBootstrapFile specifies an optional bootstrap schema file to be used for testing
 	SpicedbSchemaBootstrapFile = "spicedb-test-data/basic_schema.yaml"
-	// SpicedbRelationsBookstrapFile specifies an optional bootstrap file containing relations to be used for testing
-	SpicedbRelationsBookstrapFile = ""
+	// SpicedbRelationsBootstrapFile specifies an optional bootstrap file containing relations to be used for testing
+	SpicedbRelationsBootstrapFile = ""
 )
 
 // LocalSpiceDbContainer struct that holds pointers to the container, dockertest pool and exposes the port
@@ -63,14 +63,14 @@ func CreateContainer(logger log.Logger) (*LocalSpiceDbContainer, error) {
 		cmd = append(cmd, "/mnt/spicedb_bootstrap.yaml")
 		mounts = append(mounts, path.Join(basepath, SpicedbSchemaBootstrapFile)+":/mnt/spicedb_bootstrap.yaml")
 	}
-	if SpicedbRelationsBookstrapFile != "" {
+	if SpicedbRelationsBootstrapFile != "" {
 		if SpicedbSchemaBootstrapFile != "" {
 			cmd[len(cmd)-1] = "/mnt/spicedb_bootstrap.yaml,/mnt/spicedb_bootstrap_relations.yaml"
 		} else {
 			cmd = append(cmd, "--load-configs")
 			cmd = append(cmd, "/mnt/spicedb_bootstrap_relations.yaml")
 		}
-		mounts = append(mounts, path.Join(basepath, SpicedbRelationsBookstrapFile)+":/mnt/spicedb_bootstrap_relations.yaml")
+		mounts = append(mounts, path.Join(basepath, SpicedbRelationsBootstrapFile)+":/mnt/spicedb_bootstrap_relations.yaml")
 	}
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{

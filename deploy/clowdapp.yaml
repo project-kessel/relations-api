@@ -18,11 +18,11 @@ objects:
             livenessProbe:
               httpGet:
                 path: /livez
-                port: 8000
+                port: 8080
             readinessProbe:
               httpGet:
                 path: /readyz
-                port: 8000
+                port: 8080
           webServices:
             public:
               enabled: true

@@ -21,7 +21,7 @@ COPY --from=builder /workspace/bin/ciam-rebac /usr/local/bin/
 COPY --from=builder /workspace/configs/config.yaml /usr/local/bin/
 
 ENV SPICEDB_PRESHARED $SPICEDB_PRESHARED
-EXPOSE 8000
+EXPOSE 8080
 EXPOSE 9000
 
 USER 1001

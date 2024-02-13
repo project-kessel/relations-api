@@ -10,7 +10,7 @@ services:
     profiles: ["rebac"]
     restart: "always"
     ports:
-      - "8000:8000"
+      - "8080:8080"
       - "9000:9000"
 
   spicedb:

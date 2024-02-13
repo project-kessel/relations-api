@@ -12,6 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"strconv"
 )
 
 // SpiceDbRepository .
@@ -21,19 +22,49 @@ type SpiceDbRepository struct {
 
 // NewSpiceDbRepository .
 func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, func(), error) {
+	return newSpiceDbRepository(c, "", "", "", logger)
+}
+
+func newSpiceDbRepository(c *conf.Data, tokenOverride string, endpointOverride string, useTlsOverride string, logger log.Logger) (*SpiceDbRepository, func(), error) {
 	log.NewHelper(logger).Info("creating spicedb connection")
 
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.EmptyDialOption{}) // TODO: always did it this way with authz. Still the right option?
+	opts = append(opts, grpc.EmptyDialOption{})
 	//TODO: add a flag to enable/disable grpc.WithBlock
-	token := c.SpiceDb.Token
-	if token == "" {
-		err := fmt.Errorf("token is empty: %s", token)
-		log.NewHelper(logger).Error(err)
-		return nil, nil, err
+	var token string
+	if tokenOverride != "" {
+		token = tokenOverride
+	} else {
+		token := c.SpiceDb.Token
+		if token == "" {
+			err := fmt.Errorf("token is empty: %s", token)
+			log.NewHelper(logger).Error(err)
+			return nil, nil, err
+		}
 	}
 
-	if !c.SpiceDb.UseTLS {
+	var endpoint string
+	if endpointOverride != "" {
+		endpoint = endpointOverride
+	} else {
+		endpoint = c.SpiceDb.Endpoint
+	}
+
+	var useTLS bool
+	if useTlsOverride != "" {
+		var err error
+		useTLS, err = strconv.ParseBool(useTlsOverride)
+
+		if err != nil {
+			err = fmt.Errorf("error parsing useTlsOverride: %w", err)
+			log.NewHelper(logger).Error(err)
+			return nil, nil, err
+		}
+	} else {
+		useTLS = c.SpiceDb.UseTLS
+	}
+
+	if !useTLS {
 		opts = append(opts, grpcutil.WithInsecureBearerToken(token))
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
@@ -43,7 +74,7 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 	}
 
 	client, err := authzed.NewClient(
-		c.SpiceDb.Endpoint,
+		endpoint,
 		opts...,
 	)
 

@@ -3,6 +3,9 @@ GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 DOCKER ?= podman
 
+DOCKER ?= docker
+DOCKER_CONFIG="${PWD}/.docker"
+
 ifeq ($(GOHOSTOS), windows)
 	#the `find.exe` is different from `find` in bash/shell.
 	#to see https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/find.
@@ -50,6 +53,13 @@ api:
 build:
 	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
 
+# run all tests
+.PHONY: test
+test:
+	@echo ""
+	@echo "Running tests."
+	go test ./... -count=1
+
 .PHONY: generate
 # generate
 generate:
@@ -63,6 +73,21 @@ all:
 	make api;
 	make config;
 	make generate;
+
+# run go linter with the repositories lint config
+.PHONY: lint
+lint:
+	@echo ""
+	@echo "Linting code."
+	@$(DOCKER) run -t --rm -v $(PWD):/app -w /app golangci/golangci-lint golangci-lint run -v
+
+.PHONY: pr-check
+# generate pr-check
+pr-check:
+	make generate;
+	make test;
+	make lint;
+	make build;
 
 spicedb:
 	./spicedb/start-spicedb.sh

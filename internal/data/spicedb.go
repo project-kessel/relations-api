@@ -24,8 +24,9 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 	log.NewHelper(logger).Info("creating spicedb connection")
 
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.EmptyDialOption{}) // TODO: always did it this way with authz. Still the right option?
+	opts = append(opts, grpc.EmptyDialOption{})
 	//TODO: add a flag to enable/disable grpc.WithBlock
+
 	token := c.SpiceDb.Token
 	if token == "" {
 		err := fmt.Errorf("token is empty: %s", token)

@@ -146,8 +146,12 @@ func (l *LocalSpiceDbContainer) CreateSpiceDbRepository() (*SpiceDbRepository, e
 		return nil, err
 	}
 
-	var c *conf.Data
-	repo, _, err := newSpiceDbRepository(c, randomKey, "localhost:"+l.port, "false", l.logger)
+	spiceDbConf := &conf.Data_SpiceDb{
+		UseTLS:   false,
+		Endpoint: "localhost:" + l.port,
+		Token:    randomKey,
+	}
+	repo, _, err := NewSpiceDbRepository(&conf.Data{SpiceDb: spiceDbConf}, l.logger)
 	if err != nil {
 		return nil, err
 	}

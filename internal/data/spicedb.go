@@ -5,7 +5,10 @@ import (
 	"ciam-rebac/internal/biz"
 	"ciam-rebac/internal/conf"
 	"context"
+	"errors"
 	"fmt"
+	"io"
+
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/authzed/authzed-go/v1"
 	"github.com/authzed/grpcutil"
@@ -86,9 +89,62 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 	return err
 }
 
-func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter []*apiV1.RelationshipFilter) ([]*apiV1.Relationship, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1.RelationshipFilter) ([]*apiV1.Relationship, error) {
+	req := &v1.ReadRelationshipsRequest{}
+
+	if filter != nil {
+		req.RelationshipFilter = &v1.RelationshipFilter{
+			ResourceType:       filter.ObjectType,
+			OptionalResourceId: filter.ObjectId,
+			OptionalRelation:   filter.Relation,
+		}
+
+		if filter.SubjectFilter != nil {
+			req.RelationshipFilter.OptionalSubjectFilter = &v1.SubjectFilter{
+				SubjectType:       filter.SubjectFilter.SubjectType,
+				OptionalSubjectId: filter.SubjectFilter.SubjectId,
+			}
+
+			if filter.SubjectFilter.Relation != "" {
+				req.RelationshipFilter.OptionalSubjectFilter.OptionalRelation = &v1.SubjectFilter_RelationFilter{
+					Relation: filter.SubjectFilter.Relation,
+				}
+			}
+		}
+	}
+
+	client, err := s.client.ReadRelationships(ctx, req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]*apiV1.Relationship, 0, 0)
+	resp, err := client.Recv()
+	for err == nil {
+		results = append(results, &apiV1.Relationship{
+			Object: &apiV1.ObjectReference{
+				Type: resp.Relationship.Resource.ObjectType,
+				Id:   resp.Relationship.Resource.ObjectId,
+			},
+			Relation: resp.Relationship.Relation,
+			Subject: &apiV1.SubjectReference{
+				Relation: resp.Relationship.Subject.OptionalRelation,
+				Object: &apiV1.ObjectReference{
+					Type: resp.Relationship.Subject.Object.ObjectType,
+					Id:   resp.Relationship.Subject.Object.ObjectId,
+				},
+			},
+		})
+
+		resp, err = client.Recv()
+	}
+
+	if !errors.Is(err, io.EOF) {
+		return nil, err
+	}
+
+	return results, nil
 }
 
 func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter []*apiV1.RelationshipFilter) ([]*apiV1.Relationship, error) {

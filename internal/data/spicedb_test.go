@@ -5,13 +5,14 @@ import (
 	"ciam-rebac/internal/biz"
 	"context"
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"os"
-	"testing"
 )
 
 var container *LocalSpiceDbContainer
@@ -156,6 +157,42 @@ func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, status.Convert(err).Code(), codes.FailedPrecondition)
 	assert.Contains(t, err.Error(), "object definition `"+badObjectType+"` not found")
+}
+
+func TestWriteAndReadBackRelationships(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.NoError(t, err)
+	rels := []*apiV1.Relationship{
+		createRelationship("bob", "user", "", "member", "group", "bob_club"),
+	}
+
+	err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	readrels, err := spiceDbRepo.ReadRelationships(ctx, &apiV1.RelationshipFilter{
+		ObjectId:   "bob_club",
+		ObjectType: "group",
+		Relation:   "member",
+		SubjectFilter: &apiV1.SubjectFilter{
+			SubjectId:   "bob",
+			SubjectType: "user",
+		},
+	})
+
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, 1, len(readrels))
 }
 
 func createRelationship(subjectId string, subjectType string, subjectRelationship string, relationship string, objectType string, objectId string) *apiV1.Relationship {

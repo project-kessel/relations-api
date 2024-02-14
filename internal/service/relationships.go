@@ -12,6 +12,7 @@ import (
 type RelationshipsService struct {
 	pb.UnimplementedRelationshipsServer
 	createUsecase *biz.CreateRelationshipsUsecase
+	readUsecase   *biz.ReadRelationshipsUsecase
 	log           *log.Helper
 }
 
@@ -26,10 +27,19 @@ func (s *RelationshipsService) CreateRelationships(ctx context.Context, req *pb.
 
 	return &pb.CreateRelationshipsResponse{}, nil
 }
+
 func (s *RelationshipsService) ReadRelationships(ctx context.Context, req *pb.ReadRelationshipsRequest) (*pb.ReadRelationshipsResponse, error) {
 	s.log.Infof("Read relationships request: %v", req)
-	return &pb.ReadRelationshipsResponse{}, nil
+
+	if relationships, err := s.readUsecase.ReadRelationships(ctx, req.GetFilter()); err != nil {
+		return nil, err
+	} else {
+		return &pb.ReadRelationshipsResponse{
+			Relationships: relationships,
+		}, nil
+	}
 }
+
 func (s *RelationshipsService) DeleteRelationships(ctx context.Context, req *pb.DeleteRelationshipsRequest) (*pb.DeleteRelationshipsResponse, error) {
 	s.log.Infof("Delete relationships request: %v", req)
 	return &pb.DeleteRelationshipsResponse{}, nil

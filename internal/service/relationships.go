@@ -17,8 +17,13 @@ type RelationshipsService struct {
 	log           *log.Helper
 }
 
-func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelationshipsUsecase) *RelationshipsService {
-	return &RelationshipsService{log: log.NewHelper(logger), createUsecase: createUseCase}
+func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelationshipsUsecase, readUsecase *biz.ReadRelationshipsUsecase, deleteUsecase *biz.DeleteRelationshipsUsecase) *RelationshipsService {
+	return &RelationshipsService{
+		log:           log.NewHelper(logger),
+		createUsecase: createUseCase,
+		readUsecase:   readUsecase,
+		deleteUsecase: deleteUsecase,
+	}
 }
 
 func (s *RelationshipsService) CreateRelationships(ctx context.Context, req *pb.CreateRelationshipsRequest) (*pb.CreateRelationshipsResponse, error) {

@@ -1,12 +1,12 @@
 server:
   http:
-    addr: 0.0.0.0:8000
+    addr: "${HTTPADDR:0.0.0.0:8000}"
     timeout: 1s
   grpc:
-    addr: 0.0.0.0:9000
+    addr: "${GRPCADDR:0.0.0.0:9000}"
     timeout: 1s
 data:
   spiceDb:
     useTLS: false
-    endpoint: spicedb:50051
-    token: "${SPICEDB_PRESHARED:foobar}"
+    endpoint: "${ENDPOINT:spicedb:50051}"
+    token: "${PRESHARED:foobar}"

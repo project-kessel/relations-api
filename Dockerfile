@@ -21,6 +21,10 @@ COPY --from=builder /workspace/bin/ciam-rebac /usr/local/bin/
 COPY --from=builder /workspace/configs/config.yaml /usr/local/bin/
 
 ENV SPICEDB_PRESHARED $SPICEDB_PRESHARED
+ENV SPICEDB_ENDPOINT $SPICEDB_ENDPOINT
+ENV SPICEDB_HTTPADDR $SPICEDB_HTTPADDR
+ENV SPICEDB_GRPCADDR $SPICEDB_GRPCADDR
+
 EXPOSE 8000
 EXPOSE 9000
 

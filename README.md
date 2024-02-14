@@ -46,6 +46,10 @@ cd cmd/server
 wire
 ```
 
+## Run Rebac service with env
+
+`docker run -e SPICEDB_PRESHARED=foobar -e SPICEDB_HTTPADDR=0.0.0.0:8001 quay.io/ciam_authz/insights-rebac`
+
 ## Spicedb using docker/podman
 
 ## Run the spicedb

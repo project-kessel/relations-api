@@ -126,9 +126,17 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 	return results, nil
 }
 
-func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter []*apiV1.RelationshipFilter) ([]*apiV1.Relationship, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1.RelationshipFilter) error {
+	req := &v1.DeleteRelationshipsRequest{RelationshipFilter: createSpiceDbRelationshipFilter(filter)}
+
+	_, err := s.client.DeleteRelationships(ctx, req)
+
+	// TODO: we have not specified an option in our API to allow partial deletions, so currently it's all or nothing
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func createSpiceDbRelationshipFilter(filter *apiV1.RelationshipFilter) *v1.RelationshipFilter {

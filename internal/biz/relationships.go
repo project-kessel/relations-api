@@ -13,7 +13,7 @@ type TouchSemantics bool
 type ZanzibarRepository interface {
 	CreateRelationships(context.Context, []*v1.Relationship, TouchSemantics) error
 	ReadRelationships(context.Context, *v1.RelationshipFilter) ([]*v1.Relationship, error)
-	DeleteRelationships(context.Context, []*v1.RelationshipFilter) ([]*v1.Relationship, error)
+	DeleteRelationships(context.Context, *v1.RelationshipFilter) error
 }
 
 type CreateRelationshipsUsecase struct {
@@ -42,4 +42,18 @@ func NewReadRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *Re
 func (rc *ReadRelationshipsUsecase) ReadRelationships(ctx context.Context, r *v1.RelationshipFilter) ([]*v1.Relationship, error) {
 	rc.log.WithContext(ctx).Infof("ReadRelationships: %v", r)
 	return rc.repo.ReadRelationships(ctx, r)
+}
+
+type DeleteRelationshipsUsecase struct {
+	repo ZanzibarRepository
+	log  *log.Helper
+}
+
+func NewDeleteRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *DeleteRelationshipsUsecase {
+	return &DeleteRelationshipsUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
+func (rc *DeleteRelationshipsUsecase) DeleteRelationships(ctx context.Context, r *v1.RelationshipFilter) error {
+	rc.log.WithContext(ctx).Infof("DeleteRelationships: %v", r)
+	return rc.repo.DeleteRelationships(ctx, r)
 }

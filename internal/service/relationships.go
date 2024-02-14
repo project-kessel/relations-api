@@ -13,6 +13,7 @@ type RelationshipsService struct {
 	pb.UnimplementedRelationshipsServer
 	createUsecase *biz.CreateRelationshipsUsecase
 	readUsecase   *biz.ReadRelationshipsUsecase
+	deleteUsecase *biz.DeleteRelationshipsUsecase
 	log           *log.Helper
 }
 
@@ -45,5 +46,11 @@ func (s *RelationshipsService) ReadRelationships(ctx context.Context, req *pb.Re
 
 func (s *RelationshipsService) DeleteRelationships(ctx context.Context, req *pb.DeleteRelationshipsRequest) (*pb.DeleteRelationshipsResponse, error) {
 	s.log.Infof("Delete relationships request: %v", req)
+
+	err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.DeleteRelationshipsResponse{}, nil
 }

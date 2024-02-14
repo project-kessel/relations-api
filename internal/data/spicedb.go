@@ -5,7 +5,10 @@ import (
 	"ciam-rebac/internal/biz"
 	"ciam-rebac/internal/conf"
 	"context"
+	"errors"
 	"fmt"
+	"io"
+
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/authzed/authzed-go/v1"
 	"github.com/authzed/grpcutil"
@@ -86,33 +89,80 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 	return err
 }
 
-func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter []*apiV1.RelationshipFilter) ([]*apiV1.Relationship, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1.RelationshipFilter) ([]*apiV1.Relationship, error) {
+	req := &v1.ReadRelationshipsRequest{RelationshipFilter: createSpiceDbRelationshipFilter(filter)}
+
+	client, err := s.client.ReadRelationships(ctx, req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]*apiV1.Relationship, 0)
+	resp, err := client.Recv()
+	for err == nil {
+		results = append(results, &apiV1.Relationship{
+			Object: &apiV1.ObjectReference{
+				Type: resp.Relationship.Resource.ObjectType,
+				Id:   resp.Relationship.Resource.ObjectId,
+			},
+			Relation: resp.Relationship.Relation,
+			Subject: &apiV1.SubjectReference{
+				Relation: resp.Relationship.Subject.OptionalRelation,
+				Object: &apiV1.ObjectReference{
+					Type: resp.Relationship.Subject.Object.ObjectType,
+					Id:   resp.Relationship.Subject.Object.ObjectId,
+				},
+			},
+		})
+
+		resp, err = client.Recv()
+	}
+
+	if !errors.Is(err, io.EOF) {
+		return nil, err
+	}
+
+	return results, nil
 }
 
-func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter []*apiV1.RelationshipFilter) ([]*apiV1.Relationship, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1.RelationshipFilter) error {
+	req := &v1.DeleteRelationshipsRequest{RelationshipFilter: createSpiceDbRelationshipFilter(filter)}
+
+	_, err := s.client.DeleteRelationships(ctx, req)
+
+	// TODO: we have not specified an option in our API to allow partial deletions, so currently it's all or nothing
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// TODO: below will be needed for Read and Delete
-//func createSpiceDbRelationshipFilter(filter *apiV1.RelationshipFilter) *v1.RelationshipFilter {
-//	subject := &v1.SubjectFilter{
-//		SubjectType:       filter.GetSubjectFilter().GetSubjectType(),
-//		OptionalSubjectId: filter.GetSubjectFilter().GetSubjectId(),
-//		OptionalRelation: &v1.SubjectFilter_RelationFilter{
-//			Relation: filter.GetSubjectFilter().GetRelation(),
-//		},
-//	}
-//
-//	return &v1.RelationshipFilter{
-//		ResourceType:          filter.GetObjectType(),
-//		OptionalResourceId:    filter.GetObjectId(),
-//		OptionalRelation:      filter.GetRelation(),
-//		OptionalSubjectFilter: subject,
-//	}
-//}
+func createSpiceDbRelationshipFilter(filter *apiV1.RelationshipFilter) *v1.RelationshipFilter {
+	spiceDbRelationshipFilter := &v1.RelationshipFilter{
+		ResourceType:       filter.GetObjectType(),
+		OptionalResourceId: filter.GetObjectId(),
+		OptionalRelation:   filter.GetRelation(),
+	}
+
+	if filter.GetSubjectFilter() != nil {
+		subjectFilter := &v1.SubjectFilter{
+			SubjectType:       filter.GetSubjectFilter().GetSubjectType(),
+			OptionalSubjectId: filter.GetSubjectFilter().GetSubjectId(),
+		}
+
+		if filter.GetSubjectFilter().GetRelation() != "" {
+			subjectFilter.OptionalRelation = &v1.SubjectFilter_RelationFilter{
+				Relation: filter.GetSubjectFilter().GetRelation(),
+			}
+		}
+
+		spiceDbRelationshipFilter.OptionalSubjectFilter = subjectFilter
+	}
+
+	return spiceDbRelationshipFilter
+}
 
 func createSpiceDbRelationship(relationship *apiV1.Relationship) *v1.Relationship {
 	subject := &v1.SubjectReference{

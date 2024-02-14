@@ -29,7 +29,9 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 		return nil, nil, err
 	}
 	createRelationshipsUsecase := biz.NewCreateRelationshipsUsecase(spiceDbRepository, logger)
-	relationshipsService := service.NewRelationshipsService(logger, createRelationshipsUsecase)
+	readRelationshipsUsecase := biz.NewReadRelationshipsUsecase(spiceDbRepository, logger)
+	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
+	relationshipsService := service.NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase)
 	healthService := service.NewHealthService()
 	grpcServer := server.NewGRPCServer(confServer, relationshipsService, healthService, logger)
 	httpServer := server.NewHTTPServer(confServer, relationshipsService, healthService, logger)

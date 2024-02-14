@@ -90,28 +90,7 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 }
 
 func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1.RelationshipFilter) ([]*apiV1.Relationship, error) {
-	req := &v1.ReadRelationshipsRequest{}
-
-	if filter != nil {
-		req.RelationshipFilter = &v1.RelationshipFilter{
-			ResourceType:       filter.ObjectType,
-			OptionalResourceId: filter.ObjectId,
-			OptionalRelation:   filter.Relation,
-		}
-
-		if filter.SubjectFilter != nil {
-			req.RelationshipFilter.OptionalSubjectFilter = &v1.SubjectFilter{
-				SubjectType:       filter.SubjectFilter.SubjectType,
-				OptionalSubjectId: filter.SubjectFilter.SubjectId,
-			}
-
-			if filter.SubjectFilter.Relation != "" {
-				req.RelationshipFilter.OptionalSubjectFilter.OptionalRelation = &v1.SubjectFilter_RelationFilter{
-					Relation: filter.SubjectFilter.Relation,
-				}
-			}
-		}
-	}
+	req := &v1.ReadRelationshipsRequest{RelationshipFilter: createSpiceDbRelationshipFilter(filter)}
 
 	client, err := s.client.ReadRelationships(ctx, req)
 
@@ -119,7 +98,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 		return nil, err
 	}
 
-	results := make([]*apiV1.Relationship, 0, 0)
+	results := make([]*apiV1.Relationship, 0)
 	resp, err := client.Recv()
 	for err == nil {
 		results = append(results, &apiV1.Relationship{
@@ -152,23 +131,30 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter []*a
 	panic("implement me")
 }
 
-// TODO: below will be needed for Read and Delete
-//func createSpiceDbRelationshipFilter(filter *apiV1.RelationshipFilter) *v1.RelationshipFilter {
-//	subject := &v1.SubjectFilter{
-//		SubjectType:       filter.GetSubjectFilter().GetSubjectType(),
-//		OptionalSubjectId: filter.GetSubjectFilter().GetSubjectId(),
-//		OptionalRelation: &v1.SubjectFilter_RelationFilter{
-//			Relation: filter.GetSubjectFilter().GetRelation(),
-//		},
-//	}
-//
-//	return &v1.RelationshipFilter{
-//		ResourceType:          filter.GetObjectType(),
-//		OptionalResourceId:    filter.GetObjectId(),
-//		OptionalRelation:      filter.GetRelation(),
-//		OptionalSubjectFilter: subject,
-//	}
-//}
+func createSpiceDbRelationshipFilter(filter *apiV1.RelationshipFilter) *v1.RelationshipFilter {
+	spiceDbRelationshipFilter := &v1.RelationshipFilter{
+		ResourceType:       filter.GetObjectType(),
+		OptionalResourceId: filter.GetObjectId(),
+		OptionalRelation:   filter.GetRelation(),
+	}
+
+	if filter.GetSubjectFilter() != nil {
+		subjectFilter := &v1.SubjectFilter{
+			SubjectType:       filter.GetSubjectFilter().GetSubjectType(),
+			OptionalSubjectId: filter.GetSubjectFilter().GetSubjectId(),
+		}
+
+		if filter.GetSubjectFilter().GetRelation() != "" {
+			subjectFilter.OptionalRelation = &v1.SubjectFilter_RelationFilter{
+				Relation: filter.GetSubjectFilter().GetRelation(),
+			}
+		}
+
+		spiceDbRelationshipFilter.OptionalSubjectFilter = subjectFilter
+	}
+
+	return spiceDbRelationshipFilter
+}
 
 func createSpiceDbRelationship(relationship *apiV1.Relationship) *v1.Relationship {
 	subject := &v1.SubjectReference{

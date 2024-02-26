@@ -31,9 +31,9 @@ type RelationshipsHTTPServer interface {
 
 func RegisterRelationshipsHTTPServer(s *http.Server, srv RelationshipsHTTPServer) {
 	r := s.Route("/")
-	r.POST("/authz/v1/relationships", _Relationships_CreateRelationships0_HTTP_Handler(srv))
-	r.GET("/authz/v1/relationships", _Relationships_ReadRelationships0_HTTP_Handler(srv))
-	r.DELETE("/authz/v1/relationships", _Relationships_DeleteRelationships0_HTTP_Handler(srv))
+	r.POST("/api/authz/v1/relationships", _Relationships_CreateRelationships0_HTTP_Handler(srv))
+	r.GET("/api/authz/v1/relationships", _Relationships_ReadRelationships0_HTTP_Handler(srv))
+	r.DELETE("/api/authz/v1/relationships", _Relationships_DeleteRelationships0_HTTP_Handler(srv))
 }
 
 func _Relationships_CreateRelationships0_HTTP_Handler(srv RelationshipsHTTPServer) func(ctx http.Context) error {
@@ -112,7 +112,7 @@ func NewRelationshipsHTTPClient(client *http.Client) RelationshipsHTTPClient {
 
 func (c *RelationshipsHTTPClientImpl) CreateRelationships(ctx context.Context, in *CreateRelationshipsRequest, opts ...http.CallOption) (*CreateRelationshipsResponse, error) {
 	var out CreateRelationshipsResponse
-	pattern := "/authz/v1/relationships"
+	pattern := "/api/authz/v1/relationships"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationRelationshipsCreateRelationships))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -125,7 +125,7 @@ func (c *RelationshipsHTTPClientImpl) CreateRelationships(ctx context.Context, i
 
 func (c *RelationshipsHTTPClientImpl) DeleteRelationships(ctx context.Context, in *DeleteRelationshipsRequest, opts ...http.CallOption) (*DeleteRelationshipsResponse, error) {
 	var out DeleteRelationshipsResponse
-	pattern := "/authz/v1/relationships"
+	pattern := "/api/authz/v1/relationships"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRelationshipsDeleteRelationships))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -138,7 +138,7 @@ func (c *RelationshipsHTTPClientImpl) DeleteRelationships(ctx context.Context, i
 
 func (c *RelationshipsHTTPClientImpl) ReadRelationships(ctx context.Context, in *ReadRelationshipsRequest, opts ...http.CallOption) (*ReadRelationshipsResponse, error) {
 	var out ReadRelationshipsResponse
-	pattern := "/authz/v1/relationships"
+	pattern := "/api/authz/v1/relationships"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRelationshipsReadRelationships))
 	opts = append(opts, http.PathTemplate(pattern))

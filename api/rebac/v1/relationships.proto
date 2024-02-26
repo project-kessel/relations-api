@@ -11,18 +11,18 @@ option java_package = "api.rebac.v1";
 service Relationships {
 	rpc CreateRelationships (CreateRelationshipsRequest) returns (CreateRelationshipsResponse) {
 		option (google.api.http) = {
-			post: "/authz/v1/relationships"
+			post: "/api/authz/v1/relationships"
 			body: "*"
 		};
 	};
 	rpc ReadRelationships (ReadRelationshipsRequest) returns (ReadRelationshipsResponse) {
 		option (google.api.http) = {
-			get: "/authz/v1/relationships"
+			get: "/api/authz/v1/relationships"
 		};
 	};
 	rpc DeleteRelationships (DeleteRelationshipsRequest) returns (DeleteRelationshipsResponse) {
 		option (google.api.http) = {
-			delete: "/authz/v1/relationships"
+			delete: "/api/authz/v1/relationships"
 		};
 	};
 }

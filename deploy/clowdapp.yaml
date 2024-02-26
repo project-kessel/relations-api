@@ -26,11 +26,7 @@ objects:
           webServices:
             public:
               enabled: true
-              apiPath: relationships
-              whitelistPaths:
-                - /relationships/*
-                - /livez
-                - /readyz
+              apiPath: authz
 parameters:
   - description: Name of the ClowdApp
     name: CLOWDAPP_NAME

@@ -7,15 +7,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
-	"os"
-
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/authzed/authzed-go/v1"
 	"github.com/authzed/grpcutil"
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"io"
+	"os"
 )
 
 // SpiceDbRepository .
@@ -31,10 +30,16 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 	opts = append(opts, grpc.EmptyDialOption{})
 	//TODO: add a flag to enable/disable grpc.WithBlock
 
-	token, err := readToken(c.SpiceDb.Token)
-	if err != nil {
-		log.NewHelper(logger).Error(err)
-		return nil, nil, err
+	var token string
+	var err error
+	if c.SpiceDb.Token != "" {
+		token = c.SpiceDb.Token
+	} else if c.SpiceDb.TokenFile != "" {
+		token, err = readToken(c.SpiceDb.TokenFile)
+		if err != nil {
+			log.NewHelper(logger).Error(err)
+			return nil, nil, err
+		}
 	}
 	if token == "" {
 		err := fmt.Errorf("token is empty: %s", token)
@@ -191,10 +196,19 @@ func createSpiceDbRelationship(relationship *apiV1.Relationship) *v1.Relationshi
 }
 
 func readToken(file string) (string, error) {
+	isFileExist := checkFileExists(file)
+	if !isFileExist {
+		return file, errors.New("file doesn't exist")
+	}
 	bytes, err := os.ReadFile(file)
 	if err != nil {
 		return "", err
 	}
 
 	return string(bytes), nil
+}
+
+func checkFileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return !errors.Is(err, os.ErrNotExist)
 }

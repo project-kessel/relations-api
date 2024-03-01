@@ -4,7 +4,8 @@ services:
   rebac:
     image: "quay.io/ciam_authz/insights-rebac:latest"
     environment:
-      - "SPICEDB_PRESHARED=/run/secrets/spicedb_pre_shared"
+      - "SPICEDB_PRESHARED=${SPICEDB_GRPC_PRESHARED_KEY}"
+      # - "SPICEDB_PRESHARED_FILE=/run/secrets/spicedb_pre_shared"
       - "ENDPOINT=spicedb:50051"
     build:
       dockerfile: Dockerfile

@@ -8,7 +8,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.7.2
 	github.com/google/wire v0.6.0
 	github.com/ory/dockertest v3.3.5+incompatible
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	go.uber.org/automaxprocs v1.5.3
 	google.golang.org/genproto/googleapis/api v0.0.0-20240123012728-ef4313101c80
 	google.golang.org/grpc v1.62.0

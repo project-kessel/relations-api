@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/authzed/authzed-go/v1"
@@ -30,7 +31,11 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 	opts = append(opts, grpc.EmptyDialOption{})
 	//TODO: add a flag to enable/disable grpc.WithBlock
 
-	token := c.SpiceDb.Token
+	token, err := readToken(c.SpiceDb.Token)
+	if err != nil {
+		log.NewHelper(logger).Error(err)
+		return nil, nil, err
+	}
 	if token == "" {
 		err := fmt.Errorf("token is empty: %s", token)
 		log.NewHelper(logger).Error(err)
@@ -183,4 +188,13 @@ func createSpiceDbRelationship(relationship *apiV1.Relationship) *v1.Relationshi
 		Relation: relationship.GetRelation(),
 		Subject:  subject,
 	}
+}
+
+func readToken(file string) (string, error) {
+	bytes, err := os.ReadFile(file)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bytes), nil
 }

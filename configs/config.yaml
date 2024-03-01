@@ -8,5 +8,5 @@ server:
 data:
   spiceDb:
     useTLS: false
-    endpoint: spicedb:50051
-    token: "${SPICEDB_PRESHARED:foobar}"
+    endpoint: "${ENDPOINT:spicedb:50051}"
+    token: "${PRESHARED:.secrets/local-spicedb-secret}"

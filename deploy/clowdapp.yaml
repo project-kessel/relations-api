@@ -37,6 +37,18 @@ objects:
               httpGet:
                 path: /readyz
                 port: 8000
+            env:
+              - name: SPICEDB_PRESHARED
+                value: /config/spicedb/preshared_key
+              - name: SPICEDB_ENDPOINT
+                value: relationships-spicedb.${NAMESPACE}.svc.cluster.local:50051
+            volumes:
+              - name: spicedb-token
+                secret:
+                  secretName: dev-spicedb-config
+            volumeMounts:
+              - name: spicedb-token
+                mountPath: /config/spicedb
           webServices:
             public:
               enabled: true

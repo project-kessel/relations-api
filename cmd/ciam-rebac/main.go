@@ -76,13 +76,13 @@ func main() {
 		panic(err)
 	}
 
-	preshared, err := c.Value("PRESHARED").String()
-	if err != nil {
-		log.NewHelper(logger).Errorf("Failed to read preshared key env %d", err)
-	}
-	if preshared != "" {
-		bc.Data.SpiceDb.Token = preshared
-	}
+	//preshared, err := c.Value("PRESHARED").String()
+	//if err != nil {
+	//	log.NewHelper(logger).Errorf("Failed to read preshared key env %d", err)
+	//}
+	//if preshared != "" {
+	//	bc.Data.SpiceDb.Token = preshared
+	//}
 
 	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
 	if err != nil {

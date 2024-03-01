@@ -4,14 +4,18 @@ services:
   rebac:
     image: "quay.io/ciam_authz/insights-rebac:latest"
     environment:
-      - "SPICEDB_PRESHARED=${SPICEDB_GRPC_PRESHARED_KEY}"
+      - "SPICEDB_PRESHARED=/run/secrets/spicedb_pre_shared"
+      - "ENDPOINT=spicedb:50051"
     build:
       dockerfile: Dockerfile
     profiles: ["rebac"]
+    secrets:
+      - spicedb_pre_shared
     restart: "always"
     ports:
       - "8000:8000"
       - "9000:9000"
+
 
   spicedb:
     image: "authzed/spicedb"
@@ -49,3 +53,7 @@ services:
 configs:
   spicedb_pre_shared:
     environment: "SPICEDB_GRPC_PRESHARED_KEY"
+
+secrets:
+  spicedb_pre_shared:
+    file: ./.secrets/local-spicedb-secret

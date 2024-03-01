@@ -10,6 +10,7 @@ import (
 	"github.com/authzed/authzed-go/v1"
 	"github.com/go-kratos/kratos/v2/log"
 	"io"
+	"os"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -146,10 +147,25 @@ func (l *LocalSpiceDbContainer) CreateSpiceDbRepository() (*SpiceDbRepository, e
 		return nil, err
 	}
 
+	tmpDir, err := os.MkdirTemp("", "rebac")
+	if err != nil {
+		return nil, err
+	}
+	tmpFile, err := os.CreateTemp(tmpDir, "spicedbpreshared")
+	if err != nil {
+		return nil, err
+	}
+	err = os.WriteFile(tmpFile.Name(), []byte(randomKey), 0666)
+	if err != nil {
+		return nil, err
+	}
+
+	defer os.RemoveAll(tmpDir)
+
 	spiceDbConf := &conf.Data_SpiceDb{
 		UseTLS:   false,
 		Endpoint: "localhost:" + l.port,
-		Token:    randomKey,
+		Token:    tmpFile.Name(),
 	}
 	repo, _, err := NewSpiceDbRepository(&conf.Data{SpiceDb: spiceDbConf}, l.logger)
 	if err != nil {

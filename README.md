@@ -69,3 +69,29 @@ docker build -t <your-docker-image-name> .
 docker run --rm -p 8000:8000 -p 9000:9000 -v </path/to/your/configs>:/data/conf <your-docker-image-name>
 ```
 
+## Deploy to a openshift cluster that has Clowder
+
+### Prerequisite 
+[bonfire](https://github.com/RedHatInsights/bonfire)
+[oc](https://docs.openshift.com/container-platform/4.8/cli_reference/openshift_cli/getting-started-cli.html) 
+
+You should have logged into a valid openshift cluster using the oc login command
+
+`oc login --token=<token> --server=<openshift server>`
+
+### Deploying the components
+
+Note: the deploy script assumes you have a valid oc login and the necessary tools are in place.
+
+The deploy script under the deploy folder, will deploy all the needed components.
+
+`./deploy.sh`
+
+- Creates a postgres pod and service (Note: No PVC)
+- Creates a spiceDB secret - that contains: a preshared key and Postgres connection URI
+- Creates a Configmap object  - that serves as a bootstrap schema for spiceDB (by default it uses the schema.yaml file under deploy)
+- Creates the spiceDB service
+- Creates the relations service
+
+You should be able to use the public route (relations-*) created by the clowder in your namespace, to use the service.
+

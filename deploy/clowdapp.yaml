@@ -9,14 +9,26 @@ objects:
       name: ${CLOWDAPP_NAME}-spicedb
     spec:
       config:
-        datastoreEngine: memory
+        logLevel: debug
+        replicas: 1
+        datastoreEngine: postgres
+        datastoreBootstrapFiles: /etc/bootstrap/schema.yaml
       secretName: dev-spicedb-config
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: dev-spicedb-config
-    stringData:
-      preshared_key: "averysecretpresharedkey"
+      patches:
+      - kind: Deployment
+        patch:
+          spec:
+            template:
+              spec:
+                volumes:
+                - name:  bootstrap
+                  configMap:
+                    name: spicedb-schema
+                containers:
+                - name: spicedb
+                  volumeMounts:
+                  - name: bootstrap
+                    mountPath: /etc/bootstrap      
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:

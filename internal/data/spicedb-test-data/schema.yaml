@@ -1,0 +1,1146 @@
+schema: |-
+  // instead of going in reverse, and having to repeat hierarchies, go forward:
+  // a system "may be subscribed" to a repo (rather than a repo is subscribed by a system)
+  // test relations
+  // content/host:h1#workspace@workspace:w1
+  // workspace:w1#parent@workspace:w2
+  // workspace:w2#parent@organization:o1
+  // entitlement_set:ent1#direct_content_provider@content/repository:repo1
+  // organization:o1#entitlement_grant@entitlement_set:ent1
+  // entitlement_binding:dent1#arbiter@organization:o1#entitlement_grant
+  // entitlement_binding:dent1#grant@entitlement_set:ent1
+  // workspace:w2#entitlement_grant@entitlement_binding:dent1
+  // role:content_admin#content_host_manage_subscription@user:*
+  // role_binding:u1_admin#subject@user:u1
+  // role_binding:u1_admin#granted@role:content_admin
+  // workspace:w2#user_grant@role_binding:u1_admin
+
+  // content/host:h1#workspace@workspace:w1
+  // workspace:w1#parent@workspace:w2
+  // workspace:w2#parent@organization:o1
+  // entitlement_set:ent1#direct_content_provider@content/repository:repo1
+  // entitlement_set:ent1#direct_content_provider@content/repository:repo2
+  // entitlement_set:just_repo_1#direct_content_provider@content/repository:repo1
+  // organization:o1#entitlement_grant@entitlement_set:ent1
+  // entitlement_binding:dent1#arbiter@organization:o1#entitlement_grant
+  // entitlement_binding:dent1#grant@entitlement_set:just_repo_1
+  // workspace:w2#entitlement_grant@entitlement_binding:dent1
+  // role:content_admin#content_host_manage_subscription@user:*
+  // role_binding:u1_admin#subject@user:u1
+  // role_binding:u1_admin#granted@role:content_admin
+  // workspace:w2#user_grant@role_binding:u1_admin
+
+  definition user {}
+
+  definition group {
+    relation member: user | group#member
+  }
+
+  definition role {
+    // content namespace
+    relation content_host_manage_subscription: user:*
+
+    // openshift namespace
+    relation openshift_cluster_get : user:* //| user:* with not_deprovisioned_osd_rosa
+    relation openshift_cluster_update : user:* //| user:* with not_deprovisioned
+    relation openshift_cluster_delete : user:*
+
+    // Can report metrics about openshift/*
+    relation openshift_metrics_report : user:*
+
+    relation advisor_all_all: user:*
+    relation advisor_disable_recommendations_write: user:*
+    relation advisor_weekly_email_read: user:*
+    relation advisor_recommendation_results_read: user:*
+    relation advisor_exports_read: user:*
+    relation approval_workflows_create: user:*
+    relation approval_workflows_read: user:*
+    relation approval_workflows_update: user:*
+    relation approval_workflows_delete: user:*
+    relation approval_workflows_link: user:*
+    relation approval_workflows_unlink: user:*
+    relation approval_actions_create: user:*
+    relation approval_actions_read: user:*
+    relation approval_requests_create: user:*
+    relation approval_requests_read: user:*
+    relation approval_templates_read: user:*
+    relation automation_analytics_all_all: user:*
+    relation automation_analytics_all_read: user:*
+    relation automation_analytics_all_write: user:*
+    relation catalog_progress_messages_read: user:*
+    relation catalog_progress_messages_write: user:*
+    relation catalog_tenants_read: user:*
+    relation catalog_tenants_update: user:*
+    relation catalog_approval_requests_read: user:*
+    relation catalog_approval_requests_write: user:*
+    relation catalog_orders_read: user:*
+    relation catalog_orders_write: user:*
+    relation catalog_orders_order: user:*
+    relation catalog_order_items_read: user:*
+    relation catalog_order_items_write: user:*
+    relation catalog_order_items_order: user:*
+    relation catalog_order_processes_create: user:*
+    relation catalog_order_processes_read: user:*
+    relation catalog_order_processes_link: user:*
+    relation catalog_order_processes_unlink: user:*
+    relation catalog_order_processes_update: user:*
+    relation catalog_order_processes_delete: user:*
+    relation catalog_portfolios_create: user:*
+    relation catalog_portfolios_read: user:*
+    relation catalog_portfolios_update: user:*
+    relation catalog_portfolios_delete: user:*
+    relation catalog_portfolios_order: user:*
+    relation catalog_portfolio_items_create: user:*
+    relation catalog_portfolio_items_read: user:*
+    relation catalog_portfolio_items_update: user:*
+    relation catalog_portfolio_items_delete: user:*
+    relation catalog_portfolio_items_order: user:*
+    relation compliance_all_all: user:*
+    relation compliance_system_read: user:*
+    relation compliance_report_read: user:*
+    relation compliance_report_delete: user:*
+    relation compliance_policy_read: user:*
+    relation compliance_policy_create: user:*
+    relation compliance_policy_update: user:*
+    relation compliance_policy_delete: user:*
+    relation compliance_policy_write: user:*
+    relation config_manager_activation_keys_all: user:*
+    relation config_manager_activation_keys_read: user:*
+    relation config_manager_activation_keys_write: user:*
+    relation config_manager_state_read: user:*
+    relation config_manager_state_write: user:*
+    relation config_manager_state_changes_read: user:*
+    relation content_sources_all_all: user:*
+    relation content_sources_repositories_read: user:*
+    relation content_sources_repositories_write: user:*
+    relation cost_management_all_all: user:*
+    relation cost_management_gcp_account_all: user:*
+    relation cost_management_gcp_account_read: user:*
+    relation cost_management_gcp_project_all: user:*
+    relation cost_management_gcp_project_read: user:*
+    relation cost_management_openshift_cluster_all: user:*
+    relation cost_management_openshift_cluster_read: user:*
+    relation cost_management_openshift_node_all: user:*
+    relation cost_management_openshift_node_read: user:*
+    relation cost_management_oci_payer_tenant_id_all: user:*
+    relation cost_management_oci_payer_tenant_id_read: user:*
+    relation cost_management_cost_model_all: user:*
+    relation cost_management_cost_model_read: user:*
+    relation cost_management_cost_model_write: user:*
+    relation cost_management_azure_subscription_guid_all: user:*
+    relation cost_management_azure_subscription_guid_read: user:*
+    relation cost_management_aws_organizational_unit_all: user:*
+    relation cost_management_aws_organizational_unit_read: user:*
+    relation cost_management_openshift_project_all: user:*
+    relation cost_management_openshift_project_read: user:*
+    relation cost_management_settings_all: user:*
+    relation cost_management_settings_read: user:*
+    relation cost_management_settings_write: user:*
+    relation cost_management_aws_account_all: user:*
+    relation cost_management_aws_account_read: user:*
+    relation drift_all_all: user:*
+    relation drift_comparisons_read: user:*
+    relation drift_baselines_read: user:*
+    relation drift_baselines_write: user:*
+    relation drift_historical_system_profiles_read: user:*
+    relation drift_notifications_read: user:*
+    relation drift_notifications_write: user:*
+    relation integrations_all_all: user:*
+    relation integrations_endpoints_read: user:*
+    relation integrations_endpoints_write: user:*
+    relation inventory_all_all: user:*
+    relation inventory_all_read: user:*
+    relation inventory_staleness_all: user:*
+    relation inventory_staleness_read: user:*
+    relation inventory_staleness_write: user:*
+    relation inventory_hosts_all: user:*
+    relation inventory_hosts_read: user:*
+    relation inventory_hosts_write: user:*
+    relation inventory_groups_all: user:*
+    relation inventory_groups_read: user:*
+    relation inventory_groups_write: user:*
+    relation malware_detection_all_all: user:*
+    relation malware_detection_all_read: user:*
+    relation migration_analytics_all_all: user:*
+    relation notifications_all_all: user:*
+    relation notifications_notifications_read: user:*
+    relation notifications_notifications_write: user:*
+    relation notifications_events_read: user:*
+    relation ocp_advisor_all_all: user:*
+    relation ocp_advisor_recommendation_results_read: user:*
+    relation ocp_advisor_exports_read: user:*
+    relation ocp_advisor_toggle_recommendations_write: user:*
+    relation patch_all_all: user:*
+    relation patch_all_read: user:*
+    relation patch_all_write: user:*
+    relation patch_system_write: user:*
+    relation patch_template_write: user:*
+    relation playbook_dispatcher_run_read: user:*
+    relation playbook_dispatcher_run_write: user:*
+    relation policies_all_all: user:*
+    relation policies_policies_read: user:*
+    relation policies_policies_write: user:*
+    relation provisioning_all_all: user:*
+    relation provisioning_reservation_azure_all: user:*
+    relation provisioning_reservation_azure_read: user:*
+    relation provisioning_reservation_azure_write: user:*
+    relation provisioning_reservation_gcp_all: user:*
+    relation provisioning_reservation_gcp_read: user:*
+    relation provisioning_reservation_gcp_write: user:*
+    relation provisioning_source_all: user:*
+    relation provisioning_source_read: user:*
+    relation provisioning_pubkey_all: user:*
+    relation provisioning_pubkey_read: user:*
+    relation provisioning_pubkey_write: user:*
+    relation provisioning_reservation_all: user:*
+    relation provisioning_reservation_read: user:*
+    relation provisioning_reservation_write: user:*
+    relation provisioning_reservation_aws_all: user:*
+    relation provisioning_reservation_aws_read: user:*
+    relation provisioning_reservation_aws_write: user:*
+    relation remediations_all_all: user:*
+    relation remediations_remediation_read: user:*
+    relation remediations_remediation_write: user:*
+    relation remediations_remediation_execute: user:*
+    relation ros_all_all: user:*
+    relation ros_all_read: user:*
+    relation sources_all_all: user:*
+    relation subscriptions_all_all: user:*
+    relation subscriptions_reports_read: user:*
+    relation subscriptions_manifests_read: user:*
+    relation subscriptions_manifests_write: user:*
+    relation subscriptions_organization_read: user:*
+    relation subscriptions_organization_write: user:*
+    relation subscriptions_products_read: user:*
+    relation subscriptions_products_write: user:*
+    relation subscriptions_cloud_access_read: user:*
+    relation subscriptions_cloud_access_write: user:*
+    relation tasks_all_all: user:*
+    relation vulnerability_all_all: user:*
+    relation vulnerability_all_read: user:*
+    relation vulnerability_all_write: user:*
+    relation vulnerability_cve_business_risk_and_status_write: user:*
+    relation vulnerability_system_cve_status_write: user:*
+    relation vulnerability_advanced_report_read: user:*
+    relation vulnerability_report_and_export_read: user:*
+    relation vulnerability_system_opt_out_write: user:*
+    relation vulnerability_system_opt_out_read: user:*
+    relation vulnerability_toggle_cves_without_errata_write: user:*
+    relation vulnerability_vulnerability_results_read: user:*
+    relation remediations_all_read: user:*
+    relation remediations_all_write: user:*
+    relation rbac_all_all: user:*
+    relation rbac_principal_read: user:*
+
+  }
+
+  definition role_binding {
+    relation subject : user | group#member
+    relation granted: role
+
+    // {resourceType}_{action} = subject & granted->{resourceType}_{action}
+    permission content_host_manage_subscription = subject & granted->content_host_manage_subscription
+
+    permission openshift_metrics_report = subject & granted->openshift_metrics_report  
+
+    permission advisor_all_all = subject & granted->advisor_all_all
+    permission advisor_disable_recommendations_write = subject & granted->advisor_disable_recommendations_write
+    permission advisor_weekly_email_read = subject & granted->advisor_weekly_email_read
+    permission advisor_recommendation_results_read = subject & granted->advisor_recommendation_results_read
+    permission advisor_exports_read = subject & granted->advisor_exports_read
+    permission approval_workflows_create = subject & granted->approval_workflows_create
+    permission approval_workflows_read = subject & granted->approval_workflows_read
+    permission approval_workflows_update = subject & granted->approval_workflows_update
+    permission approval_workflows_delete = subject & granted->approval_workflows_delete
+    permission approval_workflows_link = subject & granted->approval_workflows_link
+    permission approval_workflows_unlink = subject & granted->approval_workflows_unlink
+    permission approval_actions_create = subject & granted->approval_actions_create
+    permission approval_actions_read = subject & granted->approval_actions_read
+    permission approval_requests_create = subject & granted->approval_requests_create
+    permission approval_requests_read = subject & granted->approval_requests_read
+    permission approval_templates_read = subject & granted->approval_templates_read
+    permission automation_analytics_all_all = subject & granted->automation_analytics_all_all
+    permission automation_analytics_all_read = subject & granted->automation_analytics_all_read
+    permission automation_analytics_all_write = subject & granted->automation_analytics_all_write
+    permission catalog_progress_messages_read = subject & granted->catalog_progress_messages_read
+    permission catalog_progress_messages_write = subject & granted->catalog_progress_messages_write
+    permission catalog_tenants_read = subject & granted->catalog_tenants_read
+    permission catalog_tenants_update = subject & granted->catalog_tenants_update
+    permission catalog_approval_requests_read = subject & granted->catalog_approval_requests_read
+    permission catalog_approval_requests_write = subject & granted->catalog_approval_requests_write
+    permission catalog_orders_read = subject & granted->catalog_orders_read
+    permission catalog_orders_write = subject & granted->catalog_orders_write
+    permission catalog_orders_order = subject & granted->catalog_orders_order
+    permission catalog_order_items_read = subject & granted->catalog_order_items_read
+    permission catalog_order_items_write = subject & granted->catalog_order_items_write
+    permission catalog_order_items_order = subject & granted->catalog_order_items_order
+    permission catalog_order_processes_create = subject & granted->catalog_order_processes_create
+    permission catalog_order_processes_read = subject & granted->catalog_order_processes_read
+    permission catalog_order_processes_link = subject & granted->catalog_order_processes_link
+    permission catalog_order_processes_unlink = subject & granted->catalog_order_processes_unlink
+    permission catalog_order_processes_update = subject & granted->catalog_order_processes_update
+    permission catalog_order_processes_delete = subject & granted->catalog_order_processes_delete
+    permission catalog_portfolios_create = subject & granted->catalog_portfolios_create
+    permission catalog_portfolios_read = subject & granted->catalog_portfolios_read
+    permission catalog_portfolios_update = subject & granted->catalog_portfolios_update
+    permission catalog_portfolios_delete = subject & granted->catalog_portfolios_delete
+    permission catalog_portfolios_order = subject & granted->catalog_portfolios_order
+    permission catalog_portfolio_items_create = subject & granted->catalog_portfolio_items_create
+    permission catalog_portfolio_items_read = subject & granted->catalog_portfolio_items_read
+    permission catalog_portfolio_items_update = subject & granted->catalog_portfolio_items_update
+    permission catalog_portfolio_items_delete = subject & granted->catalog_portfolio_items_delete
+    permission catalog_portfolio_items_order = subject & granted->catalog_portfolio_items_order
+    permission compliance_all_all = subject & granted->compliance_all_all
+    permission compliance_system_read = subject & granted->compliance_system_read
+    permission compliance_report_read = subject & granted->compliance_report_read
+    permission compliance_report_delete = subject & granted->compliance_report_delete
+    permission compliance_policy_read = subject & granted->compliance_policy_read
+    permission compliance_policy_create = subject & granted->compliance_policy_create
+    permission compliance_policy_update = subject & granted->compliance_policy_update
+    permission compliance_policy_delete = subject & granted->compliance_policy_delete
+    permission compliance_policy_write = subject & granted->compliance_policy_write
+    permission config_manager_activation_keys_all = subject & granted->config_manager_activation_keys_all
+    permission config_manager_activation_keys_read = subject & granted->config_manager_activation_keys_read
+    permission config_manager_activation_keys_write = subject & granted->config_manager_activation_keys_write
+    permission config_manager_state_read = subject & granted->config_manager_state_read
+    permission config_manager_state_write = subject & granted->config_manager_state_write
+    permission config_manager_state_changes_read = subject & granted->config_manager_state_changes_read
+    permission content_sources_all_all = subject & granted->content_sources_all_all
+    permission content_sources_repositories_read = subject & granted->content_sources_repositories_read
+    permission content_sources_repositories_write = subject & granted->content_sources_repositories_write
+    permission cost_management_all_all = subject & granted->cost_management_all_all
+    permission cost_management_gcp_account_all = subject & granted->cost_management_gcp_account_all
+    permission cost_management_gcp_account_read = subject & granted->cost_management_gcp_account_read
+    permission cost_management_gcp_project_all = subject & granted->cost_management_gcp_project_all
+    permission cost_management_gcp_project_read = subject & granted->cost_management_gcp_project_read
+    permission cost_management_openshift_cluster_all = subject & granted->cost_management_openshift_cluster_all
+    permission cost_management_openshift_cluster_read = subject & granted->cost_management_openshift_cluster_read
+    permission cost_management_openshift_node_all = subject & granted->cost_management_openshift_node_all
+    permission cost_management_openshift_node_read = subject & granted->cost_management_openshift_node_read
+    permission cost_management_oci_payer_tenant_id_all = subject & granted->cost_management_oci_payer_tenant_id_all
+    permission cost_management_oci_payer_tenant_id_read = subject & granted->cost_management_oci_payer_tenant_id_read
+    permission cost_management_cost_model_all = subject & granted->cost_management_cost_model_all
+    permission cost_management_cost_model_read = subject & granted->cost_management_cost_model_read
+    permission cost_management_cost_model_write = subject & granted->cost_management_cost_model_write
+    permission cost_management_azure_subscription_guid_all = subject & granted->cost_management_azure_subscription_guid_all
+    permission cost_management_azure_subscription_guid_read = subject & granted->cost_management_azure_subscription_guid_read
+    permission cost_management_aws_organizational_unit_all = subject & granted->cost_management_aws_organizational_unit_all
+    permission cost_management_aws_organizational_unit_read = subject & granted->cost_management_aws_organizational_unit_read
+    permission cost_management_openshift_project_all = subject & granted->cost_management_openshift_project_all
+    permission cost_management_openshift_project_read = subject & granted->cost_management_openshift_project_read
+    permission cost_management_settings_all = subject & granted->cost_management_settings_all
+    permission cost_management_settings_read = subject & granted->cost_management_settings_read
+    permission cost_management_settings_write = subject & granted->cost_management_settings_write
+    permission cost_management_aws_account_all = subject & granted->cost_management_aws_account_all
+    permission cost_management_aws_account_read = subject & granted->cost_management_aws_account_read
+    permission drift_all_all = subject & granted->drift_all_all
+    permission drift_comparisons_read = subject & granted->drift_comparisons_read
+    permission drift_baselines_read = subject & granted->drift_baselines_read
+    permission drift_baselines_write = subject & granted->drift_baselines_write
+    permission drift_historical_system_profiles_read = subject & granted->drift_historical_system_profiles_read
+    permission drift_notifications_read = subject & granted->drift_notifications_read
+    permission drift_notifications_write = subject & granted->drift_notifications_write
+    permission integrations_all_all = subject & granted->integrations_all_all
+    permission integrations_endpoints_read = subject & granted->integrations_endpoints_read
+    permission integrations_endpoints_write = subject & granted->integrations_endpoints_write
+    permission inventory_all_all = subject & granted->inventory_all_all
+    permission inventory_all_read = subject & granted->inventory_all_read
+    permission inventory_staleness_all = subject & granted->inventory_staleness_all
+    permission inventory_staleness_read = subject & granted->inventory_staleness_read
+    permission inventory_staleness_write = subject & granted->inventory_staleness_write
+    permission inventory_hosts_all = subject & granted->inventory_hosts_all
+    permission inventory_hosts_read = subject & granted->inventory_hosts_read
+    permission inventory_hosts_write = subject & granted->inventory_hosts_write
+    permission inventory_groups_all = subject & granted->inventory_groups_all
+    permission inventory_groups_read = subject & granted->inventory_groups_read
+    permission inventory_groups_write = subject & granted->inventory_groups_write
+    permission malware_detection_all_all = subject & granted->malware_detection_all_all
+    permission malware_detection_all_read = subject & granted->malware_detection_all_read
+    permission migration_analytics_all_all = subject & granted->migration_analytics_all_all
+    permission notifications_all_all = subject & granted->notifications_all_all
+    permission notifications_notifications_read = subject & granted->notifications_notifications_read
+    permission notifications_notifications_write = subject & granted->notifications_notifications_write
+    permission notifications_events_read = subject & granted->notifications_events_read
+    permission ocp_advisor_all_all = subject & granted->ocp_advisor_all_all
+    permission ocp_advisor_recommendation_results_read = subject & granted->ocp_advisor_recommendation_results_read
+    permission ocp_advisor_exports_read = subject & granted->ocp_advisor_exports_read
+    permission ocp_advisor_toggle_recommendations_write = subject & granted->ocp_advisor_toggle_recommendations_write
+    permission patch_all_all = subject & granted->patch_all_all
+    permission patch_all_read = subject & granted->patch_all_read
+    permission patch_all_write = subject & granted->patch_all_write
+    permission patch_system_write = subject & granted->patch_system_write
+    permission patch_template_write = subject & granted->patch_template_write
+    permission playbook_dispatcher_run_read = subject & granted->playbook_dispatcher_run_read
+    permission playbook_dispatcher_run_write = subject & granted->playbook_dispatcher_run_write
+    permission policies_all_all = subject & granted->policies_all_all
+    permission policies_policies_read = subject & granted->policies_policies_read
+    permission policies_policies_write = subject & granted->policies_policies_write
+    permission provisioning_all_all = subject & granted->provisioning_all_all
+    permission provisioning_reservation_azure_all = subject & granted->provisioning_reservation_azure_all
+    permission provisioning_reservation_azure_read = subject & granted->provisioning_reservation_azure_read
+    permission provisioning_reservation_azure_write = subject & granted->provisioning_reservation_azure_write
+    permission provisioning_reservation_gcp_all = subject & granted->provisioning_reservation_gcp_all
+    permission provisioning_reservation_gcp_read = subject & granted->provisioning_reservation_gcp_read
+    permission provisioning_reservation_gcp_write = subject & granted->provisioning_reservation_gcp_write
+    permission provisioning_source_all = subject & granted->provisioning_source_all
+    permission provisioning_source_read = subject & granted->provisioning_source_read
+    permission provisioning_pubkey_all = subject & granted->provisioning_pubkey_all
+    permission provisioning_pubkey_read = subject & granted->provisioning_pubkey_read
+    permission provisioning_pubkey_write = subject & granted->provisioning_pubkey_write
+    permission provisioning_reservation_all = subject & granted->provisioning_reservation_all
+    permission provisioning_reservation_read = subject & granted->provisioning_reservation_read
+    permission provisioning_reservation_write = subject & granted->provisioning_reservation_write
+    permission provisioning_reservation_aws_all = subject & granted->provisioning_reservation_aws_all
+    permission provisioning_reservation_aws_read = subject & granted->provisioning_reservation_aws_read
+    permission provisioning_reservation_aws_write = subject & granted->provisioning_reservation_aws_write
+    permission remediations_all_all = subject & granted->remediations_all_all
+    permission remediations_remediation_read = subject & granted->remediations_remediation_read
+    permission remediations_remediation_write = subject & granted->remediations_remediation_write
+    permission remediations_remediation_execute = subject & granted->remediations_remediation_execute
+    permission ros_all_all = subject & granted->ros_all_all
+    permission ros_all_read = subject & granted->ros_all_read
+    permission sources_all_all = subject & granted->sources_all_all
+    permission subscriptions_all_all = subject & granted->subscriptions_all_all
+    permission subscriptions_reports_read = subject & granted->subscriptions_reports_read
+    permission subscriptions_manifests_read = subject & granted->subscriptions_manifests_read
+    permission subscriptions_manifests_write = subject & granted->subscriptions_manifests_write
+    permission subscriptions_organization_read = subject & granted->subscriptions_organization_read
+    permission subscriptions_organization_write = subject & granted->subscriptions_organization_write
+    permission subscriptions_products_read = subject & granted->subscriptions_products_read
+    permission subscriptions_products_write = subject & granted->subscriptions_products_write
+    permission subscriptions_cloud_access_read = subject & granted->subscriptions_cloud_access_read
+    permission subscriptions_cloud_access_write = subject & granted->subscriptions_cloud_access_write
+    permission tasks_all_all = subject & granted->tasks_all_all
+    permission vulnerability_all_all = subject & granted->vulnerability_all_all
+    permission vulnerability_all_read = subject & granted->vulnerability_all_read
+    permission vulnerability_all_write = subject & granted->vulnerability_all_write
+    permission vulnerability_cve_business_risk_and_status_write = subject & granted->vulnerability_cve_business_risk_and_status_write
+    permission vulnerability_system_cve_status_write = subject & granted->vulnerability_system_cve_status_write
+    permission vulnerability_advanced_report_read = subject & granted->vulnerability_advanced_report_read
+    permission vulnerability_report_and_export_read = subject & granted->vulnerability_report_and_export_read
+    permission vulnerability_system_opt_out_write = subject & granted->vulnerability_system_opt_out_write
+    permission vulnerability_system_opt_out_read = subject & granted->vulnerability_system_opt_out_read
+    permission vulnerability_toggle_cves_without_errata_write = subject & granted->vulnerability_toggle_cves_without_errata_write
+    permission vulnerability_vulnerability_results_read = subject & granted->vulnerability_vulnerability_results_read
+    permission remediations_all_read = subject & granted->remediations_all_read
+    permission remediations_all_write = subject & granted->remediations_all_write
+    permission rbac_all_all = subject & granted->rbac_all_all
+    permission rbac_principal_read = subject & granted->rbac_principal_read
+
+  }
+
+  definition realm {
+    relation user_grant: role_binding
+  }
+
+  definition organization {
+    // every org should get an realm relation to a common root
+    relation realm: realm
+    relation user_grant: role_binding
+
+    // authority=service provider
+    // the authority is important, because you can assign entitlement_sets to workspaces all you want,
+    // but the service provider has to agree.
+    // the authority is about "meta permissions": what party is authorized to write these relations
+    relation entitlement_grant: entitlement_set | entitlement_binding // with expiration
+
+    permission content_provider = entitlement_grant->content_provider
+  }
+
+  definition workspace {
+    // if you want folders instead of recursive workspaces, change that here
+    // authority=org
+    relation parent: workspace | organization
+    relation user_grant: role_binding
+    relation entitlement_grant: entitlement_binding // with expiration
+
+    // synthetic relation for hierarchy
+    // requires repeating all entitlement_sets at workspace & org levels though
+    // Note: it's important this permission name does NOT collid with organization content_provider which
+    // is not meant to be inherited
+    permission granted_content_provider = entitlement_grant->content_provider
+    permission content_host_provide_content = granted_content_provider + parent->content_host_provide_content
+    
+    permission content_register_host = user_grant->content_register_host + parent->content_register_host
+    permission content_host_manage_subscription = user_grant->content_host_manage_subscription + parent->content_host_manage_subscription
+
+    // Openshift namespace
+    permission openshift_metrics_report = (user_grant->openshift_metrics_report & entitlement_grant->openshift_metrics_entitled) + parent->openshift_metrics_report
+
+    permission advisor_all_all = user_grant->advisor_all_all + parent->advisor_all_all
+    permission advisor_disable_recommendations_write = user_grant->advisor_disable_recommendations_write + parent->advisor_disable_recommendations_write
+    permission advisor_weekly_email_read = user_grant->advisor_weekly_email_read + parent->advisor_weekly_email_read
+    permission advisor_recommendation_results_read = user_grant->advisor_recommendation_results_read + parent->advisor_recommendation_results_read
+    permission advisor_exports_read = user_grant->advisor_exports_read + parent->advisor_exports_read
+    permission approval_workflows_create = user_grant->approval_workflows_create + parent->approval_workflows_create
+    permission approval_workflows_read = user_grant->approval_workflows_read + parent->approval_workflows_read
+    permission approval_workflows_update = user_grant->approval_workflows_update + parent->approval_workflows_update
+    permission approval_workflows_delete = user_grant->approval_workflows_delete + parent->approval_workflows_delete
+    permission approval_workflows_link = user_grant->approval_workflows_link + parent->approval_workflows_link
+    permission approval_workflows_unlink = user_grant->approval_workflows_unlink + parent->approval_workflows_unlink
+    permission approval_actions_create = user_grant->approval_actions_create + parent->approval_actions_create
+    permission approval_actions_read = user_grant->approval_actions_read + parent->approval_actions_read
+    permission approval_requests_create = user_grant->approval_requests_create + parent->approval_requests_create
+    permission approval_requests_read = user_grant->approval_requests_read + parent->approval_requests_read
+    permission approval_templates_read = user_grant->approval_templates_read + parent->approval_templates_read
+    permission automation_analytics_all_all = user_grant->automation_analytics_all_all + parent->automation_analytics_all_all
+    permission automation_analytics_all_read = user_grant->automation_analytics_all_read + parent->automation_analytics_all_read
+    permission automation_analytics_all_write = user_grant->automation_analytics_all_write + parent->automation_analytics_all_write
+    permission catalog_progress_messages_read = user_grant->catalog_progress_messages_read + parent->catalog_progress_messages_read
+    permission catalog_progress_messages_write = user_grant->catalog_progress_messages_write + parent->catalog_progress_messages_write
+    permission catalog_tenants_read = user_grant->catalog_tenants_read + parent->catalog_tenants_read
+    permission catalog_tenants_update = user_grant->catalog_tenants_update + parent->catalog_tenants_update
+    permission catalog_approval_requests_read = user_grant->catalog_approval_requests_read + parent->catalog_approval_requests_read
+    permission catalog_approval_requests_write = user_grant->catalog_approval_requests_write + parent->catalog_approval_requests_write
+    permission catalog_orders_read = user_grant->catalog_orders_read + parent->catalog_orders_read
+    permission catalog_orders_write = user_grant->catalog_orders_write + parent->catalog_orders_write
+    permission catalog_orders_order = user_grant->catalog_orders_order + parent->catalog_orders_order
+    permission catalog_order_items_read = user_grant->catalog_order_items_read + parent->catalog_order_items_read
+    permission catalog_order_items_write = user_grant->catalog_order_items_write + parent->catalog_order_items_write
+    permission catalog_order_items_order = user_grant->catalog_order_items_order + parent->catalog_order_items_order
+    permission catalog_order_processes_create = user_grant->catalog_order_processes_create + parent->catalog_order_processes_create
+    permission catalog_order_processes_read = user_grant->catalog_order_processes_read + parent->catalog_order_processes_read
+    permission catalog_order_processes_link = user_grant->catalog_order_processes_link + parent->catalog_order_processes_link
+    permission catalog_order_processes_unlink = user_grant->catalog_order_processes_unlink + parent->catalog_order_processes_unlink
+    permission catalog_order_processes_update = user_grant->catalog_order_processes_update + parent->catalog_order_processes_update
+    permission catalog_order_processes_delete = user_grant->catalog_order_processes_delete + parent->catalog_order_processes_delete
+    permission catalog_portfolios_create = user_grant->catalog_portfolios_create + parent->catalog_portfolios_create
+    permission catalog_portfolios_read = user_grant->catalog_portfolios_read + parent->catalog_portfolios_read
+    permission catalog_portfolios_update = user_grant->catalog_portfolios_update + parent->catalog_portfolios_update
+    permission catalog_portfolios_delete = user_grant->catalog_portfolios_delete + parent->catalog_portfolios_delete
+    permission catalog_portfolios_order = user_grant->catalog_portfolios_order + parent->catalog_portfolios_order
+    permission catalog_portfolio_items_create = user_grant->catalog_portfolio_items_create + parent->catalog_portfolio_items_create
+    permission catalog_portfolio_items_read = user_grant->catalog_portfolio_items_read + parent->catalog_portfolio_items_read
+    permission catalog_portfolio_items_update = user_grant->catalog_portfolio_items_update + parent->catalog_portfolio_items_update
+    permission catalog_portfolio_items_delete = user_grant->catalog_portfolio_items_delete + parent->catalog_portfolio_items_delete
+    permission catalog_portfolio_items_order = user_grant->catalog_portfolio_items_order + parent->catalog_portfolio_items_order
+    permission compliance_all_all = user_grant->compliance_all_all + parent->compliance_all_all
+    permission compliance_system_read = user_grant->compliance_system_read + parent->compliance_system_read
+    permission compliance_report_read = user_grant->compliance_report_read + parent->compliance_report_read
+    permission compliance_report_delete = user_grant->compliance_report_delete + parent->compliance_report_delete
+    permission compliance_policy_read = user_grant->compliance_policy_read + parent->compliance_policy_read
+    permission compliance_policy_create = user_grant->compliance_policy_create + parent->compliance_policy_create
+    permission compliance_policy_update = user_grant->compliance_policy_update + parent->compliance_policy_update
+    permission compliance_policy_delete = user_grant->compliance_policy_delete + parent->compliance_policy_delete
+    permission compliance_policy_write = user_grant->compliance_policy_write + parent->compliance_policy_write
+    permission config_manager_activation_keys_all = user_grant->config_manager_activation_keys_all + parent->config_manager_activation_keys_all
+    permission config_manager_activation_keys_read = user_grant->config_manager_activation_keys_read + parent->config_manager_activation_keys_read
+    permission config_manager_activation_keys_write = user_grant->config_manager_activation_keys_write + parent->config_manager_activation_keys_write
+    permission config_manager_state_read = user_grant->config_manager_state_read + parent->config_manager_state_read
+    permission config_manager_state_write = user_grant->config_manager_state_write + parent->config_manager_state_write
+    permission config_manager_state_changes_read = user_grant->config_manager_state_changes_read + parent->config_manager_state_changes_read
+    permission content_sources_all_all = user_grant->content_sources_all_all + parent->content_sources_all_all
+    permission content_sources_repositories_read = user_grant->content_sources_repositories_read + parent->content_sources_repositories_read
+    permission content_sources_repositories_write = user_grant->content_sources_repositories_write + parent->content_sources_repositories_write
+    permission cost_management_all_all = user_grant->cost_management_all_all + parent->cost_management_all_all
+    permission cost_management_gcp_account_all = user_grant->cost_management_gcp_account_all + parent->cost_management_gcp_account_all
+    permission cost_management_gcp_account_read = user_grant->cost_management_gcp_account_read + parent->cost_management_gcp_account_read
+    permission cost_management_gcp_project_all = user_grant->cost_management_gcp_project_all + parent->cost_management_gcp_project_all
+    permission cost_management_gcp_project_read = user_grant->cost_management_gcp_project_read + parent->cost_management_gcp_project_read
+    permission cost_management_openshift_cluster_all = user_grant->cost_management_openshift_cluster_all + parent->cost_management_openshift_cluster_all
+    permission cost_management_openshift_cluster_read = user_grant->cost_management_openshift_cluster_read + parent->cost_management_openshift_cluster_read
+    permission cost_management_openshift_node_all = user_grant->cost_management_openshift_node_all + parent->cost_management_openshift_node_all
+    permission cost_management_openshift_node_read = user_grant->cost_management_openshift_node_read + parent->cost_management_openshift_node_read
+    permission cost_management_oci_payer_tenant_id_all = user_grant->cost_management_oci_payer_tenant_id_all + parent->cost_management_oci_payer_tenant_id_all
+    permission cost_management_oci_payer_tenant_id_read = user_grant->cost_management_oci_payer_tenant_id_read + parent->cost_management_oci_payer_tenant_id_read
+    permission cost_management_cost_model_all = user_grant->cost_management_cost_model_all + parent->cost_management_cost_model_all
+    permission cost_management_cost_model_read = user_grant->cost_management_cost_model_read + parent->cost_management_cost_model_read
+    permission cost_management_cost_model_write = user_grant->cost_management_cost_model_write + parent->cost_management_cost_model_write
+    permission cost_management_azure_subscription_guid_all = user_grant->cost_management_azure_subscription_guid_all + parent->cost_management_azure_subscription_guid_all
+    permission cost_management_azure_subscription_guid_read = user_grant->cost_management_azure_subscription_guid_read + parent->cost_management_azure_subscription_guid_read
+    permission cost_management_aws_organizational_unit_all = user_grant->cost_management_aws_organizational_unit_all + parent->cost_management_aws_organizational_unit_all
+    permission cost_management_aws_organizational_unit_read = user_grant->cost_management_aws_organizational_unit_read + parent->cost_management_aws_organizational_unit_read
+    permission cost_management_openshift_project_all = user_grant->cost_management_openshift_project_all + parent->cost_management_openshift_project_all
+    permission cost_management_openshift_project_read = user_grant->cost_management_openshift_project_read + parent->cost_management_openshift_project_read
+    permission cost_management_settings_all = user_grant->cost_management_settings_all + parent->cost_management_settings_all
+    permission cost_management_settings_read = user_grant->cost_management_settings_read + parent->cost_management_settings_read
+    permission cost_management_settings_write = user_grant->cost_management_settings_write + parent->cost_management_settings_write
+    permission cost_management_aws_account_all = user_grant->cost_management_aws_account_all + parent->cost_management_aws_account_all
+    permission cost_management_aws_account_read = user_grant->cost_management_aws_account_read + parent->cost_management_aws_account_read
+    permission drift_all_all = user_grant->drift_all_all + parent->drift_all_all
+    permission drift_comparisons_read = user_grant->drift_comparisons_read + parent->drift_comparisons_read
+    permission drift_baselines_read = user_grant->drift_baselines_read + parent->drift_baselines_read
+    permission drift_baselines_write = user_grant->drift_baselines_write + parent->drift_baselines_write
+    permission drift_historical_system_profiles_read = user_grant->drift_historical_system_profiles_read + parent->drift_historical_system_profiles_read
+    permission drift_notifications_read = user_grant->drift_notifications_read + parent->drift_notifications_read
+    permission drift_notifications_write = user_grant->drift_notifications_write + parent->drift_notifications_write
+    permission integrations_all_all = user_grant->integrations_all_all + parent->integrations_all_all
+    permission integrations_endpoints_read = user_grant->integrations_endpoints_read + parent->integrations_endpoints_read
+    permission integrations_endpoints_write = user_grant->integrations_endpoints_write + parent->integrations_endpoints_write
+    permission inventory_all_all = user_grant->inventory_all_all + parent->inventory_all_all
+    permission inventory_all_read = user_grant->inventory_all_read + parent->inventory_all_read
+    permission inventory_staleness_all = user_grant->inventory_staleness_all + parent->inventory_staleness_all
+    permission inventory_staleness_read = user_grant->inventory_staleness_read + parent->inventory_staleness_read
+    permission inventory_staleness_write = user_grant->inventory_staleness_write + parent->inventory_staleness_write
+    permission inventory_hosts_all = user_grant->inventory_hosts_all + parent->inventory_hosts_all
+    permission inventory_hosts_read = user_grant->inventory_hosts_read + parent->inventory_hosts_read
+    permission inventory_hosts_write = user_grant->inventory_hosts_write + parent->inventory_hosts_write
+    permission inventory_groups_all = user_grant->inventory_groups_all + parent->inventory_groups_all
+    permission inventory_groups_read = user_grant->inventory_groups_read + parent->inventory_groups_read
+    permission inventory_groups_write = user_grant->inventory_groups_write + parent->inventory_groups_write
+    permission malware_detection_all_all = user_grant->malware_detection_all_all + parent->malware_detection_all_all
+    permission malware_detection_all_read = user_grant->malware_detection_all_read + parent->malware_detection_all_read
+    permission migration_analytics_all_all = user_grant->migration_analytics_all_all + parent->migration_analytics_all_all
+    permission notifications_all_all = user_grant->notifications_all_all + parent->notifications_all_all
+    permission notifications_notifications_read = user_grant->notifications_notifications_read + parent->notifications_notifications_read
+    permission notifications_notifications_write = user_grant->notifications_notifications_write + parent->notifications_notifications_write
+    permission notifications_events_read = user_grant->notifications_events_read + parent->notifications_events_read
+    permission ocp_advisor_all_all = user_grant->ocp_advisor_all_all + parent->ocp_advisor_all_all
+    permission ocp_advisor_recommendation_results_read = user_grant->ocp_advisor_recommendation_results_read + parent->ocp_advisor_recommendation_results_read
+    permission ocp_advisor_exports_read = user_grant->ocp_advisor_exports_read + parent->ocp_advisor_exports_read
+    permission ocp_advisor_toggle_recommendations_write = user_grant->ocp_advisor_toggle_recommendations_write + parent->ocp_advisor_toggle_recommendations_write
+    permission patch_all_all = user_grant->patch_all_all + parent->patch_all_all
+    permission patch_all_read = user_grant->patch_all_read + parent->patch_all_read
+    permission patch_all_write = user_grant->patch_all_write + parent->patch_all_write
+    permission patch_system_write = user_grant->patch_system_write + parent->patch_system_write
+    permission patch_template_write = user_grant->patch_template_write + parent->patch_template_write
+    permission playbook_dispatcher_run_read = user_grant->playbook_dispatcher_run_read + parent->playbook_dispatcher_run_read
+    permission playbook_dispatcher_run_write = user_grant->playbook_dispatcher_run_write + parent->playbook_dispatcher_run_write
+    permission policies_all_all = user_grant->policies_all_all + parent->policies_all_all
+    permission policies_policies_read = user_grant->policies_policies_read + parent->policies_policies_read
+    permission policies_policies_write = user_grant->policies_policies_write + parent->policies_policies_write
+    permission provisioning_all_all = user_grant->provisioning_all_all + parent->provisioning_all_all
+    permission provisioning_reservation_azure_all = user_grant->provisioning_reservation_azure_all + parent->provisioning_reservation_azure_all
+    permission provisioning_reservation_azure_read = user_grant->provisioning_reservation_azure_read + parent->provisioning_reservation_azure_read
+    permission provisioning_reservation_azure_write = user_grant->provisioning_reservation_azure_write + parent->provisioning_reservation_azure_write
+    permission provisioning_reservation_gcp_all = user_grant->provisioning_reservation_gcp_all + parent->provisioning_reservation_gcp_all
+    permission provisioning_reservation_gcp_read = user_grant->provisioning_reservation_gcp_read + parent->provisioning_reservation_gcp_read
+    permission provisioning_reservation_gcp_write = user_grant->provisioning_reservation_gcp_write + parent->provisioning_reservation_gcp_write
+    permission provisioning_source_all = user_grant->provisioning_source_all + parent->provisioning_source_all
+    permission provisioning_source_read = user_grant->provisioning_source_read + parent->provisioning_source_read
+    permission provisioning_pubkey_all = user_grant->provisioning_pubkey_all + parent->provisioning_pubkey_all
+    permission provisioning_pubkey_read = user_grant->provisioning_pubkey_read + parent->provisioning_pubkey_read
+    permission provisioning_pubkey_write = user_grant->provisioning_pubkey_write + parent->provisioning_pubkey_write
+    permission provisioning_reservation_all = user_grant->provisioning_reservation_all + parent->provisioning_reservation_all
+    permission provisioning_reservation_read = user_grant->provisioning_reservation_read + parent->provisioning_reservation_read
+    permission provisioning_reservation_write = user_grant->provisioning_reservation_write + parent->provisioning_reservation_write
+    permission provisioning_reservation_aws_all = user_grant->provisioning_reservation_aws_all + parent->provisioning_reservation_aws_all
+    permission provisioning_reservation_aws_read = user_grant->provisioning_reservation_aws_read + parent->provisioning_reservation_aws_read
+    permission provisioning_reservation_aws_write = user_grant->provisioning_reservation_aws_write + parent->provisioning_reservation_aws_write
+    permission remediations_all_all = user_grant->remediations_all_all + parent->remediations_all_all
+    permission remediations_remediation_read = user_grant->remediations_remediation_read + parent->remediations_remediation_read
+    permission remediations_remediation_write = user_grant->remediations_remediation_write + parent->remediations_remediation_write
+    permission remediations_remediation_execute = user_grant->remediations_remediation_execute + parent->remediations_remediation_execute
+    permission ros_all_all = user_grant->ros_all_all + parent->ros_all_all
+    permission ros_all_read = user_grant->ros_all_read + parent->ros_all_read
+    permission sources_all_all = user_grant->sources_all_all + parent->sources_all_all
+    permission subscriptions_all_all = user_grant->subscriptions_all_all + parent->subscriptions_all_all
+    permission subscriptions_reports_read = user_grant->subscriptions_reports_read + parent->subscriptions_reports_read
+    permission subscriptions_manifests_read = user_grant->subscriptions_manifests_read + parent->subscriptions_manifests_read
+    permission subscriptions_manifests_write = user_grant->subscriptions_manifests_write + parent->subscriptions_manifests_write
+    permission subscriptions_organization_read = user_grant->subscriptions_organization_read + parent->subscriptions_organization_read
+    permission subscriptions_organization_write = user_grant->subscriptions_organization_write + parent->subscriptions_organization_write
+    permission subscriptions_products_read = user_grant->subscriptions_products_read + parent->subscriptions_products_read
+    permission subscriptions_products_write = user_grant->subscriptions_products_write + parent->subscriptions_products_write
+    permission subscriptions_cloud_access_read = user_grant->subscriptions_cloud_access_read + parent->subscriptions_cloud_access_read
+    permission subscriptions_cloud_access_write = user_grant->subscriptions_cloud_access_write + parent->subscriptions_cloud_access_write
+    permission tasks_all_all = user_grant->tasks_all_all + parent->tasks_all_all
+    permission vulnerability_all_all = user_grant->vulnerability_all_all + parent->vulnerability_all_all
+    permission vulnerability_all_read = user_grant->vulnerability_all_read + parent->vulnerability_all_read
+    permission vulnerability_all_write = user_grant->vulnerability_all_write + parent->vulnerability_all_write
+    permission vulnerability_cve_business_risk_and_status_write = user_grant->vulnerability_cve_business_risk_and_status_write + parent->vulnerability_cve_business_risk_and_status_write
+    permission vulnerability_system_cve_status_write = user_grant->vulnerability_system_cve_status_write + parent->vulnerability_system_cve_status_write
+    permission vulnerability_advanced_report_read = user_grant->vulnerability_advanced_report_read + parent->vulnerability_advanced_report_read
+    permission vulnerability_report_and_export_read = user_grant->vulnerability_report_and_export_read + parent->vulnerability_report_and_export_read
+    permission vulnerability_system_opt_out_write = user_grant->vulnerability_system_opt_out_write + parent->vulnerability_system_opt_out_write
+    permission vulnerability_system_opt_out_read = user_grant->vulnerability_system_opt_out_read + parent->vulnerability_system_opt_out_read
+    permission vulnerability_toggle_cves_without_errata_write = user_grant->vulnerability_toggle_cves_without_errata_write + parent->vulnerability_toggle_cves_without_errata_write
+    permission vulnerability_vulnerability_results_read = user_grant->vulnerability_vulnerability_results_read + parent->vulnerability_vulnerability_results_read
+    permission remediations_all_read = user_grant->remediations_all_read + parent->remediations_all_read
+    permission remediations_all_write = user_grant->remediations_all_write + parent->remediations_all_write
+    permission rbac_all_all = user_grant->rbac_all_all + parent->rbac_all_all
+    permission rbac_principal_read = user_grant->rbac_principal_read + parent->rbac_principal_read
+
+  }
+
+  definition entitlement_set {
+    relation provider: entitlement_set
+
+    // content namespace
+    relation direct_content_provider: content/repository
+
+    // allows hierarchical entitlement_set sets
+    permission content_provider = direct_content_provider + provider->content_provider
+
+    // support namespace
+    relation direct_support_case_entitled: user:*
+
+    // observability namespace
+    relation direct_openshift_metrics_entitled: user:*
+    
+    permission openshift_metrics_entitled = direct_openshift_metrics_entitled + provider->openshift_metrics_entitled
+
+  // <GENERATED_ENTITLEMENT_PERMS_HERE>
+  }
+
+  definition entitlement_binding {
+    // this makes lifecycle tied to an organization or workspace's entitlement
+    relation arbiter: entitlement_set | entitlement_binding
+    relation grant: entitlement_set
+
+    permission content_provider = arbiter->content_provider & grant->content_provider
+
+    permission openshift_metrics_entitled = arbiter->openshift_metrics_entitled & grant->openshift_metrics_entitled
+
+  // <GENERATED_ENTITLEMENTBINDING_PERMS_HERE>
+  }
+
+  definition content/repository {
+  }
+
+  definition content/host {
+    relation workspace: workspace
+    relation user_grant: role_binding
+
+    permission manage_subscription = user_grant->content_host_manage_subscription + workspace->content_host_manage_subscription
+
+    // find path to entitled repository
+    permission provide_content = workspace->content_host_provide_content
+  }
+
+  definition openshift/cluster {
+    relation workspace: workspace
+    relation user_grant: role_binding
+    relation entitlement_grant: entitlement_set | entitlement_binding
+
+    permission metrics_report = (user_grant->openshift_metrics_report & entitlement_grant->openshift_metrics_entitled) + workspace->openshift_metrics_report
+  }
+
+  // knowing that a metric with labels...
+  // tenant=openshift
+  // cluster=1
+  // namespace=2
+  // means the resource openshift/namespace:1/2
+  // see if user:u1 is authority over namespace 1/2 metrics
+  // check namespace:1/2#metrics_report@user:u1
+  // then knowing tenant=openshift,
+  // check if that tenant is a metrics provider to that resource (namespace 1/2)
+  // check namespace:1/2#metrics_provider@rhobs/tenant:openshift
+  // this will be gated on whether it has been directly entitled by openshift, or if the cluster,
+  // or the workspace, or the organization has been entitled
+  // we could also name the entitlement after the rhobs tenant
+  // in which case we could combine to a single check with a user-feature-style entitlement
+  definition openshift/namespace {
+    relation cluster: openshift/cluster
+    relation user_grant: role_binding
+    relation entitlement_grant: entitlement_set | entitlement_binding
+
+    permission metrics_report = (user_grant->openshift_metrics_report & entitlement_grant->openshift_metrics_entitled) + cluster->metrics_report
+  }
+
+  definition advisor/disable_recommendations {
+    relation workspace: workspace
+    permission write = workspace->advisor_disable_recommendations_write + workspace->advisor_all_all
+  }
+
+  definition advisor/weekly_email {
+    relation workspace: workspace
+    permission read = workspace->advisor_weekly_email_read + workspace->advisor_all_all
+  }
+
+  definition advisor/recommendation_results {
+    relation workspace: workspace
+    permission read = workspace->advisor_recommendation_results_read + workspace->advisor_all_all
+  }
+
+  definition advisor/exports {
+    relation workspace: workspace
+    permission read = workspace->advisor_exports_read + workspace->advisor_all_all
+  }
+
+  definition approval/workflows {
+    relation workspace: workspace
+    permission create = workspace->approval_workflows_create
+    permission read = workspace->approval_workflows_read
+    permission update = workspace->approval_workflows_update
+    permission delete = workspace->approval_workflows_delete
+    permission link = workspace->approval_workflows_link
+    permission unlink = workspace->approval_workflows_unlink
+  }
+
+  definition approval/actions {
+    relation workspace: workspace
+    permission create = workspace->approval_actions_create
+    permission read = workspace->approval_actions_read
+  }
+
+  definition approval/requests {
+    relation workspace: workspace
+    permission create = workspace->approval_requests_create
+    permission read = workspace->approval_requests_read
+  }
+
+  definition approval/templates {
+    relation workspace: workspace
+    permission read = workspace->approval_templates_read
+  }
+
+  definition catalog/progress_messages {
+    relation workspace: workspace
+    permission read = workspace->catalog_progress_messages_read
+    permission write = workspace->catalog_progress_messages_write
+  }
+
+  definition catalog/tenants {
+    relation workspace: workspace
+    permission read = workspace->catalog_tenants_read
+    permission update = workspace->catalog_tenants_update
+  }
+
+  definition catalog/approval_requests {
+    relation workspace: workspace
+    permission read = workspace->catalog_approval_requests_read
+    permission write = workspace->catalog_approval_requests_write
+  }
+
+  definition catalog/orders {
+    relation workspace: workspace
+    permission read = workspace->catalog_orders_read
+    permission write = workspace->catalog_orders_write
+    permission order = workspace->catalog_orders_order
+  }
+
+  definition catalog/order_items {
+    relation workspace: workspace
+    permission read = workspace->catalog_order_items_read
+    permission write = workspace->catalog_order_items_write
+    permission order = workspace->catalog_order_items_order
+  }
+
+  definition catalog/order_processes {
+    relation workspace: workspace
+    permission create = workspace->catalog_order_processes_create
+    permission read = workspace->catalog_order_processes_read
+    permission link = workspace->catalog_order_processes_link
+    permission unlink = workspace->catalog_order_processes_unlink
+    permission update = workspace->catalog_order_processes_update
+    permission delete = workspace->catalog_order_processes_delete
+  }
+
+  definition catalog/portfolios {
+    relation workspace: workspace
+    permission create = workspace->catalog_portfolios_create
+    permission read = workspace->catalog_portfolios_read
+    permission update = workspace->catalog_portfolios_update
+    permission delete = workspace->catalog_portfolios_delete
+    permission order = workspace->catalog_portfolios_order
+  }
+
+  definition catalog/portfolio_items {
+    relation workspace: workspace
+    permission create = workspace->catalog_portfolio_items_create
+    permission read = workspace->catalog_portfolio_items_read
+    permission update = workspace->catalog_portfolio_items_update
+    permission delete = workspace->catalog_portfolio_items_delete
+    permission order = workspace->catalog_portfolio_items_order
+  }
+
+  definition compliance/system {
+    relation workspace: workspace
+    permission read = workspace->compliance_system_read + workspace->compliance_all_all
+  }
+
+  definition compliance/report {
+    relation workspace: workspace
+    permission read = workspace->compliance_report_read + workspace->compliance_all_all
+    permission delete = workspace->compliance_report_delete + workspace->compliance_all_all
+  }
+
+  definition compliance/policy {
+    relation workspace: workspace
+    permission read = workspace->compliance_policy_read + workspace->compliance_all_all
+    permission create = workspace->compliance_policy_create + workspace->compliance_all_all
+    permission update = workspace->compliance_policy_update + workspace->compliance_all_all
+    permission delete = workspace->compliance_policy_delete + workspace->compliance_all_all
+    permission write = workspace->compliance_policy_write + workspace->compliance_all_all
+  }
+
+  definition config_manager/activation_keys {
+    relation workspace: workspace
+    permission read = workspace->config_manager_activation_keys_read + workspace->config_manager_activation_keys_all
+    permission write = workspace->config_manager_activation_keys_write + workspace->config_manager_activation_keys_all
+  }
+
+  definition config_manager/state {
+    relation workspace: workspace
+    permission read = workspace->config_manager_state_read
+    permission write = workspace->config_manager_state_write
+  }
+
+  definition config_manager/state_changes {
+    relation workspace: workspace
+    permission read = workspace->config_manager_state_changes_read
+  }
+
+  definition content_sources/repositories {
+    relation workspace: workspace
+    permission read = workspace->content_sources_repositories_read + workspace->content_sources_all_all
+    permission write = workspace->content_sources_repositories_write + workspace->content_sources_all_all
+  }
+
+  definition cost_management/gcp_account {
+    relation workspace: workspace
+    permission read = workspace->cost_management_gcp_account_read + workspace->cost_management_gcp_account_all + workspace->cost_management_all_all
+  }
+
+  definition cost_management/gcp_project {
+    relation workspace: workspace
+    permission read = workspace->cost_management_gcp_project_read + workspace->cost_management_gcp_project_all + workspace->cost_management_all_all
+  }
+
+  definition cost_management/openshift_cluster {
+    relation workspace: workspace
+    permission read = workspace->cost_management_openshift_cluster_read + workspace->cost_management_openshift_cluster_all + workspace->cost_management_all_all
+  }
+
+  definition cost_management/openshift_node {
+    relation workspace: workspace
+    permission read = workspace->cost_management_openshift_node_read + workspace->cost_management_openshift_node_all + workspace->cost_management_all_all
+  }
+
+  definition cost_management/oci_payer_tenant_id {
+    relation workspace: workspace
+    permission read = workspace->cost_management_oci_payer_tenant_id_read + workspace->cost_management_oci_payer_tenant_id_all + workspace->cost_management_all_all
+  }
+
+  definition cost_management/cost_model {
+    relation workspace: workspace
+    permission read = workspace->cost_management_cost_model_read + workspace->cost_management_cost_model_all + workspace->cost_management_all_all
+    permission write = workspace->cost_management_cost_model_write + workspace->cost_management_cost_model_all + workspace->cost_management_all_all
+  }
+
+  definition cost_management/azure_subscription_guid {
+    relation workspace: workspace
+    permission read = workspace->cost_management_azure_subscription_guid_read + workspace->cost_management_azure_subscription_guid_all + workspace->cost_management_all_all
+  }
+
+  definition cost_management/aws_organizational_unit {
+    relation workspace: workspace
+    permission read = workspace->cost_management_aws_organizational_unit_read + workspace->cost_management_aws_organizational_unit_all + workspace->cost_management_all_all
+  }
+
+  definition cost_management/openshift_project {
+    relation workspace: workspace
+    permission read = workspace->cost_management_openshift_project_read + workspace->cost_management_openshift_project_all + workspace->cost_management_all_all
+  }
+
+  definition cost_management/settings {
+    relation workspace: workspace
+    permission read = workspace->cost_management_settings_read + workspace->cost_management_settings_all + workspace->cost_management_all_all
+    permission write = workspace->cost_management_settings_write + workspace->cost_management_settings_all + workspace->cost_management_all_all
+  }
+
+  definition cost_management/aws_account {
+    relation workspace: workspace
+    permission read = workspace->cost_management_aws_account_read + workspace->cost_management_aws_account_all + workspace->cost_management_all_all
+  }
+
+  definition drift/comparisons {
+    relation workspace: workspace
+    permission read = workspace->drift_comparisons_read + workspace->drift_all_all
+  }
+
+  definition drift/baselines {
+    relation workspace: workspace
+    permission read = workspace->drift_baselines_read + workspace->drift_all_all
+    permission write = workspace->drift_baselines_write + workspace->drift_all_all
+  }
+
+  definition drift/historical_system_profiles {
+    relation workspace: workspace
+    permission read = workspace->drift_historical_system_profiles_read + workspace->drift_all_all
+  }
+
+  definition drift/notifications {
+    relation workspace: workspace
+    permission read = workspace->drift_notifications_read + workspace->drift_all_all
+    permission write = workspace->drift_notifications_write + workspace->drift_all_all
+  }
+
+  definition integrations/endpoints {
+    relation workspace: workspace
+    permission read = workspace->integrations_endpoints_read + workspace->integrations_all_all
+    permission write = workspace->integrations_endpoints_write + workspace->integrations_all_all
+  }
+
+  definition inventory/staleness {
+    relation workspace: workspace
+    permission read = workspace->inventory_staleness_read + workspace->inventory_staleness_all + workspace->inventory_all_read + workspace->inventory_all_all
+    permission write = workspace->inventory_staleness_write + workspace->inventory_staleness_all + workspace->inventory_all_all
+  }
+
+  definition inventory/hosts {
+    relation workspace: workspace
+    permission read = workspace->inventory_hosts_read + workspace->inventory_hosts_all + workspace->inventory_all_read + workspace->inventory_all_all
+    permission write = workspace->inventory_hosts_write + workspace->inventory_hosts_all + workspace->inventory_all_all
+  }
+
+  definition inventory/groups {
+    relation workspace: workspace
+    permission read = workspace->inventory_groups_read + workspace->inventory_groups_all + workspace->inventory_all_read + workspace->inventory_all_all
+    permission write = workspace->inventory_groups_write + workspace->inventory_groups_all + workspace->inventory_all_all
+  }
+
+  definition notifications/notifications {
+    relation workspace: workspace
+    permission read = workspace->notifications_notifications_read + workspace->notifications_all_all
+    permission write = workspace->notifications_notifications_write + workspace->notifications_all_all
+  }
+
+  definition notifications/events {
+    relation workspace: workspace
+    permission read = workspace->notifications_events_read + workspace->notifications_all_all
+  }
+
+  definition ocp_advisor/recommendation_results {
+    relation workspace: workspace
+    permission read = workspace->ocp_advisor_recommendation_results_read + workspace->ocp_advisor_all_all
+  }
+
+  definition ocp_advisor/exports {
+    relation workspace: workspace
+    permission read = workspace->ocp_advisor_exports_read + workspace->ocp_advisor_all_all
+  }
+
+  definition ocp_advisor/toggle_recommendations {
+    relation workspace: workspace
+    permission write = workspace->ocp_advisor_toggle_recommendations_write + workspace->ocp_advisor_all_all
+  }
+
+  definition patch/system {
+    relation workspace: workspace
+    permission write = workspace->patch_system_write + workspace->patch_all_write + workspace->patch_all_all
+    permission read = workspace->patch_all_read + workspace->patch_all_all
+  }
+
+  definition patch/template {
+    relation workspace: workspace
+    permission write = workspace->patch_template_write + workspace->patch_all_write + workspace->patch_all_all
+    permission read = workspace->patch_all_read + workspace->patch_all_all
+  }
+
+  definition playbook_dispatcher/run {
+    relation workspace: workspace
+    permission read = workspace->playbook_dispatcher_run_read
+    permission write = workspace->playbook_dispatcher_run_write
+  }
+
+  definition policies/policies {
+    relation workspace: workspace
+    permission read = workspace->policies_policies_read + workspace->policies_all_all
+    permission write = workspace->policies_policies_write + workspace->policies_all_all
+  }
+
+  definition provisioning/reservation_azure {
+    relation workspace: workspace
+    permission read = workspace->provisioning_reservation_azure_read + workspace->provisioning_reservation_azure_all + workspace->provisioning_all_all
+    permission write = workspace->provisioning_reservation_azure_write + workspace->provisioning_reservation_azure_all + workspace->provisioning_all_all
+  }
+
+  definition provisioning/reservation_gcp {
+    relation workspace: workspace
+    permission read = workspace->provisioning_reservation_gcp_read + workspace->provisioning_reservation_gcp_all + workspace->provisioning_all_all
+    permission write = workspace->provisioning_reservation_gcp_write + workspace->provisioning_reservation_gcp_all + workspace->provisioning_all_all
+  }
+
+  definition provisioning/source {
+    relation workspace: workspace
+    permission read = workspace->provisioning_source_read + workspace->provisioning_source_all + workspace->provisioning_all_all
+  }
+
+  definition provisioning/pubkey {
+    relation workspace: workspace
+    permission read = workspace->provisioning_pubkey_read + workspace->provisioning_pubkey_all + workspace->provisioning_all_all
+    permission write = workspace->provisioning_pubkey_write + workspace->provisioning_pubkey_all + workspace->provisioning_all_all
+  }
+
+  definition provisioning/reservation {
+    relation workspace: workspace
+    permission read = workspace->provisioning_reservation_read + workspace->provisioning_reservation_all + workspace->provisioning_all_all
+    permission write = workspace->provisioning_reservation_write + workspace->provisioning_reservation_all + workspace->provisioning_all_all
+  }
+
+  definition provisioning/reservation_aws {
+    relation workspace: workspace
+    permission read = workspace->provisioning_reservation_aws_read + workspace->provisioning_reservation_aws_all + workspace->provisioning_all_all
+    permission write = workspace->provisioning_reservation_aws_write + workspace->provisioning_reservation_aws_all + workspace->provisioning_all_all
+  }
+
+  definition remediations/remediation {
+    relation workspace: workspace
+    permission read = workspace->remediations_remediation_read + workspace->remediations_all_all
+    permission write = workspace->remediations_remediation_write + workspace->remediations_all_all
+    permission execute = workspace->remediations_remediation_execute + workspace->remediations_all_all
+  }
+
+  definition subscriptions/reports {
+    relation workspace: workspace
+    permission read = workspace->subscriptions_reports_read + workspace->subscriptions_all_all
+  }
+
+  definition subscriptions/manifests {
+    relation workspace: workspace
+    permission read = workspace->subscriptions_manifests_read + workspace->subscriptions_all_all
+    permission write = workspace->subscriptions_manifests_write + workspace->subscriptions_all_all
+  }
+
+  definition subscriptions/organization {
+    relation workspace: workspace
+    permission read = workspace->subscriptions_organization_read + workspace->subscriptions_all_all
+    permission write = workspace->subscriptions_organization_write + workspace->subscriptions_all_all
+  }
+
+  definition subscriptions/products {
+    relation workspace: workspace
+    permission read = workspace->subscriptions_products_read + workspace->subscriptions_all_all
+    permission write = workspace->subscriptions_products_write + workspace->subscriptions_all_all
+  }
+
+  definition subscriptions/cloud_access {
+    relation workspace: workspace
+    permission read = workspace->subscriptions_cloud_access_read + workspace->subscriptions_all_all
+    permission write = workspace->subscriptions_cloud_access_write + workspace->subscriptions_all_all
+  }
+
+  definition vulnerability/cve_business_risk_and_status {
+    relation workspace: workspace
+    permission write = workspace->vulnerability_cve_business_risk_and_status_write + workspace->vulnerability_all_write + workspace->vulnerability_all_all
+    permission read = workspace->vulnerability_all_read + workspace->vulnerability_all_all
+  }
+
+  definition vulnerability/system_cve_status {
+    relation workspace: workspace
+    permission write = workspace->vulnerability_system_cve_status_write + workspace->vulnerability_all_write + workspace->vulnerability_all_all
+    permission read = workspace->vulnerability_all_read + workspace->vulnerability_all_all
+  }
+
+  definition vulnerability/advanced_report {
+    relation workspace: workspace
+    permission read = workspace->vulnerability_advanced_report_read + workspace->vulnerability_all_read + workspace->vulnerability_all_all
+    permission write = workspace->vulnerability_all_write + workspace->vulnerability_all_all
+  }
+
+  definition vulnerability/report_and_export {
+    relation workspace: workspace
+    permission read = workspace->vulnerability_report_and_export_read + workspace->vulnerability_all_read + workspace->vulnerability_all_all
+    permission write = workspace->vulnerability_all_write + workspace->vulnerability_all_all
+  }
+
+  definition vulnerability/system_opt_out {
+    relation workspace: workspace
+    permission write = workspace->vulnerability_system_opt_out_write + workspace->vulnerability_all_write + workspace->vulnerability_all_all
+    permission read = workspace->vulnerability_system_opt_out_read + workspace->vulnerability_all_read + workspace->vulnerability_all_all
+  }
+
+  definition vulnerability/toggle_cves_without_errata {
+    relation workspace: workspace
+    permission write = workspace->vulnerability_toggle_cves_without_errata_write + workspace->vulnerability_all_write + workspace->vulnerability_all_all
+    permission read = workspace->vulnerability_all_read + workspace->vulnerability_all_all
+  }
+
+  definition vulnerability/vulnerability_results {
+    relation workspace: workspace
+    permission read = workspace->vulnerability_vulnerability_results_read + workspace->vulnerability_all_read + workspace->vulnerability_all_all
+    permission write = workspace->vulnerability_all_write + workspace->vulnerability_all_all
+  }
+

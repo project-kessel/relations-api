@@ -7,14 +7,15 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/authzed/authzed-go/v1"
-	"github.com/go-kratos/kratos/v2/log"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/authzed/authzed-go/v1"
+	"github.com/go-kratos/kratos/v2/log"
 
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"google.golang.org/grpc"
@@ -29,7 +30,7 @@ const (
 	// SpicedbVersion is the image version used for containerized spiceDB in tests
 	SpicedbVersion = "v1.22.2"
 	// SpicedbSchemaBootstrapFile specifies an optional bootstrap schema file to be used for testing
-	SpicedbSchemaBootstrapFile = "spicedb-test-data/basic_schema.yaml"
+	SpicedbSchemaBootstrapFile = "spicedb-test-data/schema.yaml"
 	// SpicedbRelationsBootstrapFile specifies an optional bootstrap file containing relations to be used for testing
 	SpicedbRelationsBootstrapFile = ""
 )

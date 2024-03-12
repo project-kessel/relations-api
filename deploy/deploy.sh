@@ -24,8 +24,7 @@ else
   exit 1
 fi
 
-
-
+# Check if there is an existing NS
 NAMESPACE=$(oc project -q)
 
 if [[ -z "${NAMESPACE}" ]]; then
@@ -33,6 +32,8 @@ if [[ -z "${NAMESPACE}" ]]; then
     # Reserve a namespace
   bonfire namespace reserve --duration 8h
 fi
+
+NAMESPACE=$(oc project -q)
 echo "Using Namespace:" $NAMESPACE
 
 #Prepare the bonfire config yaml file
@@ -71,12 +72,17 @@ bonfire deploy relationships -n $NAMESPACE --local-config-method override
 ROUTE=$(oc get routes --selector='app=relationships' -o jsonpath='{.items[*].spec.host}')
 BASE_URL="https://$ROUTE"
 
+echo ""
 echo "Route: ${BASE_URL}/api/authz/v1/relationships"
 
 USER="$(oc get secrets env-$NAMESPACE-keycloak --template={{.data.defaultUsername}} | base64 -d)"
 PASSWORD="$( oc get secrets env-$NAMESPACE-keycloak --template={{.data.defaultPassword}} | base64 -d)"
 
+echo ""
 echo "user: ${USER}"
 echo "pass: ${PASSWORD}"
 
-echo "curl -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v1/relationships -d '{ "touch": true, "relationships": [{"object": {"type": "group","id": "bob_club"},"relation": "member","subject": {"object": {"type": "user","id": "bob"}}}]}'"
+echo ""
+echo "Relations - Write(POST) - Sample CURL request"
+echo ""
+echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v1/relationships -d '{ "touch": true, "relationships": [{"object": {"type": "group","id": "bob_club"},"relation": "member","subject": {"object": {"type": "user","id": "bob"}}}]}'"

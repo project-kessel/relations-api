@@ -22,6 +22,8 @@ services:
     image: "authzed/spicedb"
     command: "serve"
     restart: "always"
+    configs:
+      - bootstrap_file
     ports:
       - "8080:8080"
       - "9090:9090"
@@ -29,6 +31,7 @@ services:
     environment:
       - "SPICEDB_GRPC_PRESHARED_KEY=${SPICEDB_GRPC_PRESHARED_KEY}"
       - "SPICEDB_DATASTORE_ENGINE=postgres"
+      - "SPICEDB_DATASTORE_BOOTSTRAP_FILES=/bootstrap_file"
       - "SPICEDB_DATASTORE_CONN_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/spicedb?sslmode=disable"
     depends_on:
       - "migrate"
@@ -54,6 +57,8 @@ services:
 configs:
   spicedb_pre_shared:
     environment: "SPICEDB_GRPC_PRESHARED_KEY"
+  bootstrap_file:
+    file: ./deploy/schema.yaml
 
 secrets:
   spicedb_pre_shared:

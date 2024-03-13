@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relationships
+  namespace: spicedb
+  labels:
+    app: relationships
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relationships
+  template:
+    metadata:
+      labels:
+        app: relationships
+    spec:
+      containers:
+        - name: relationships
+          image: quay.io/ciam_authz/insights-rebac:latest
+          ports:
+            - containerPort: 8000
+            - containerPort: 9000
+          env:
+            - name: SPICEDB_PRESHARED
+              valueFrom:
+                secretKeyRef:
+                  key: preshared_key
+                  name: dev-spicedb-config
+            - name: SPICEDB_ENDPOINT
+              value: spicedb-cr:50051

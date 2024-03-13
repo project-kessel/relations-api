@@ -103,7 +103,7 @@ spicedb/teardown:
 	./spicedb/teardown.sh
 .PHONY: spicedb/teardown
 
-kind/spicedb:
+kind/rebac:
 	./spicedb-kind-setup/setup.sh
 .PHONY: kind/spicedb
 

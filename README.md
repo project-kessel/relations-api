@@ -57,8 +57,8 @@ wire
 ## teardown spicedb and postgresql db
 `make spicedb/teardown`
 
-## Spicedb using kind/kubernetes
-`make kind/spicedb`
+## Deploy Rebac and Spicedb using kind/kubernetes
+`make kind/rebac`
 
 ## Docker
 ```bash

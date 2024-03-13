@@ -51,5 +51,21 @@ while [[ -z $(kubectl get deployments.apps -n spicedb spicedb-cr-spicedb -o json
   sleep 1
 done
 echo "spicedb is ready"
-
 kubectl get ingresses.networking.k8s.io -n spicedb
+
+echo "Deploying rebac service"
+kubectl apply -f ./spicedb-kind-setup/rebac/secret.yaml -n spicedb
+kubectl apply -f ./spicedb-kind-setup/rebac/deployment.yaml -n spicedb
+kubectl apply -f ./spicedb-kind-setup/rebac/svc.yaml -n spicedb
+
+while [[ -z $(kubectl get deployments.apps -n spicedb relationships -o jsonpath="{.status.readyReplicas}" 2>/dev/null) ]]; do
+  echo "still waiting for relationships"
+  sleep 1
+done
+
+echo "Route"
+kubectl get ingresses.networking.k8s.io -n spicedb
+
+echo "Sample curl to relationships api"
+echo ""
+echo  "curl http://relationships.127.0.0.1.nip.io/api/authz/v1/relationships -d '{ "touch": true, "relationships": [{"object": {"type": "group","id": "bob_club"},"relation": "member","subject": {"object": {"type": "user","id": "bob"}}}]}'"

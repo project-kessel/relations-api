@@ -285,21 +285,32 @@ func createRelationship(subjectId string, subjectType string, subjectRelationshi
 	}
 }
 
-var operations = map[string]map[string][]string{
-	"inventory": {
-		"all":    {"read", "all"},
-		"hosts":  {"read", "write"},
-		"groups": {"read", "write", "all"},
-	},
-	"cost-management": {},
-}
-
 const (
 	DefaultWorkspace string = "aspian/default"
 	WorkspaceA       string = "aspian/default/A"
 	WorkspaceB       string = "aspian/default/B"
 	User             string = "user"
 )
+
+var InventoryAllAll = Operation{V1Permission: "inventory:*:*", V2WorkspacePermission: "inventory_all_all", V2ResourceVerb: "all"}
+var InventoryAllRead = Operation{V1Permission: "inventory:*:read", V2WorkspacePermission: "inventory_all_read", V2ResourceVerb: "read"}
+
+var InventoryHostsAll = Operation{V1Permission: "inventory:hosts:*", V2WorkspacePermission: "inventory_hosts_all", V2ResourceType: "inventory/hosts"} //Actually, I don't think there is an "all" at the resource level- that doesn't make sense. Maybe make optional?
+var InventoryHostsRead = Operation{V1Permission: "inventory:hosts:read", V2WorkspacePermission: "inventory_hosts_read", V2ResourceType: "inventory/hosts", V2ResourceVerb: "read"}
+var InventoryHostsWrite = Operation{V1Permission: "inventory:hosts:write", V2WorkspacePermission: "inventory_hosts_write", V2ResourceType: "inventory/hosts", V2ResourceVerb: "write"}
+
+var InventoryGroupsAll = Operation{V1Permission: "inventory:groups:*", V2WorkspacePermission: "inventory_groups_all", V2ResourceType: "inventory/groups"}
+var InventoryGroupsRead = Operation{V1Permission: "inventory:groups:read", V2WorkspacePermission: "inventory_groups_read", V2ResourceType: "inventory/groups", V2ResourceVerb: "read"}
+var InventoryGroupsWrite = Operation{V1Permission: "inventory:groups:write", V2WorkspacePermission: "inventory_groups_write", V2ResourceType: "inventory/groups", V2ResourceVerb: "write"}
+
+var operations = map[string]map[string][]Operation{
+	"inventory": {
+		"all":    {InventoryAllAll, InventoryAllRead},
+		"hosts":  {InventoryHostsAll, InventoryHostsRead, InventoryHostsWrite},
+		"groups": {InventoryGroupsAll, InventoryGroupsRead, InventoryGroupsWrite},
+	},
+	"cost-management": {},
+}
 
 func seedRoleTestingRelationships(spiceDb *SpiceDbRepository) {
 	createRelationship(DefaultWorkspace, "workspace", "", "parent", "workspace", WorkspaceA)
@@ -313,10 +324,28 @@ func TestSingleGlobalPermissionRoleConversion(t *testing.T) {
 	assert.NoError(t, err)
 
 	role := V1Role{
-		Id:                  "4cc8ea10-dfe3-11ee-8af7-6777abd80b44",
-		Name:                "Inventory Host Readers",
-		GlobalPermissions:   []string{"inventory:hosts:read"},
-		FilteredPermissions: map[string]map[string]AttributeFilter{},
+		Id:                "4cc8ea10-dfe3-11ee-8af7-6777abd80b44",
+		Name:              "Inventory Host Readers",
+		GlobalPermissions: []string{"inventory:hosts:read"},
+	}
+
+	seedRoleTestingRelationships(spiceDbRepo)
+
+	assertRole(t, ctx, spiceDbRepo, User, role)
+}
+
+func TestSingleFilteredPermissionRoleConversion(t *testing.T) {
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+
+	assert.NoError(t, err)
+
+	role := V1Role{
+		Id:   "5199c59a-e534-11ee-8b89-638222e98bf8",
+		Name: "Group A Readers",
+		FilteredPermissions: map[string]AttributeFilter{
+			"inventory:groups:read": {ExplicitResourceIDs: []string{WorkspaceA}, ExpectedResourceIDs: []string{WorkspaceA}},
+		},
 	}
 
 	seedRoleTestingRelationships(spiceDbRepo)
@@ -325,28 +354,22 @@ func TestSingleGlobalPermissionRoleConversion(t *testing.T) {
 }
 
 func assertRole(t *testing.T, ctx context.Context, spiceDb *SpiceDbRepository, user string, role V1Role) bool {
-	for appName, app := range operations {
-		for resourceType, operations := range app {
+	for _, app := range operations {
+		for _, operations := range app {
 			for _, operation := range operations {
 				//Check global permission
-				shouldHave := contains(operation, role.GlobalPermissions)
-				has := checkGlobalPermission(t, ctx, spiceDb, user, appName+"_"+resourceType+"_"+operation) //This probably works- maybe try writing a test that leverages just it?
+				shouldHave := contains(operation.V1Permission, role.GlobalPermissions)
+				has := checkGlobalPermission(t, ctx, spiceDb, user, operation.V2WorkspacePermission)
 				assert.Equal(t, shouldHave, has, "User: %s, permission: %s, should have: %b, has: %b", user, operation, shouldHave, has)
 
 				//Check attribute filters
-				if filter, found := role.FilteredPermissions[appName][resourceType]; found {
+				if filter, found := role.FilteredPermissions[operation.V1Permission]; found && operation.V2ResourceType != "" {
 					if has {
 						t.Log("Cannot check filtered permission when the permission is granted globally")
 						continue
 					}
-					//Potential problem! Wildcards will cause false positives!
-					//Potential solution: have the test case specify what the results should be separately from what the permissions should be. These could go on the AttributeFilter struct
-					//	This might be the way, if it's efficient and based on well-known values. It lets the test author be explicit about what's expected.
-					//Potential solution: have the operations data be structs that include pointing to the ones they should imply
-					//	This seems really efficient by its nature but there's a catch- it's not clear to the test author what's expected, and it's possible the test could be comparing two flawed sets under the hood
 
-					//Related potential problem: we sometimes use the full permission name, like inventory:hosts:read and sometimes short names like read
-					authorizedIDs := getAuthorizedIDs(t, ctx, spiceDb, user, resourceType, operation)
+					authorizedIDs := getAuthorizedIDs(t, ctx, spiceDb, user, operation.V2ResourceType, operation.V2ResourceVerb)
 					assert.ElementsMatch(t, filter.ExpectedResourceIDs, authorizedIDs)
 				}
 			}
@@ -423,11 +446,17 @@ func getAuthorizedIDs(t *testing.T, ctx context.Context, spiceDb *SpiceDbReposit
 	return authorizedIDs
 }
 
+type Operation struct {
+	V1Permission          string
+	V2WorkspacePermission string
+	V2ResourceType        string
+	V2ResourceVerb        string
+}
 type V1Role struct {
 	Id                  string
 	Name                string
 	GlobalPermissions   []string
-	FilteredPermissions map[string]map[string]AttributeFilter
+	FilteredPermissions map[string]AttributeFilter
 }
 
 type AttributeFilter struct {

@@ -95,3 +95,21 @@ The deploy script under the deploy folder, will deploy all the needed components
 
 You should be able to use the public route (relations-*) created by the clowder in your namespace, to use the service.
 
+#### Deploying the components with rbac
+
+This is demonstrating calling relationship api from rbac service in ephemeral environment.
+
+```
+./deploy.sh rbac <path_to_local_copy_of_insights_rbac>
+```
+
+`path_to_local_copy_of_insights_rbac` is this [repository](https://github.com/RedHatInsights/insights-rbac)
+
+Example:
+```
+./deploy.sh rbac /Users/liborpichler/Projects/insights-rbac
+```
+
+- Updates config bonfire file and add rbac component
+- Deploys rbac together with relationships application
+  - Hardcoded image is used with grpc client for calling relationships

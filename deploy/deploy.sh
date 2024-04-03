@@ -1,4 +1,16 @@
 #!/bin/bash
+
+RBAC_ARGUMENT="$1"
+RBAC_DIR="$2"
+if [ "$RBAC_ARGUMENT" == "rbac" ]; then
+
+ if [ ! -d "$RBAC_DIR" ]; then
+    echo "The directory $RBAC_DIR does not exist."
+    echo "Please specify local directory(absolute path) to copy of https://github.com/RedHatInsights/insights-rbac repository."
+    exit
+  fi
+fi
+
 source ../.secrets/postgres.env
 
 # Export tags
@@ -43,7 +55,7 @@ cat > $file_location <<EOF
 apps:
 - name: relationships
   components:
-    - name:  relationships
+    - name: relationships
       host: local
       repo: $currentpath
       path: clowdapp.yaml
@@ -52,6 +64,20 @@ apps:
         IMAGE: $IMAGE
         IMAGE_TAG: $IMAGE_TAG
 EOF
+
+if [[ "$RBAC_ARGUMENT" == "rbac" ]]; then
+  cat >> $file_location <<EOF
+- name: rbac
+  components:
+    - name: rbac
+      host: local
+      repo: $RBAC_DIR/deploy
+      path: rbac-clowdapp.yml
+      parameters:
+        IMAGE: quay.io/lpichler/insights-rbac
+        IMAGE_TAG: rebac
+EOF
+fi
 
 # Create postgres pod,service and the spiceDB secret
 oc process -f postgres.yaml -p NAMESPACE=$NAMESPACE -p POSTGRES_USER=$POSTGRES_USER -p POSTGRES_PASSWORD=$POSTGRES_PASSWORD -p POSTGRES_DB=$POSTGRES_DB | oc apply --wait=true -f -
@@ -67,7 +93,7 @@ echo "postgress is ready"
 oc create configmap spicedb-schema --from-file=schema.yaml -n $NAMESPACE
 
 #Deploy Relations service, spiceDB service
-bonfire deploy relationships -n $NAMESPACE --local-config-method override 
+bonfire deploy $RBAC_ARGUMENT relationships -n $NAMESPACE --local-config-method merge
 
 ROUTE=$(oc get routes --selector='app=relationships' -o jsonpath='{.items[*].spec.host}')
 BASE_URL="https://$ROUTE"
@@ -81,8 +107,19 @@ PASSWORD="$( oc get secrets env-$NAMESPACE-keycloak --template={{.data.defaultPa
 echo ""
 echo "user: ${USER}"
 echo "pass: ${PASSWORD}"
-
 echo ""
+
+if [[ "$RBAC_ARGUMENT" == "rbac" ]]; then
+  echo "RBAC - status request consist creation of relations(image from PR https://github.com/RedHatInsights/insights-rbac/pull/1060)"
+  echo ""
+  echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/rbac/v1/status/"
+  echo ""
+  echo "Relations - Read(GET) - Sample CURL request"
+  echo ""
+  echo "curl -v -u ${USER}:${PASSWORD} '${BASE_URL}/api/authz/v1/relationships?filter.objectType=group&filter.objectId=bob_club&filter.relation=member'"
+  echo ""
+fi
+
 echo "Relations - Write(POST) - Sample CURL request"
 echo ""
 echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v1/relationships -d '{ "touch": true, "relationships": [{"object": {"type": "group","id": "bob_club"},"relation": "member","subject": {"object": {"type": "user","id": "bob"}}}]}'"

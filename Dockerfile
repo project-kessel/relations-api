@@ -1,7 +1,7 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.3 AS builder
+FROM registry.access.redhat.com/ubi8/ubi:8.9-1160 AS builder
 ARG TARGETARCH
 USER root
-RUN microdnf install -y tar gzip make which
+RUN dnf install -y tar gzip make which
 
 # install platform specific go version
 RUN curl -O -J  https://dl.google.com/go/go1.22.0.linux-${TARGETARCH}.tar.gz

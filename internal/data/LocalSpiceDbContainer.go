@@ -92,7 +92,7 @@ func CreateContainer(logger log.Logger) (*LocalSpiceDbContainer, error) {
 	cErr := pool.Retry(func() error {
 		log.NewHelper(logger).Info("Attempting to connect to spicedb...")
 
-		conn, err := grpc.Dial(
+		conn, err := grpc.NewClient(
 			fmt.Sprintf("localhost:%s", port),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)

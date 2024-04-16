@@ -2,6 +2,7 @@ server:
   http:
     addr: "${HTTPADDR:0.0.0.0:8000}"
     timeout: 1s
+    pathprefix: "/api/authz"
   grpc:
     addr: "${GRPCADDR:0.0.0.0:9000}"
     timeout: 1s

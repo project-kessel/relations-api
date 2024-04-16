@@ -6,7 +6,49 @@ info:
     title: ""
     version: 0.0.1
 paths:
-    /api/authz/v1/relationships:
+    /livez:
+        get:
+            tags:
+                - Health
+            operationId: Health_GetLivez
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.health.v1.GetLivezReply'
+    /readyz:
+        get:
+            tags:
+                - Health
+            operationId: Health_GetReadyz
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.health.v1.GetReadyzReply'
+    /v1/check:
+        post:
+            tags:
+                - Check
+            operationId: Check_Check
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rebac.v1.CheckRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rebac.v1.CheckResponse'
+    /v1/relationships:
         get:
             tags:
                 - Relationships
@@ -96,30 +138,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.rebac.v1.DeleteRelationshipsResponse'
-    /livez:
-        get:
-            tags:
-                - Health
-            operationId: Health_GetLivez
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.health.v1.GetLivezReply'
-    /readyz:
-        get:
-            tags:
-                - Health
-            operationId: Health_GetReadyz
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.health.v1.GetReadyzReply'
 components:
     schemas:
         api.health.v1.GetLivezReply:
@@ -128,6 +146,21 @@ components:
         api.health.v1.GetReadyzReply:
             type: object
             properties: {}
+        api.rebac.v1.CheckRequest:
+            type: object
+            properties:
+                object:
+                    $ref: '#/components/schemas/api.rebac.v1.ObjectReference'
+                relation:
+                    type: string
+                subject:
+                    $ref: '#/components/schemas/api.rebac.v1.SubjectReference'
+        api.rebac.v1.CheckResponse:
+            type: object
+            properties:
+                allowed:
+                    type: integer
+                    format: enum
         api.rebac.v1.CreateRelationshipsRequest:
             type: object
             properties:
@@ -174,5 +207,6 @@ components:
                 object:
                     $ref: '#/components/schemas/api.rebac.v1.ObjectReference'
 tags:
+    - name: Check
     - name: Health
     - name: Relationships

@@ -262,6 +262,90 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 
 }
 
+func TestSpiceDbRepository_CheckPermission(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	//group:bob_club#member@user:bob
+	//workspace:test#user_grant@role_binding:rb_test
+	//role_binding:rb_test#granted@role:rl1
+	//role_binding:rb_test#subject@user:bob
+	//role:rl1#view_the_thing@user:*
+	rels := []*apiV1.Relationship{
+		createRelationship("bob", "user", "", "member", "group", "bob_club"),
+		createRelationship("rb_test", "role_binding", "", "user_grant", "workspace", "test"),
+		createRelationship("rl1", "role", "", "granted", "role_binding", "rb_test"),
+		createRelationship("bob", "user", "", "subject", "role_binding", "rb_test"),
+		createRelationship("*", "user", "", "view_the_thing", "role", "rl1"),
+	}
+
+	err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	subject := &apiV1.SubjectReference{
+		Object: &apiV1.ObjectReference{
+			Type: "user",
+			Id:   "bob",
+		},
+	}
+
+	object := &apiV1.ObjectReference{
+		Type: "workspace",
+		Id:   "test",
+	}
+	// zed permission check workspace:test view_the_thing user:bob --explain
+	check := apiV1.CheckRequest{
+		Subject:  subject,
+		Relation: "view_the_thing",
+		Object:   object,
+	}
+	resp, err := spiceDbRepo.Check(ctx, &check)
+	if !assert.NoError(t, err) {
+		return
+	}
+	//apiV1.CheckResponse_ALLOWED_TRUE
+	checkResponse := apiV1.CheckResponse{
+		Allowed: apiV1.CheckResponse_ALLOWED_TRUE,
+	}
+	assert.Equal(t, &checkResponse, resp)
+
+	//Remove // role_binding:rb_test#subject@user:bob
+	err = spiceDbRepo.DeleteRelationships(ctx, &apiV1.RelationshipFilter{
+		ObjectId:   "rb_test",
+		ObjectType: "role_binding",
+		Relation:   "subject",
+		SubjectFilter: &apiV1.SubjectFilter{
+			SubjectId:   "bob",
+			SubjectType: "user",
+		},
+	})
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// zed permission check workspace:test view_the_thing user:bob --explain
+	check2 := apiV1.CheckRequest{
+		Subject:  subject,
+		Relation: "view_the_thing",
+		Object:   object,
+	}
+
+	resp2, err := spiceDbRepo.Check(ctx, &check2)
+	if !assert.NoError(t, err) {
+		return
+	}
+	checkResponsev2 := apiV1.CheckResponse{
+		Allowed: apiV1.CheckResponse_ALLOWED_FALSE,
+	}
+	assert.Equal(t, &checkResponsev2, resp2)
+}
 func createRelationship(subjectId string, subjectType string, subjectRelationship string, relationship string, objectType string, objectId string) *apiV1.Relationship {
 	subject := &apiV1.SubjectReference{
 		Object: &apiV1.ObjectReference{

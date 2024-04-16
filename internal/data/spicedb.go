@@ -149,6 +149,36 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 	return nil
 }
 
+func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV1.CheckRequest) (*apiV1.CheckResponse, error) {
+	subject := &v1.SubjectReference{
+		Object: &v1.ObjectReference{
+			ObjectType: check.GetSubject().GetObject().GetType(),
+			ObjectId:   check.GetSubject().GetObject().GetId(),
+		},
+		OptionalRelation: check.GetSubject().GetRelation(),
+	}
+
+	object := &v1.ObjectReference{
+		ObjectType: check.GetObject().GetType(),
+		ObjectId:   check.GetObject().GetId(),
+	}
+	checkResponse, err := s.client.CheckPermission(ctx, &v1.CheckPermissionRequest{
+		Resource:   object,
+		Permission: check.GetRelation(),
+		Subject:    subject,
+	})
+	if err != nil {
+		log.Errorf("Error check permission %v", err.Error())
+		return &apiV1.CheckResponse{Allowed: apiV1.CheckResponse_ALLOWED_UNSPECIFIED}, err
+	}
+
+	if checkResponse.Permissionship == v1.CheckPermissionResponse_PERMISSIONSHIP_HAS_PERMISSION {
+		return &apiV1.CheckResponse{Allowed: apiV1.CheckResponse_ALLOWED_TRUE}, nil
+	}
+
+	return &apiV1.CheckResponse{Allowed: apiV1.CheckResponse_ALLOWED_FALSE}, nil
+}
+
 func createSpiceDbRelationshipFilter(filter *apiV1.RelationshipFilter) *v1.RelationshipFilter {
 	spiceDbRelationshipFilter := &v1.RelationshipFilter{
 		ResourceType:       filter.GetObjectType(),

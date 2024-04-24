@@ -3,7 +3,6 @@
 RBAC_ARGUMENT="$1"
 RBAC_DIR="$2"
 if [ "$RBAC_ARGUMENT" == "rbac" ]; then
-
  if [ ! -d "$RBAC_DIR" ]; then
     echo "The directory $RBAC_DIR does not exist."
     echo "Please specify local directory(absolute path) to copy of https://github.com/RedHatInsights/insights-rbac repository."
@@ -92,7 +91,7 @@ echo "postgress is ready"
 # Create spiceDB bootstrap schema configmap
 oc create configmap spicedb-schema --from-file=schema.yaml -n $NAMESPACE
 
-#Deploy Relations service, spiceDB service
+#Deploy Relations service, spiceDB service and rbac service when $RBAC_ARGUMENT is not empty
 bonfire deploy $RBAC_ARGUMENT relationships -n $NAMESPACE --local-config-method merge
 
 ROUTE=$(oc get routes --selector='app=relationships' -o jsonpath='{.items[*].spec.host}')

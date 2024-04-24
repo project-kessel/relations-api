@@ -107,7 +107,7 @@ This is demonstrating calling relationship api from rbac service in ephemeral en
 
 Example:
 ```
-./deploy.sh rbac /Users/liborpichler/Projects/insights-rbac
+./deploy.sh rbac /Projects/insights-rbac
 ```
 
 - Updates config bonfire file and add rbac component

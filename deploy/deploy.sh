@@ -16,12 +16,6 @@ source ../.secrets/postgres.env
 IMAGE=quay.io/ciam_authz/insights-rebac
 IMAGE_TAG=latest
 
-# Prepare bonfire env
-VENV_DIR=~/bonfire_venv
-mkdir -p $VENV_DIR
-python3 -m venv $VENV_DIR
-. $VENV_DIR/bin/activate
-
 # Function to check if a command is available
 command_exists() {
   command -v "$1" >/dev/null 2>&1
@@ -36,21 +30,24 @@ else
 fi
 
 # Check if there is an existing NS
-NAMESPACE=$(oc project -q)
+RESERVATIONS=$(bonfire namespace list -m)
 
-if [[ -z "${NAMESPACE}" ]]; then
+if [ "${RESERVATIONS}" == "no namespaces found" ]; then
   echo "Namespace is not set"
     # Reserve a namespace
-  bonfire namespace reserve --duration 8h
+  NAMESPACE=$(bonfire namespace reserve --duration 8h)
 fi
 
-NAMESPACE=$(oc project -q)
+if [[ -z "${NAMEPACE}" ]]; then
+  NAMESPACE=$(oc project -q)
+fi
+
 echo "Using Namespace:" $NAMESPACE
 
 #Prepare the bonfire config yaml file
 currentpath=$(pwd)
-file_location=~/.config/bonfire/config.yaml
-cat > $file_location <<EOF
+config_file_location=./local_bonfire_config.yaml
+cat > $config_file_location <<EOF
 apps:
 - name: relationships
   components:
@@ -65,7 +62,7 @@ apps:
 EOF
 
 if [[ "$RBAC_ARGUMENT" == "rbac" ]]; then
-  cat >> $file_location <<EOF
+  cat >> $config_file_location <<EOF
 - name: rbac
   components:
     - name: rbac
@@ -92,7 +89,7 @@ echo "postgress is ready"
 oc create configmap spicedb-schema --from-file=schema.yaml -n $NAMESPACE
 
 #Deploy Relations service, spiceDB service and rbac service when $RBAC_ARGUMENT is not empty
-bonfire deploy $RBAC_ARGUMENT relationships -n $NAMESPACE --local-config-method merge
+bonfire deploy $RBAC_ARGUMENT relationships -n $NAMESPACE --local-config-method merge --local-config-path $config_file_location
 
 ROUTE=$(oc get routes --selector='app=relationships' -o jsonpath='{.items[*].spec.host}')
 BASE_URL="https://$ROUTE"
@@ -121,4 +118,4 @@ fi
 
 echo "Relations - Write(POST) - Sample CURL request"
 echo ""
-echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v1/relationships -d '{ "touch": true, "relationships": [{"object": {"type": "group","id": "bob_club"},"relation": "member","subject": {"object": {"type": "user","id": "bob"}}}]}'"
+echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v1/relationships -H 'Content-Type: application/json' -d '{ "touch": true, "relationships": [{"object": {"type": "group","id": "bob_club"},"relation": "member","subject": {"object": {"type": "user","id": "bob"}}}]}'"

@@ -62,7 +62,7 @@ apps:
 EOF
 
 if [[ "$RBAC_ARGUMENT" == "rbac" ]]; then
-  cat >> $file_location <<EOF
+  cat >> $config_file_location <<EOF
 - name: rbac
   components:
     - name: rbac

@@ -16,12 +16,6 @@ source ../.secrets/postgres.env
 IMAGE=quay.io/ciam_authz/insights-rebac
 IMAGE_TAG=latest
 
-# Prepare bonfire env
-VENV_DIR=~/bonfire_venv
-mkdir -p $VENV_DIR
-python3 -m venv $VENV_DIR
-. $VENV_DIR/bin/activate
-
 # Function to check if a command is available
 command_exists() {
   command -v "$1" >/dev/null 2>&1

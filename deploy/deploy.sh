@@ -30,21 +30,24 @@ else
 fi
 
 # Check if there is an existing NS
-NAMESPACE=$(oc project -q)
+RESERVATIONS=$(bonfire namespace list -m)
 
-if [[ -z "${NAMESPACE}" ]]; then
+if [ "${RESERVATIONS}" == "no namespaces found" ]; then
   echo "Namespace is not set"
     # Reserve a namespace
-  bonfire namespace reserve --duration 8h
+  NAMESPACE=$(bonfire namespace reserve --duration 8h)
 fi
 
-NAMESPACE=$(oc project -q)
+if [[ -z "${NAMEPACE}" ]]; then
+  NAMESPACE=$(oc project -q)
+fi
+
 echo "Using Namespace:" $NAMESPACE
 
 #Prepare the bonfire config yaml file
 currentpath=$(pwd)
-file_location=~/.config/bonfire/config.yaml
-cat > $file_location <<EOF
+config_file_location=./local_bonfire_config.yaml
+cat > $config_file_location <<EOF
 apps:
 - name: relationships
   components:
@@ -86,7 +89,7 @@ echo "postgress is ready"
 oc create configmap spicedb-schema --from-file=schema.yaml -n $NAMESPACE
 
 #Deploy Relations service, spiceDB service and rbac service when $RBAC_ARGUMENT is not empty
-bonfire deploy $RBAC_ARGUMENT relationships -n $NAMESPACE --local-config-method merge
+bonfire deploy $RBAC_ARGUMENT relationships -n $NAMESPACE --local-config-method merge --local-config-path $config_file_location
 
 ROUTE=$(oc get routes --selector='app=relationships' -o jsonpath='{.items[*].spec.host}')
 BASE_URL="https://$ROUTE"

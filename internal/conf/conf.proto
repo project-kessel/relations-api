@@ -15,6 +15,7 @@ message Server {
     string network = 1;
     string addr = 2;
     google.protobuf.Duration timeout = 3;
+    string pathprefix = 4;
   }
   message GRPC {
     string network = 1;

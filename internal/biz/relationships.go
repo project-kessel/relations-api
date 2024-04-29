@@ -11,9 +11,24 @@ import (
 type TouchSemantics bool
 
 type ZanzibarRepository interface {
+	Check(ctx context.Context, request *v1.CheckRequest) (*v1.CheckResponse, error)
 	CreateRelationships(context.Context, []*v1.Relationship, TouchSemantics) error
 	ReadRelationships(context.Context, *v1.RelationshipFilter) ([]*v1.Relationship, error)
 	DeleteRelationships(context.Context, *v1.RelationshipFilter) error
+}
+
+type CheckUsecase struct {
+	repo ZanzibarRepository
+	log  *log.Helper
+}
+
+func NewCheckUsecase(repo ZanzibarRepository, logger log.Logger) *CheckUsecase {
+	return &CheckUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
+func (rc *CheckUsecase) Check(ctx context.Context, check *v1.CheckRequest) (*v1.CheckResponse, error) {
+	rc.log.WithContext(ctx).Infof("Check: %v", check)
+	return rc.repo.Check(ctx, check)
 }
 
 type CreateRelationshipsUsecase struct {

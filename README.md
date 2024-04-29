@@ -83,7 +83,7 @@ You should have logged into a valid openshift cluster using the oc login command
 
 Note: the deploy script assumes you have a valid oc login and the necessary tools are in place.
 
-The deploy script under the deploy folder, will deploy all the needed components.
+The [deploy script](deploy/deploy.sh) under the [deploy](deploy) folder, will deploy all the needed components.
 
 `./deploy.sh`
 

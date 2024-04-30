@@ -43,11 +43,11 @@ objects:
             image: ${IMAGE}:${IMAGE_TAG}
             livenessProbe:
               httpGet:
-                path: /livez
+                path: /api/authz/livez
                 port: 8000
             readinessProbe:
               httpGet:
-                path: /readyz
+                path: /api/authz/readyz
                 port: 8000
             env:
               - name: SPICEDB_PRESHARED

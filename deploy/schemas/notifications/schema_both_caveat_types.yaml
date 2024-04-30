@@ -1,0 +1,56 @@
+schema: |-
+  definition user {}
+  definition group {
+    relation member: user | group#member
+  }
+  definition role {
+    relation inventory_host_view: user:*
+  }
+  definition role_binding {
+    relation subject: user | group#member
+    relation granted: role
+    permission inventory_host_view = subject & granted->inventory_host_view
+  }
+  definition organization {
+    relation member: user
+  }
+  definition workspace {
+    relation parent: workspace
+    relation user_grant: role_binding
+    // Both gives you options:
+    // You could write user:* for default subscribed, and then unsubscriber relations for opt outs
+    // Or you could not write any for default unsubscribed, and then only subscriber relations.
+    relation direct_notification_subscriber: user with event_types | user:* with event_types
+    relation direct_notification_unsubscriber: user with event_types
+    permission inventory_host_view = user_grant->inventory_host_view
+    permission notification_subscriber = (direct_notification_subscriber + parent->notification_subscriber) - (direct_notification_unsubscriber - parent->direct_notification_unsubscriber)
+  }
+  definition inventory/host {
+    relation workspace: workspace
+    permission view = workspace->inventory_host_view
+    permission view_notification = view & workspace->notification_subscriber
+  }
+  caveat event_types(event_type string, event_types list<string>) {
+    event_type in event_types
+  }
+relationships: |-
+  // There is a host_admin role
+  role:host_admin#inventory_host_view@user:*
+  // There is a workspace (org1/w1) underneath a root org workspace (org1)
+  workspace:org1/w1#parent@workspace:org1
+  // There is a host within workspace:org/w1
+  inventory/host:h1#workspace@workspace:org1/w1
+  // There are two event types which are subscribed by default
+  workspace:org1#direct_notification_subscriber@user:*[event_types:{"event_types":["host_new_cve", "host_patch_failure"]}]
+
+  // u3 has unsubscribed from host_new_cve
+  workspace:org1#direct_notification_unsubscriber@user:u3[event_types:{"event_types":["host_new_cve"]}]
+
+  // But only u1 has permissions (via the host_admin role)
+  workspace:org1/w1#user_grant@role_binding:u1_w1_host_admin
+  role_binding:u1_w1_host_admin#granted@role:host_admin
+  role_binding:u1_w1_host_admin#subject@user:u1
+  // u3 also has permissions, but is not subscribed.
+  workspace:org1/w1#user_grant@role_binding:u3_w1_host_admin
+  role_binding:u3_w1_host_admin#granted@role:host_admin
+  role_binding:u3_w1_host_admin#subject@user:u3

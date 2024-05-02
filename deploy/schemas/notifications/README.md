@@ -27,3 +27,19 @@ There are tradeoffs to consider with these different models:
 - Using a caveat for the event type reduces the number of tuples needed even further. You still have the same amount of writes, but those writes involve updating relations in place (replacing the caveat context with a different event type list), rather than adding new relations.
 
 In short, the "relationships for both subscriber & unsubscriber" combined with event type in caveat seems to be theoretically the least work with the most flexibility for different kinds of notification defaults (default subscribed vs default unsubscribed).
+
+## Use cases
+
+### Querying for users to notify
+
+Pre-requisite work:
+
+- There must be some function F(event) which results in:
+   - A reference to a specific object type and ID relevant to that event (e.g. `inventory/host:1`)
+   - An access related event type code or name (e.g. `view` or `new_cve`). This depends on how granular the access control is for that event.
+
+When an event occurs which may result in a notification...
+
+1. Apply F(event) to get the object and event type
+2. Run a `lookup-subjects` query to find the users to notify, using the output of step 1 as the inputs to the query. E.g. `lookup-subjects <object> <event_type>_notification user` or `lookup-subjects inventory/host:1 view_notification user`
+3. As a result you'll get a stream of user IDs. The rest of this pipeline is an exercise for the reader, but for example you could publish these IDs to another async part of the processing flow which could lookup that user's delivery preferences like time or email address and batch or send the notifications accordingly.

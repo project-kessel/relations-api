@@ -1,0 +1,48 @@
+schema: |-
+  definition user {}
+
+  definition group {
+    relation member: user | group#member
+  }
+
+  definition role {
+    relation inventory_host_view: user:*
+  }
+
+  definition role_binding {
+    relation subject: user | group#member
+    relation granted: role
+    permission inventory_host_view = subject & granted->inventory_host_view
+  }
+
+  definition workspace {
+    relation parent: workspace
+    relation user_grant: role_binding
+    relation direct_host_notification_subscriber: user
+    permission inventory_host_view = user_grant->inventory_host_view + parent->inventory_host_view
+    permission host_notification_subscriber = direct_host_notification_subscriber + parent->host_notification_subscriber
+  }
+
+  definition inventory/host {
+    relation workspace: workspace
+    permission view = workspace->inventory_host_view
+    permission view_notification = view & workspace->host_notification_subscriber
+  }
+relationships: |-
+  // There is a host_admin role
+  role:host_admin#inventory_host_view@user:*
+  // There is a workspace (org1/w1) underneath a root org workspace (org1)
+  workspace:org1/w1#parent@workspace:org1
+  // There is a host within workspace:org/w1
+  inventory/host:h1#workspace@workspace:org1/w1
+  // There are two subscribers to host notifications in org1
+  workspace:org1#direct_host_notification_subscriber@user:u1
+  workspace:org1#direct_host_notification_subscriber@user:u2
+  // But only u1 has permissions (via the host_admin role)
+  workspace:org1/w1#user_grant@role_binding:u1_w1_host_admin
+  role_binding:u1_w1_host_admin#granted@role:host_admin
+  role_binding:u1_w1_host_admin#subject@user:u1
+  // u3 also has permissions, but is not subscribed.
+  workspace:org1/w1#user_grant@role_binding:u3_w1_host_admin
+  role_binding:u3_w1_host_admin#granted@role:host_admin
+  role_binding:u3_w1_host_admin#subject@user:u3

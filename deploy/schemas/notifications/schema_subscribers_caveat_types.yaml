@@ -19,7 +19,7 @@ schema: |-
     relation parent: workspace
     relation user_grant: role_binding
     relation direct_notification_subscriber: user with event_types
-    permission inventory_host_view = user_grant->inventory_host_view
+    permission inventory_host_view = user_grant->inventory_host_view + parent->inventory_host_view
     permission notification_subscriber = direct_notification_subscriber + parent->notification_subscriber
   }
 

@@ -22,7 +22,7 @@ schema: |-
     // Or you could not write any for default unsubscribed, and then only subscriber relations.
     relation direct_notification_subscriber: user with event_types | user:* with event_types
     relation direct_notification_unsubscriber: user with event_types
-    permission inventory_host_view = user_grant->inventory_host_view
+    permission inventory_host_view = user_grant->inventory_host_view + parent->inventory_host_view
     permission notification_subscriber = (direct_notification_subscriber + parent->notification_subscriber) - (direct_notification_unsubscriber - parent->direct_notification_unsubscriber)
   }
   definition inventory/host {

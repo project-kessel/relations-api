@@ -1,32 +1,31 @@
 schema: |-
   definition user {}
-
   definition group {
     relation member: user | group#member
   }
-
   definition role {
     relation inventory_host_view: user:*
   }
-
   definition role_binding {
     relation subject: user | group#member
     relation granted: role
     permission inventory_host_view = subject & granted->inventory_host_view
   }
-
+  definition organization {
+    relation member: user
+  }
   definition workspace {
     relation parent: workspace
     relation user_grant: role_binding
+    relation direct_host_notification_subscriber: user | organization#member
     relation direct_host_notification_unsubscriber: user
     permission inventory_host_view = user_grant->inventory_host_view + parent->inventory_host_view
-    permission host_notification_unsubscriber = direct_host_notification_unsubscriber + parent->host_notification_unsubscriber
+    permission host_notification_subscriber = (direct_host_notification_subscriber + parent->host_notification_subscriber) - (direct_host_notification_unsubscriber - parent->direct_host_notification_unsubscriber)
   }
-
   definition inventory/host {
     relation workspace: workspace
     permission view = workspace->inventory_host_view
-    permission view_notification = view - workspace->host_notification_unsubscriber
+    permission view_notification = view & workspace->host_notification_subscriber
   }
 relationships: |-
   // There is a host_admin role
@@ -35,6 +34,11 @@ relationships: |-
   workspace:org1/w1#parent@workspace:org1
   // There is a host within workspace:org/w1
   inventory/host:h1#workspace@workspace:org1/w1
+  // All of org1 is subscribed
+  workspace:org1#direct_host_notification_subscriber@organization:org1#member
+  organization:org1#member@user:u1
+  organization:org1#member@user:u2
+  organization:org1#member@user:u3
   // There is one unsubscriber to host notifications in org1
   workspace:org1#direct_host_notification_unsubscriber@user:u3
   // u1 has permissions (via the host_admin role)

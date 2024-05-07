@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 RBAC_ARGUMENT="$1"
 RBAC_DIR="$2"

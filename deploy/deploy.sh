@@ -91,7 +91,12 @@ done
 echo "postgress is ready"
 
 # Create spiceDB bootstrap schema configmap
-oc create configmap spicedb-schema --from-file=schema.yaml -n $NAMESPACE
+
+if ! oc get configmap spicedb-schema >/dev/null 2>&1; then
+    oc create configmap spicedb-schema --from-file=schema.yaml -n $NAMESPACE
+else
+    echo "Configmap 'spicedb-schema' already exists."
+fi
 
 #Deploy Relations service, spiceDB service and rbac service when $RBAC_ARGUMENT is not empty
 bonfire deploy $RBAC_ARGUMENT relationships -n $NAMESPACE --local-config-method merge --local-config-path $config_file_location

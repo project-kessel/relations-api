@@ -118,4 +118,5 @@ fi
 
 echo "Relations - Write(POST) - Sample CURL request"
 echo ""
-echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v1/relationships -H 'Content-Type: application/json' -d '{ "touch": true, "relationships": [{"object": {"type": "group","id": "bob_club"},"relation": "member","subject": {"object": {"type": "user","id": "bob"}}}]}'"
+JSON_DATA='{"touch":true,"relationships":[{"object":{"type":"group","id":"bob_club"},"relation":"member","subject":{"object":{"type":"user","id":"bob"}}}]}'
+echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v1/relationships -H 'Content-Type: application/json' -d '$JSON_DATA'"

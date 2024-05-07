@@ -29,6 +29,10 @@ else
   exit 1
 fi
 
+echo "Upgrading bonfire..."
+pip install --upgrade crc-bonfire
+echo "Bonfire upgrade finished."
+
 # Check if there is an existing NS
 RESERVATIONS=$(bonfire namespace list -m)
 

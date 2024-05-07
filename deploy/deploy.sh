@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Define the minimum required version
+MIN_BONFIRE_VERSION="5.7.2"
+
 RBAC_ARGUMENT="$1"
 RBAC_DIR="$2"
 if [ "$RBAC_ARGUMENT" == "rbac" ]; then
@@ -30,9 +33,14 @@ else
   exit 1
 fi
 
-echo "Upgrading bonfire..."
-pip install --upgrade crc-bonfire
-echo "Bonfire upgrade finished."
+CURRENT_BONFIRE_VERSION=$(bonfire version | cut -d' ' -f3)
+
+if [[ $(printf '%s\n' "$MIN_BONFIRE_VERSION" "$CURRENT_BONFIRE_VERSION" | sort -V | head -n1) != "$MIN_BONFIRE_VERSION" ]]; then
+  echo "Current bonfire version ($CURRENT_BONFIRE_VERSION) is less than required version ($MIN_BONFIRE_VERSION)."
+  echo "Please upgrade bonfire with command:"
+  echo "pip install crc-bonfire"
+  exit 1
+fi
 
 # Check if there is an existing NS
 RESERVATIONS=$(bonfire namespace list -m)

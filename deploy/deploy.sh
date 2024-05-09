@@ -1,4 +1,8 @@
 #!/bin/bash
+set -e
+
+# Define the minimum required version
+MIN_BONFIRE_VERSION="5.7.2"
 
 RBAC_ARGUMENT="$1"
 RBAC_DIR="$2"
@@ -26,6 +30,15 @@ if command_exists bonfire; then
   echo "Bonfire is OK "
 else
   echo "bonfire needs to be installed"
+  exit 1
+fi
+
+CURRENT_BONFIRE_VERSION=$(bonfire version | cut -d' ' -f3)
+
+if [[ $(printf '%s\n' "$MIN_BONFIRE_VERSION" "$CURRENT_BONFIRE_VERSION" | sort -V | head -n1) != "$MIN_BONFIRE_VERSION" ]]; then
+  echo "Current bonfire version ($CURRENT_BONFIRE_VERSION) is less than required version ($MIN_BONFIRE_VERSION)."
+  echo "Please upgrade bonfire with command:"
+  echo "pip install --upgrade crc-bonfire"
   exit 1
 fi
 
@@ -86,7 +99,12 @@ done
 echo "postgress is ready"
 
 # Create spiceDB bootstrap schema configmap
-oc create configmap spicedb-schema --from-file=schema.yaml -n $NAMESPACE
+
+if ! oc get configmap spicedb-schema >/dev/null 2>&1; then
+    oc create configmap spicedb-schema --from-file=schema.yaml -n $NAMESPACE
+else
+    echo "Configmap 'spicedb-schema' already exists."
+fi
 
 #Deploy Relations service, spiceDB service and rbac service when $RBAC_ARGUMENT is not empty
 bonfire deploy $RBAC_ARGUMENT relationships -n $NAMESPACE --local-config-method merge --local-config-path $config_file_location

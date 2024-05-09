@@ -73,6 +73,16 @@ docker run --rm -p 8000:8000 -p 9000:9000 -v </path/to/your/configs>:/data/conf 
 
 ### Prerequisite 
 [bonfire](https://github.com/RedHatInsights/bonfire)
+
+NOTE: The minimum required version of [bonfire](https://github.com/RedHatInsights/bonfire)
+is specified in the MIN_BONFIRE_VERSION variable in the deploy.sh script
+Bonfire could be upgraded by command:
+```asciidoc
+pip install --upgrade crc-bonfire
+```
+Latest version of [bonfire](https://github.com/RedHatInsights/bonfire) could be found [here](https://github.com/RedHatInsights/bonfire/releases).
+
+
 [oc](https://docs.openshift.com/container-platform/4.8/cli_reference/openshift_cli/getting-started-cli.html) 
 
 You should have logged into a valid openshift cluster using the oc login command

@@ -38,7 +38,7 @@ CURRENT_BONFIRE_VERSION=$(bonfire version | cut -d' ' -f3)
 if [[ $(printf '%s\n' "$MIN_BONFIRE_VERSION" "$CURRENT_BONFIRE_VERSION" | sort -V | head -n1) != "$MIN_BONFIRE_VERSION" ]]; then
   echo "Current bonfire version ($CURRENT_BONFIRE_VERSION) is less than required version ($MIN_BONFIRE_VERSION)."
   echo "Please upgrade bonfire with command:"
-  echo "pip install crc-bonfire"
+  echo "pip install --upgrade crc-bonfire"
   exit 1
 fi
 

@@ -78,7 +78,7 @@ NOTE: The minimum required version of [bonfire](https://github.com/RedHatInsight
 is specified in the MIN_BONFIRE_VERSION variable in the deploy.sh script
 Bonfire could be upgraded by command:
 ```asciidoc
-pip install crc-bonfire
+pip install --upgrade crc-bonfire
 ```
 Latest version of [bonfire](https://github.com/RedHatInsights/bonfire) could be found [here](https://github.com/RedHatInsights/bonfire/releases).
 

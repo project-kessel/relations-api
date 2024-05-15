@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package api.relations.v1;
+
+option go_package = "ciam-rebac/api/relations/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.relations.v1";
+
+message Relationship {
+	ObjectReference resource = 1;
+	string relation = 2;
+	SubjectReference subject = 3;
+}
+
+message SubjectReference {
+	optional string relation = 1;
+	ObjectReference subject = 2;
+}
+
+message ObjectReference {
+	string type = 1;
+	string id = 2;
+}

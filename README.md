@@ -66,23 +66,23 @@ wire
 
 ## Spicedb using docker/podman
 
-## Run the spicedb
+### Run the spicedb
 
 `make spicedb`
 
-## Run the insights-rebac with docker compose
+### Run the insights-rebac with docker compose
 
 `make rebac`
 
-## teardown spicedb and postgresql db
+### teardown spicedb and postgresql db
 
 `make spicedb/teardown`
 
-## Deploy Rebac and Spicedb using kind/kubernetes
+### Deploy Rebac and Spicedb using kind/kubernetes
 
 `make kind/rebac`
 
-## Docker
+### Docker
 
 ```bash
 # build

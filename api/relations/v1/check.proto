@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package api.relations.v1;
+import "google/api/annotations.proto";
+import "relations/v1/common.proto";
+option go_package = "ciam-rebac/api/relations/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.relations.v1";
+
+service CheckService {
+	rpc Check (CheckRequest) returns (CheckResponse) {
+		option (google.api.http) = {
+			post: "/v1/check"
+			body: "*"
+		};
+	};
+}
+
+message CheckRequest {
+	ObjectReference resource = 1;
+	string relation = 2;
+	SubjectReference subject = 3;
+}
+
+message CheckResponse {
+	enum Allowed {
+		ALLOWED_UNSPECIFIED = 0;
+		ALLOWED_TRUE = 1;
+		ALLOWED_FALSE = 2;
+		// e.g.  ALLOWED_CONDITIONAL = 3;
+	}
+	Allowed allowed = 1;
+}
+

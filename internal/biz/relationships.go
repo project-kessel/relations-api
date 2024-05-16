@@ -15,6 +15,7 @@ type ZanzibarRepository interface {
 	CreateRelationships(context.Context, []*v0.Relationship, TouchSemantics) error
 	ReadRelationships(context.Context, *v0.RelationTupleFilter) ([]*v0.Relationship, error)
 	DeleteRelationships(context.Context, *v0.RelationTupleFilter) error
+	LookupSubjects(context.Context, string, string, *v0.ObjectReference) (chan *v0.SubjectReference, chan error, error)
 }
 
 type CheckUsecase struct {

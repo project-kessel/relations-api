@@ -155,6 +155,39 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v0.DeleteTuplesResponse'
+    /v1/subjects:
+        get:
+            tags:
+                - Lookup
+            operationId: Lookup_Subjects
+            parameters:
+                - name: subjectType
+                  in: query
+                  schema:
+                    type: string
+                - name: relation
+                  in: query
+                  schema:
+                    type: string
+                - name: object.type.namespace
+                  in: query
+                  schema:
+                    type: string
+                - name: object.type.type
+                  in: query
+                  schema:
+                    type: string
+                - name: object.id
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v0.LookupSubjectsResponse'
 components:
     schemas:
         kessel.relations.v0.CheckRequest:
@@ -188,6 +221,11 @@ components:
         kessel.relations.v0.DeleteTuplesResponse:
             type: object
             properties: {}
+        kessel.relations.v0.LookupSubjectsResponse:
+            type: object
+            properties:
+                subject:
+                    $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
         kessel.relations.v0.ObjectReference:
             type: object
             properties:
@@ -241,3 +279,4 @@ tags:
     - name: KesselHealth
     - name: KesselTupleService
       description: "KesselTupleServices manages the persisted _Tuples_ stored in the system..\n \n A Tuple is an explicitly stated, persistent relation \n between a Resource and a Subject or Subject Set. \n It has the same _shape_ as a Relationship but is not the same thing as a Relationship.\n \n A single Tuple may result in zero-to-many Relationships."
+    - name: Lookup

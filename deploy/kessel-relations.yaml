@@ -1,0 +1,151 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: relations
+objects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: postgres-secret
+    stringData:
+      POSTGRESQL_DATABASE: authz
+      POSTGRESQL_USER: authz
+      POSTGRESQL_PASSWORD: SuperSecretPassword
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: dev-spicedb-config
+    stringData:
+      preshared_key: "averysecretpresharedkey"
+      datastore_uri: postgres://authz:SuperSecretPassword@postgres:5432/authz?sslmode=disable      
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app: postgres
+      name: postgres
+    spec:
+      selector:
+        matchLabels:
+          app: postgres
+      template:
+        metadata:
+          labels:
+            app: postgres
+        spec:
+          containers:
+          - env:
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRESQL_DATABASE
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRESQL_USER            
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRESQL_PASSWORD               
+            - name: PGDATA
+              value: /temp/data
+            image: registry.redhat.io/rhel9/postgresql-15:1-54
+            imagePullPolicy: Always
+            name: postgres
+            ports:
+            - containerPort: 5432
+              protocol: TCP
+            resources:
+              limits:
+                cpu: 60m
+                memory: 256Mi
+              requests:
+                cpu: 30m
+                memory: 128Mi
+          restartPolicy: Always
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: postgres
+      name: postgres
+    spec:
+      ports:
+      - name: http
+        port: 5432
+        protocol: TCP
+      selector:
+        app: postgres
+  - apiVersion: authzed.com/v1alpha1
+    kind: SpiceDBCluster
+    metadata:
+      name: relations-spicedb
+    spec:
+      config:
+        logLevel: debug
+        replicas: 1
+        datastoreEngine: postgres
+        datastoreBootstrapFiles: /etc/bootstrap/schema.yaml
+      secretName: dev-spicedb-config
+      patches:
+      - kind: Deployment
+        patch:
+          spec:
+            template:
+              spec:
+                volumes:
+                - name:  bootstrap
+                  configMap:
+                    name: spicedb-schema
+                containers:
+                - name: spicedb
+                  volumeMounts:
+                  - name: bootstrap
+                    mountPath: /etc/bootstrap      
+  - apiVersion: cloud.redhat.com/v1alpha1
+    kind: ClowdApp
+    metadata:
+      name: relations
+    spec:
+      envName: ${ENV_NAME}
+      replicas: 1
+      deployments:
+        - name: relations
+          podSpec:
+            image: ${RELATIONS_IMAGE}:${RELATIONS_IMAGE_TAG}
+            livenessProbe:
+              httpGet:
+                path: /api/authz/livez
+                port: 8000
+            readinessProbe:
+              httpGet:
+                path: /api/authz/readyz
+                port: 8000
+            env:
+              - name: SPICEDB_PRESHARED
+                valueFrom:
+                  secretKeyRef:
+                    key: preshared_key
+                    name: dev-spicedb-config
+              - name: SPICEDB_ENDPOINT
+                value: relations-spicedb:50051
+          webServices:
+            public:
+              enabled: true
+              apiPath: authz        
+parameters:        
+  - description: Name of the ClowdApp
+    name: CLOWDAPP_NAME
+    value: relations
+  - description : ClowdEnvironment name
+    name: ENV_NAME
+    value: insights-ephemeral
+  - description: App Image
+    name: RELATIONS_IMAGE
+    value: quay.io/ciam_authz/insights-rebac
+  - description: Image Tag
+    name: RELATIONS_IMAGE_TAG
+    value: latest    

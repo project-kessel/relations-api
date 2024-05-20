@@ -18,10 +18,10 @@ func NewLookupSubjectsService(repo biz.ZanzibarRepository) *LookupService {
 
 }
 
-func (s *LookupService) Lookup(req *pb.LookupSubjectsRequest, conn pb.Lookup_SubjectsServer) error {
+func (s *LookupService) Subjects(req *pb.LookupSubjectsRequest, conn pb.Lookup_SubjectsServer) error {
 	ctx := context.TODO() //Doesn't get context from grpc?
 	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, req.Relation, &pb.ObjectReference{
-		Type: req.Object.Type,
+		Type: req.Object.Type, //Need null check
 		Id:   req.Object.Id,
 	})
 

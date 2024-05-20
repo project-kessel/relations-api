@@ -93,31 +93,33 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type str
 		return nil, nil, err
 	}
 
-	subjects := make(chan *v1.SubjectReference)
+	subjects := make(chan *apiV1.SubjectReference)
 	errs := make(chan error, 1)
 
 	go func() {
-		msg, err := client.Recv()
-		if err != nil {
-			if !errors.Is(err, io.EOF) {
-				errs <- err
+		for {
+			msg, err := client.Recv()
+			if err != nil {
+				if !errors.Is(err, io.EOF) {
+					errs <- err
+				}
+				close(errs)
+				close(subjects)
+				return
 			}
-			close(errs)
-			close(subjects)
-			return
-		}
 
-		subj := msg.GetSubject()
-		subjects <- &v1.SubjectReference{
-			Object: &v1.ObjectReference{
-				ObjectType: subject_type,
-				ObjectId:   subj.SubjectObjectId,
-			},
-			OptionalRelation: "",
+			subj := msg.GetSubject()
+			subjects <- &apiV1.SubjectReference{
+				Object: &apiV1.ObjectReference{
+					Type: subject_type,
+					Id:   subj.SubjectObjectId,
+				},
+				Relation: "",
+			}
 		}
 	}()
 
-	return nil, nil, nil
+	return subjects, errs, nil
 }
 
 func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV0.Relationship, touch biz.TouchSemantics) error {

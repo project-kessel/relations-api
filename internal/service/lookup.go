@@ -20,10 +20,19 @@ func NewLookupSubjectsService(repo biz.ZanzibarRepository) *LookupService {
 
 func (s *LookupService) Subjects(req *pb.LookupSubjectsRequest, conn pb.Lookup_SubjectsServer) error {
 	ctx := context.TODO() //Doesn't get context from grpc?
+	limit := uint32(1000)
+	if req.Limit != nil {
+		limit = *req.Limit
+	}
+
+	continuation := biz.ContinuationToken("")
+	if req.ContinuationToken != nil {
+		continuation = biz.ContinuationToken(*req.ContinuationToken)
+	}
 	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, req.Relation, &pb.ObjectReference{
 		Type: req.Object.Type, //Need null check
 		Id:   req.Object.Id,
-	})
+	}, limit, continuation)
 
 	if err != nil {
 		return err
@@ -31,7 +40,8 @@ func (s *LookupService) Subjects(req *pb.LookupSubjectsRequest, conn pb.Lookup_S
 
 	for sub := range subs {
 		err = conn.Send(&pb.LookupSubjectsResponse{
-			Subject: sub,
+			Subject:           sub.Subject,
+			ContinuationToken: string(sub.Continuation),
 		})
 		if err != nil {
 			return err

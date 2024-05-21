@@ -10,12 +10,18 @@ import (
 // relationship domain objects re-used from the api layer for now, but otherwise would be defined here
 type TouchSemantics bool
 
+type ContinuationToken string
+type SubjectResult struct {
+	Subject      *v0.SubjectReference
+	Continuation ContinuationToken
+}
+
 type ZanzibarRepository interface {
 	Check(ctx context.Context, request *v0.CheckRequest) (*v0.CheckResponse, error)
 	CreateRelationships(context.Context, []*v0.Relationship, TouchSemantics) error
 	ReadRelationships(context.Context, *v0.RelationTupleFilter) ([]*v0.Relationship, error)
 	DeleteRelationships(context.Context, *v0.RelationTupleFilter) error
-	LookupSubjects(context.Context, string, string, *v0.ObjectReference) (chan *v0.SubjectReference, chan error, error)
+	LookupSubjects(ctx context.Context, subjectType, relation string, resource *v0.ObjectReference, limit uint32, continuation ContinuationToken) (chan *SubjectResult, chan error, error)
 }
 
 type CheckUsecase struct {

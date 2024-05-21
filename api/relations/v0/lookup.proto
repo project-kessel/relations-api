@@ -21,8 +21,12 @@ message LookupSubjectsRequest {
     string subject_type = 1;
     string relation = 2;
     ObjectReference object = 3;
+    optional uint32 limit = 4;
+    optional string continuation_token = 5;
 }
 
 message LookupSubjectsResponse {
     SubjectReference subject = 1;
+    bool has_more = 2;
+    string continuation_token = 3;
 }

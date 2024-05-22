@@ -3,36 +3,24 @@ package service
 import (
 	pb "ciam-rebac/api/relations/v0"
 	"ciam-rebac/internal/biz"
-	"context"
 )
 
 type LookupService struct {
 	pb.UnimplementedLookupServer
-	repo biz.ZanzibarRepository
+	subjectsUsecase *biz.GetSubjectsUsecase
 }
 
-func NewLookupSubjectsService(repo biz.ZanzibarRepository) *LookupService {
+func NewLookupSubjectsService(subjectsUseCase *biz.GetSubjectsUsecase) *LookupService {
 	return &LookupService{
-		repo: repo,
+		subjectsUsecase: subjectsUseCase,
 	}
 
 }
 
 func (s *LookupService) Subjects(req *pb.LookupSubjectsRequest, conn pb.Lookup_SubjectsServer) error {
-	ctx := context.TODO() //Doesn't get context from grpc?
-	limit := uint32(1000)
-	if req.Limit != nil {
-		limit = *req.Limit
-	}
+	ctx := conn.Context() //Doesn't get context from grpc?
 
-	continuation := biz.ContinuationToken("")
-	if req.ContinuationToken != nil {
-		continuation = biz.ContinuationToken(*req.ContinuationToken)
-	}
-	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, req.Relation, &pb.ObjectReference{
-		Type: req.Object.Type, //Need null check
-		Id:   req.Object.Id,
-	}, limit, continuation)
+	subs, errs, err := s.subjectsUsecase.Get(ctx, req)
 
 	if err != nil {
 		return err

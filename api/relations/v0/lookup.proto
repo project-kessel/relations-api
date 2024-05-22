@@ -19,10 +19,11 @@ service Lookup {
 
 message LookupSubjectsRequest {
     string subject_type = 1;
-    string relation = 2;
-    ObjectReference object = 3;
-    optional uint32 limit = 4;
-    optional string continuation_token = 5;
+    string subject_relation = 2;
+    string relation = 3;
+    ObjectReference object = 4;
+    optional uint32 limit = 5;
+    optional string continuation_token = 6;
 }
 
 message LookupSubjectsResponse {

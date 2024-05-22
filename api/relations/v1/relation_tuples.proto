@@ -9,7 +9,7 @@ option go_package = "ciam-rebac/api/relations/v1;v1";
 option java_multiple_files = true;
 option java_package = "api.relations.v1";
 
-service RelationTupleService {
+service KesselRelationTupleService {
 	rpc CreateTuples (CreateTuplesRequest) returns (CreateTuplesResponse) {
 		option (google.api.http) = {
 			post: "/v1/relation-tuples"
@@ -35,18 +35,18 @@ message CreateTuplesRequest {
 message CreateTuplesResponse {}
 
 message ReadTuplesRequest {
-	RelationshipFilter filter = 1;
+	RelationTupleFilter filter = 1;
 }
 message ReadTuplesResponse {
 	repeated Relationship tuples = 1;
 }
 
 message DeleteTuplesRequest {
-	RelationshipFilter filter = 1;
+	RelationTupleFilter filter = 1;
 }
 message DeleteTuplesResponse {}
 
-message RelationshipFilter {
+message RelationTupleFilter {
 	string object_type = 1;
 	string object_id = 2;
 	string relation = 3;
@@ -56,5 +56,6 @@ message RelationshipFilter {
 message SubjectFilter {
 	string relation = 1;
 	string subject_id = 2;
+	string subject_namespace = 4;
 	string subject_type = 3;
 }

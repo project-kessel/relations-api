@@ -7,7 +7,7 @@ option go_package = "ciam-rebac/api/relations/v1;v1";
 option java_multiple_files = true;
 option java_package = "api.relations.v1";
 
-service CheckService {
+service KesselCheckService {
 	rpc Check (CheckRequest) returns (CheckResponse) {
 		option (google.api.http) = {
 			post: "/v1/check"

@@ -18,6 +18,11 @@ message SubjectReference {
 }
 
 message ObjectReference {
-	string type = 1;
+	ObjectType type = 1;
 	string id = 2;
+}
+
+message ObjectType {
+	string namespace = 1;
+	string type = 2;
 }

@@ -4,6 +4,7 @@ import (
 	v0 "ciam-rebac/api/relations/v0"
 	"context"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -29,6 +30,10 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequ
 	continuation := ContinuationToken("")
 	if req.ContinuationToken != nil {
 		continuation = ContinuationToken(*req.ContinuationToken)
+	}
+
+	if req.Object == nil {
+		return nil, nil, errors.BadRequest("Invalid request", "Object is required")
 	}
 
 	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, req.SubjectRelation, req.Relation, &v0.ObjectReference{

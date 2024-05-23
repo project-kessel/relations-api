@@ -10,7 +10,7 @@ type LookupService struct {
 	subjectsUsecase *biz.GetSubjectsUsecase
 }
 
-func NewLookupSubjectsService(subjectsUseCase *biz.GetSubjectsUsecase) *LookupService {
+func NewLookupService(subjectsUseCase *biz.GetSubjectsUsecase) *LookupService {
 	return &LookupService{
 		subjectsUsecase: subjectsUseCase,
 	}

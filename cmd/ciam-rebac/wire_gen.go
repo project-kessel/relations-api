@@ -36,7 +36,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	checkUsecase := biz.NewCheckUsecase(spiceDbRepository, logger)
 	checkService := service.NewCheckService(logger, checkUsecase)
 	getSubjectsUsecase := biz.NewGetSubjectsUseCase(spiceDbRepository, logger)
-	lookupService := service.NewLookupSubjectsService(getSubjectsUsecase)
+	lookupService := service.NewLookupService(getSubjectsUsecase)
 	grpcServer := server.NewGRPCServer(confServer, relationshipsService, healthService, checkService, lookupService, logger)
 	httpServer := server.NewHTTPServer(confServer, relationshipsService, healthService, checkService, lookupService, logger)
 	app := newApp(logger, grpcServer, httpServer)

@@ -37,16 +37,31 @@ func (s *RelationshipsService) CreateRelationships(ctx context.Context, req *pb.
 	return &pb.CreateTuplesResponse{}, nil
 }
 
-func (s *RelationshipsService) ReadRelationships(ctx context.Context, req *pb.ReadTuplesRequest) (*pb.ReadTuplesResponse, error) {
-	s.log.Infof("Read relationships request: %v", req)
+func (s *RelationshipsService) ReadRelationships(req *pb.ReadTuplesRequest, conn pb.KesselTupleService_ReadTuplesServer) error {
+	ctx := conn.Context() //Doesn't get context from grpc?
 
-	if relationships, err := s.readUsecase.ReadRelationships(ctx, req.GetFilter()); err != nil {
-		return nil, err
-	} else {
-		return &pb.ReadTuplesResponse{
-			Tuples: relationships,
-		}, nil
+	relationships, errs, err := s.readUsecase.ReadRelationships(ctx, req)
+
+	if err != nil {
+		return err
 	}
+
+	for rel := range relationships {
+		err = conn.Send(&pb.ReadTuplesResponse{
+			Tuple:             rel.Relationship,
+			ContinuationToken: string(rel.Continuation),
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	err, ok := <-errs
+	if ok {
+		return err
+	}
+
+	return nil
 }
 
 func (s *RelationshipsService) DeleteRelationships(ctx context.Context, req *pb.DeleteTuplesRequest) (*pb.DeleteTuplesResponse, error) {

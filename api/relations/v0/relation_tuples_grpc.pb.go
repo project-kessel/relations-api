@@ -29,7 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KesselTupleServiceClient interface {
 	CreateTuples(ctx context.Context, in *CreateTuplesRequest, opts ...grpc.CallOption) (*CreateTuplesResponse, error)
-	ReadTuples(ctx context.Context, in *ReadTuplesRequest, opts ...grpc.CallOption) (*ReadTuplesResponse, error)
+	ReadTuples(ctx context.Context, in *ReadTuplesRequest, opts ...grpc.CallOption) (KesselTupleService_ReadTuplesClient, error)
 	DeleteTuples(ctx context.Context, in *DeleteTuplesRequest, opts ...grpc.CallOption) (*DeleteTuplesResponse, error)
 }
 
@@ -50,13 +50,36 @@ func (c *kesselTupleServiceClient) CreateTuples(ctx context.Context, in *CreateT
 	return out, nil
 }
 
-func (c *kesselTupleServiceClient) ReadTuples(ctx context.Context, in *ReadTuplesRequest, opts ...grpc.CallOption) (*ReadTuplesResponse, error) {
-	out := new(ReadTuplesResponse)
-	err := c.cc.Invoke(ctx, KesselTupleService_ReadTuples_FullMethodName, in, out, opts...)
+func (c *kesselTupleServiceClient) ReadTuples(ctx context.Context, in *ReadTuplesRequest, opts ...grpc.CallOption) (KesselTupleService_ReadTuplesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &KesselTupleService_ServiceDesc.Streams[0], KesselTupleService_ReadTuples_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &kesselTupleServiceReadTuplesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type KesselTupleService_ReadTuplesClient interface {
+	Recv() (*ReadTuplesResponse, error)
+	grpc.ClientStream
+}
+
+type kesselTupleServiceReadTuplesClient struct {
+	grpc.ClientStream
+}
+
+func (x *kesselTupleServiceReadTuplesClient) Recv() (*ReadTuplesResponse, error) {
+	m := new(ReadTuplesResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *kesselTupleServiceClient) DeleteTuples(ctx context.Context, in *DeleteTuplesRequest, opts ...grpc.CallOption) (*DeleteTuplesResponse, error) {
@@ -73,7 +96,7 @@ func (c *kesselTupleServiceClient) DeleteTuples(ctx context.Context, in *DeleteT
 // for forward compatibility
 type KesselTupleServiceServer interface {
 	CreateTuples(context.Context, *CreateTuplesRequest) (*CreateTuplesResponse, error)
-	ReadTuples(context.Context, *ReadTuplesRequest) (*ReadTuplesResponse, error)
+	ReadTuples(*ReadTuplesRequest, KesselTupleService_ReadTuplesServer) error
 	DeleteTuples(context.Context, *DeleteTuplesRequest) (*DeleteTuplesResponse, error)
 	mustEmbedUnimplementedKesselTupleServiceServer()
 }
@@ -85,8 +108,8 @@ type UnimplementedKesselTupleServiceServer struct {
 func (UnimplementedKesselTupleServiceServer) CreateTuples(context.Context, *CreateTuplesRequest) (*CreateTuplesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTuples not implemented")
 }
-func (UnimplementedKesselTupleServiceServer) ReadTuples(context.Context, *ReadTuplesRequest) (*ReadTuplesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadTuples not implemented")
+func (UnimplementedKesselTupleServiceServer) ReadTuples(*ReadTuplesRequest, KesselTupleService_ReadTuplesServer) error {
+	return status.Errorf(codes.Unimplemented, "method ReadTuples not implemented")
 }
 func (UnimplementedKesselTupleServiceServer) DeleteTuples(context.Context, *DeleteTuplesRequest) (*DeleteTuplesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTuples not implemented")
@@ -122,22 +145,25 @@ func _KesselTupleService_CreateTuples_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KesselTupleService_ReadTuples_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadTuplesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _KesselTupleService_ReadTuples_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ReadTuplesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(KesselTupleServiceServer).ReadTuples(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: KesselTupleService_ReadTuples_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KesselTupleServiceServer).ReadTuples(ctx, req.(*ReadTuplesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(KesselTupleServiceServer).ReadTuples(m, &kesselTupleServiceReadTuplesServer{stream})
+}
+
+type KesselTupleService_ReadTuplesServer interface {
+	Send(*ReadTuplesResponse) error
+	grpc.ServerStream
+}
+
+type kesselTupleServiceReadTuplesServer struct {
+	grpc.ServerStream
+}
+
+func (x *kesselTupleServiceReadTuplesServer) Send(m *ReadTuplesResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _KesselTupleService_DeleteTuples_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -170,14 +196,16 @@ var KesselTupleService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KesselTupleService_CreateTuples_Handler,
 		},
 		{
-			MethodName: "ReadTuples",
-			Handler:    _KesselTupleService_ReadTuples_Handler,
-		},
-		{
 			MethodName: "DeleteTuples",
 			Handler:    _KesselTupleService_DeleteTuples_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ReadTuples",
+			Handler:       _KesselTupleService_ReadTuples_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "relations/v0/relation_tuples.proto",
 }

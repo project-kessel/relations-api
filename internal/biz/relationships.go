@@ -15,11 +15,15 @@ type SubjectResult struct {
 	Subject      *v0.SubjectReference
 	Continuation ContinuationToken
 }
+type RelationshipResult struct {
+	Relationship *v0.Relationship
+	Continuation ContinuationToken
+}
 
 type ZanzibarRepository interface {
 	Check(ctx context.Context, request *v0.CheckRequest) (*v0.CheckResponse, error)
 	CreateRelationships(context.Context, []*v0.Relationship, TouchSemantics) error
-	ReadRelationships(context.Context, *v0.RelationTupleFilter) ([]*v0.Relationship, error)
+	ReadRelationships(ctx context.Context, filter *v0.RelationTupleFilter, limit uint32, continuation ContinuationToken) (chan *RelationshipResult, chan error, error)
 	DeleteRelationships(context.Context, *v0.RelationTupleFilter) error
 	LookupSubjects(ctx context.Context, subjectType, subject_relation, relation string, resource *v0.ObjectReference, limit uint32, continuation ContinuationToken) (chan *SubjectResult, chan error, error)
 }
@@ -61,9 +65,26 @@ func NewReadRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *Re
 	return &ReadRelationshipsUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *ReadRelationshipsUsecase) ReadRelationships(ctx context.Context, r *v0.RelationTupleFilter) ([]*v0.Relationship, error) {
-	rc.log.WithContext(ctx).Infof("ReadRelationships: %v", r)
-	return rc.repo.ReadRelationships(ctx, r)
+func (rc *ReadRelationshipsUsecase) ReadRelationships(ctx context.Context, req *v0.ReadTuplesRequest) (chan *RelationshipResult, chan error, error) {
+	rc.log.WithContext(ctx).Infof("ReadRelationships: %v", req)
+
+	limit := uint32(MaxStreamingCount)
+	if req.Limit != nil && *req.Limit < limit {
+		limit = *req.Limit
+	}
+
+	continuation := ContinuationToken("")
+	if req.ContinuationToken != nil {
+		continuation = ContinuationToken(*req.ContinuationToken)
+	}
+
+	relationships, errs, err := rc.repo.ReadRelationships(ctx, req.Filter, limit, continuation)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return relationships, errs, nil
 }
 
 type DeleteRelationshipsUsecase struct {

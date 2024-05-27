@@ -21,18 +21,15 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationKesselTupleServiceCreateTuples = "/kessel.relations.v0.KesselTupleService/CreateTuples"
 const OperationKesselTupleServiceDeleteTuples = "/kessel.relations.v0.KesselTupleService/DeleteTuples"
-const OperationKesselTupleServiceReadTuples = "/kessel.relations.v0.KesselTupleService/ReadTuples"
 
 type KesselTupleServiceHTTPServer interface {
 	CreateTuples(context.Context, *CreateTuplesRequest) (*CreateTuplesResponse, error)
 	DeleteTuples(context.Context, *DeleteTuplesRequest) (*DeleteTuplesResponse, error)
-	ReadTuples(context.Context, *ReadTuplesRequest) (*ReadTuplesResponse, error)
 }
 
 func RegisterKesselTupleServiceHTTPServer(s *http.Server, srv KesselTupleServiceHTTPServer) {
 	r := s.Route("/")
 	r.POST("/v0/tuples", _KesselTupleService_CreateTuples0_HTTP_Handler(srv))
-	r.GET("/v0/tuples", _KesselTupleService_ReadTuples0_HTTP_Handler(srv))
 	r.DELETE("/v0/tuples", _KesselTupleService_DeleteTuples0_HTTP_Handler(srv))
 }
 
@@ -54,25 +51,6 @@ func _KesselTupleService_CreateTuples0_HTTP_Handler(srv KesselTupleServiceHTTPSe
 			return err
 		}
 		reply := out.(*CreateTuplesResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _KesselTupleService_ReadTuples0_HTTP_Handler(srv KesselTupleServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ReadTuplesRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationKesselTupleServiceReadTuples)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ReadTuples(ctx, req.(*ReadTuplesRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*ReadTuplesResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -99,7 +77,6 @@ func _KesselTupleService_DeleteTuples0_HTTP_Handler(srv KesselTupleServiceHTTPSe
 type KesselTupleServiceHTTPClient interface {
 	CreateTuples(ctx context.Context, req *CreateTuplesRequest, opts ...http.CallOption) (rsp *CreateTuplesResponse, err error)
 	DeleteTuples(ctx context.Context, req *DeleteTuplesRequest, opts ...http.CallOption) (rsp *DeleteTuplesResponse, err error)
-	ReadTuples(ctx context.Context, req *ReadTuplesRequest, opts ...http.CallOption) (rsp *ReadTuplesResponse, err error)
 }
 
 type KesselTupleServiceHTTPClientImpl struct {
@@ -130,19 +107,6 @@ func (c *KesselTupleServiceHTTPClientImpl) DeleteTuples(ctx context.Context, in 
 	opts = append(opts, http.Operation(OperationKesselTupleServiceDeleteTuples))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-func (c *KesselTupleServiceHTTPClientImpl) ReadTuples(ctx context.Context, in *ReadTuplesRequest, opts ...http.CallOption) (*ReadTuplesResponse, error) {
-	var out ReadTuplesResponse
-	pattern := "/v0/tuples"
-	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationKesselTupleServiceReadTuples))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

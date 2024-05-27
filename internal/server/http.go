@@ -33,7 +33,6 @@ func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, 
 
 	srv := http.NewServer(opts...)
 
-	v0.RegisterKesselTupleServiceHTTPServer(srv, relationships)
 	v0.RegisterKesselCheckServiceHTTPServer(srv, check)
 	h.RegisterKesselHealthHTTPServer(srv, health)
 	return srv

@@ -12,6 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -65,15 +66,21 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 		},
 	},
 	}
-	response, err := relationshipsService.ReadRelationships(ctx, readReq)
-	assert.NoError(t, err)
-	responseRelationships := response.Tuples
-	for _, actual := range responseRelationships {
-		assert.Equal(t, expected.Resource.Id, actual.Resource.Id)
-		assert.Equal(t, expected.Resource.Type.Type, actual.Resource.Type.Type)
-		assert.Equal(t, expected.Subject.Subject.Id, actual.Subject.Subject.Id)
-		assert.Equal(t, expected.Subject.Subject.Type.Type, actual.Subject.Subject.Type.Type)
-		assert.Equal(t, expected.Relation, actual.Relation)
+	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
+	err = relationshipsService.ReadRelationships(readReq, collectingServer)
+	if err != nil {
+		t.FailNow()
+	}
+	responseRelationships := collectingServer.responses
+
+	for _, resp := range responseRelationships {
+		assert.Equal(t, expected.Resource.Id, resp.Tuple.Resource.Id)
+		assert.Equal(t, expected.Resource.Type.Namespace, resp.Tuple.Resource.Type.Namespace)
+		assert.Equal(t, expected.Resource.Type.Type, resp.Tuple.Resource.Type.Type)
+		assert.Equal(t, expected.Subject.Subject.Id, resp.Tuple.Subject.Subject.Id)
+		assert.Equal(t, expected.Subject.Subject.Type.Namespace, resp.Tuple.Subject.Subject.Type.Namespace)
+		assert.Equal(t, expected.Subject.Subject.Type.Type, resp.Tuple.Subject.Subject.Type.Type)
+		assert.Equal(t, expected.Relation, resp.Tuple.Relation)
 	}
 
 }
@@ -103,15 +110,21 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 		},
 	},
 	}
-	response, err := relationshipsService.ReadRelationships(ctx, readReq)
-	assert.NoError(t, err)
-	responseRelationships := response.Tuples
-	for _, actual := range responseRelationships {
-		assert.Equal(t, expected.Resource.Id, actual.Resource.Id)
-		assert.Equal(t, expected.Resource.Type.Type, actual.Resource.Type.Type)
-		assert.Equal(t, expected.Subject.Subject.Id, actual.Subject.Subject.Id)
-		assert.Equal(t, expected.Subject.Subject.Type.Type, actual.Subject.Subject.Type.Type)
-		assert.Equal(t, expected.Relation, actual.Relation)
+	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
+	err = relationshipsService.ReadRelationships(readReq, collectingServer)
+	if err != nil {
+		t.FailNow()
+	}
+	responseRelationships := collectingServer.responses
+
+	for _, resp := range responseRelationships {
+		assert.Equal(t, expected.Resource.Id, resp.Tuple.Resource.Id)
+		assert.Equal(t, expected.Resource.Type.Namespace, resp.Tuple.Resource.Type.Namespace)
+		assert.Equal(t, expected.Resource.Type.Type, resp.Tuple.Resource.Type.Type)
+		assert.Equal(t, expected.Subject.Subject.Id, resp.Tuple.Subject.Subject.Id)
+		assert.Equal(t, expected.Subject.Subject.Type.Namespace, resp.Tuple.Subject.Subject.Type.Namespace)
+		assert.Equal(t, expected.Subject.Subject.Type.Type, resp.Tuple.Subject.Subject.Type.Type)
+		assert.Equal(t, expected.Relation, resp.Tuple.Relation)
 	}
 
 	_, err = relationshipsService.CreateRelationships(ctx, req)
@@ -193,8 +206,15 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 		},
 	},
 	}
-	response, err := relationshipsService.ReadRelationships(ctx, readReq)
-	assert.Equal(t, 0, len(response.Tuples))
+
+	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
+	err = relationshipsService.ReadRelationships(readReq, collectingServer)
+	if err != nil {
+		t.FailNow()
+	}
+	responses := collectingServer.responses
+
+	assert.Equal(t, 0, len(responses))
 	assert.NoError(t, err)
 }
 
@@ -217,6 +237,8 @@ func setup(t *testing.T) (error, *RelationshipsService) {
 
 func TestRelationshipsService_ReadRelationships(t *testing.T) {
 	t.Parallel()
+	ctx := context.TODO()
+
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
@@ -231,7 +253,16 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
 	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase)
 
-	ctx := context.Background()
+	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
+
+	reqCr := &v0.CreateTuplesRequest{
+		Tuples: []*v0.Relationship{
+			expected,
+		},
+	}
+	_, err = relationshipsService.CreateRelationships(ctx, reqCr)
+	assert.NoError(t, err)
+
 	req := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
@@ -242,8 +273,15 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 		},
 	},
 	}
-	readResponse, err := relationshipsService.ReadRelationships(ctx, req)
-	assert.Equal(t, 0, len(readResponse.Tuples))
+
+	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
+	err = relationshipsService.ReadRelationships(req, collectingServer)
+	if err != nil {
+		t.FailNow()
+	}
+	responses := collectingServer.responses
+
+	assert.Equal(t, 1, len(responses))
 	assert.NoError(t, err)
 }
 
@@ -277,4 +315,29 @@ func createRelationship(subjectId string, subjectType *v0.ObjectType, subjectRel
 		Relation: relationship,
 		Subject:  subject,
 	}
+}
+
+// Below is the boilerplate for creating test servers for streaming ReadRelationships rpc
+
+func NewRelationships_ReadRelationshipsServerStub(ctx context.Context) *Relationships_ReadRelationshipsServerStub {
+	return &Relationships_ReadRelationshipsServerStub{
+		ServerStream: nil,
+		responses:    []*v0.ReadTuplesResponse{},
+		ctx:          ctx,
+	}
+}
+
+type Relationships_ReadRelationshipsServerStub struct {
+	grpc.ServerStream
+	responses []*v0.ReadTuplesResponse
+	ctx       context.Context
+}
+
+func (x *Relationships_ReadRelationshipsServerStub) Send(m *v0.ReadTuplesResponse) error {
+	x.responses = append(x.responses, m)
+	return nil
+}
+
+func (x *Relationships_ReadRelationshipsServerStub) Context() context.Context {
+	return x.ctx
 }

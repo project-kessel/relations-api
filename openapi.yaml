@@ -87,6 +87,15 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: continuationToken
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -260,10 +269,10 @@ components:
         kessel.relations.v0.ReadTuplesResponse:
             type: object
             properties:
-                tuples:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/kessel.relations.v0.Relationship'
+                tuple:
+                    $ref: '#/components/schemas/kessel.relations.v0.Relationship'
+                continuationToken:
+                    type: string
         kessel.relations.v0.Relationship:
             type: object
             properties:

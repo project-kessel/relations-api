@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package kessel.relations.v0;
+
+import "google/api/annotations.proto";
+import "relations/v0/common.proto";
+
+option go_package = "ciam-rebac/api/relations/v0;v0";
+option java_multiple_files = true;
+option java_package = "org.projectkessel.api.relations.v0";
+
+// KesselTupleServices manages the persisted _Tuples_ stored in the system..
+// 
+// A Tuple is an explicitly stated, persistent relation 
+// between a Resource and a Subject or Subject Set. 
+// It has the same _shape_ as a Relationship but is not the same thing as a Relationship.
+// 
+// A single Tuple may result in zero-to-many Relationships.
+service KesselTupleService {
+	rpc CreateTuples (CreateTuplesRequest) returns (CreateTuplesResponse) {
+		option (google.api.http) = {
+			post: "/v0/tuples"
+			body: "*"
+		};
+	};
+	rpc ReadTuples (ReadTuplesRequest) returns (ReadTuplesResponse) {
+		option (google.api.http) = {
+			get: "/v0/tuples"
+		};
+	};
+	rpc DeleteTuples (DeleteTuplesRequest) returns (DeleteTuplesResponse) {
+		option (google.api.http) = {
+			delete: "/v0/tuples"
+		};
+	};
+}
+
+message CreateTuplesRequest {
+	// Whether or not the request should ignore existing tuples (`true`),
+	// or if the request should fail if the same tuple already exists (`false`).
+	// 
+	// Defaults to `false`.
+	bool upsert = 1;
+	repeated Relationship tuples = 2;
+}
+message CreateTuplesResponse {}
+
+message ReadTuplesRequest {
+	RelationTupleFilter filter = 1;
+}
+message ReadTuplesResponse {
+	repeated Relationship tuples = 1;
+}
+
+message DeleteTuplesRequest {
+	RelationTupleFilter filter = 1;
+}
+message DeleteTuplesResponse {}
+
+// RelationTupleFilter is used to filter tuples based on their resource, relation, and subject.
+// All fields are optional but capabilities may vary based on the chosen store and its indexes.
+// At least one field must be provided.
+message RelationTupleFilter {
+	optional string resource_namespace = 1;
+	optional string resource_type = 2;
+	optional string resource_id = 3;
+	optional string relation = 4;
+	optional SubjectFilter subject_filter = 5;
+}
+
+message SubjectFilter {
+	optional string subject_namespace = 1;
+	optional string subject_type = 2;
+	optional string subject_id = 3;
+	optional string relation = 4;
+}

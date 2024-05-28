@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package kessel.relations.v0;
+
+option go_package = "ciam-rebac/api/relations/v0;v0";
+option java_multiple_files = true;
+option java_package = "org.projectkessel.api.relations.v0";
+
+// A _Relationship_ is the realization of a _Relation_ (a string) 
+// between a _Resource_ and a _Subject_ or a _Subject Set_ (known as a Userset in Zanzibar).
+//
+// All Relationships are object-object relations.
+// "Resource" and "Subject" are relative terms which define the direction of a Relation.
+// That is, Relations are unidirectional.
+// If you reverse the Subject and Resource, it is a different Relation and a different Relationship.
+// Conventionally, we generally refer to the Resource first, then Subject,
+// following the direction of typical graph traversal (Resource to Subject).
+message Relationship {
+	ObjectReference resource = 1;
+	string relation = 2;
+	SubjectReference subject = 3;
+}
+
+// A reference to a Subject or, if a `relation` is provided, a Subject Set.
+message SubjectReference {
+	// An optional relation which points to a set of Subjects instead of the single Subject.
+	// e.g. "members" or "owners" of a group identified in `subject`.
+	optional string relation = 1;
+	ObjectReference subject = 2;
+}
+
+message ObjectReference {
+	ObjectType type = 1;
+	string id = 2;
+}
+
+message ObjectType {
+	string namespace = 1;
+	string type = 2;
+}

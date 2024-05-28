@@ -30,7 +30,8 @@ set of verbs. Custom method names are allowed outside of this.
 - https://cloud.google.com/apis/design/naming_convention#method_names
 - https://cloud.google.com/apis/design/standard_methods
 
-Note that "List" uses paged messages, _not_ streams, so should be avoided for streaming responses.
+Note that "List" uses paged messages, _not_ streams,
+so "List" should be avoided for methods with streaming responses.
 
 It does not appear there is any other convention for methods with streaming responses,
 [based on querying all of GCP's APIs][1].

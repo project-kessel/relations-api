@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.9-1161.1715068733 AS builder
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10 AS builder
 ARG TARGETARCH
 USER root
 RUN microdnf install -y tar gzip make which
@@ -12,10 +12,10 @@ WORKDIR /workspace
 
 COPY . ./
 
-RUN go mod vendor 
+RUN go mod vendor
 RUN make build
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.9-1161.1715068733
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10
 
 COPY --from=builder /workspace/bin/ciam-rebac /usr/local/bin/
 COPY --from=builder /workspace/configs/config.yaml /usr/local/bin/

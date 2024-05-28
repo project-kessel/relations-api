@@ -38,7 +38,7 @@ func (s *RelationshipsService) CreateRelationships(ctx context.Context, req *pb.
 }
 
 func (s *RelationshipsService) ReadRelationships(req *pb.ReadTuplesRequest, conn pb.KesselTupleService_ReadTuplesServer) error {
-	ctx := conn.Context() //Doesn't get context from grpc?
+	ctx := conn.Context()
 
 	relationships, errs, err := s.readUsecase.ReadRelationships(ctx, req)
 

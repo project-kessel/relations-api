@@ -18,7 +18,7 @@ func NewLookupService(subjectsUseCase *biz.GetSubjectsUsecase) *LookupService {
 }
 
 func (s *LookupService) Subjects(req *pb.LookupSubjectsRequest, conn pb.Lookup_SubjectsServer) error {
-	ctx := conn.Context() //Doesn't get context from grpc?
+	ctx := conn.Context()
 
 	subs, errs, err := s.subjectsUsecase.Get(ctx, req)
 

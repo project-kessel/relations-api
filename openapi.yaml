@@ -248,8 +248,6 @@ components:
             properties:
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
-                hasMore:
-                    type: boolean
                 continuationToken:
                     type: string
         kessel.relations.v0.ObjectReference:

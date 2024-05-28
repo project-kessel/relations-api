@@ -1,23 +1,27 @@
 syntax = "proto3";
 
-package api.rebac.v1;
-import "google/api/annotations.proto";
-import "rebac/v1/relationships.proto";
-option go_package = "ciam-rebac/api/rebac/v1;v1";
-option java_multiple_files = true;
-option java_package = "api.rebac.v1";
+package kessel.relations.v0;
 
-service Check {
+import "google/api/annotations.proto";
+import "relations/v0/common.proto";
+
+option go_package = "ciam-rebac/api/relations/v0;v0";
+option java_multiple_files = true;
+option java_package = "org.projectkessel.api.relations.v0";
+
+service KesselCheckService {
+	// Checks for the existence of a single Relationship 
+	// (a Relation between a Resource and a Subject or Subject Set).
 	rpc Check (CheckRequest) returns (CheckResponse) {
 		option (google.api.http) = {
-			post: "/v1/check"
+			post: "/v0/check"
 			body: "*"
 		};
 	};
 }
 
 message CheckRequest {
-	ObjectReference object = 1;
+	ObjectReference resource = 1;
 	string relation = 2;
 	SubjectReference subject = 3;
 }

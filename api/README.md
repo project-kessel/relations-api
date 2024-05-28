@@ -32,12 +32,12 @@ set of verbs. Custom method names are allowed outside of this.
 
 Note that "List" uses paged messages, _not_ streams, so should be avoided for streaming responses.
 
-It does not appear there is any other convention for methods with streaming responses, 
+It does not appear there is any other convention for methods with streaming responses,
 [based on querying all of GCP's APIs][1].
 
 [1]: https://github.com/search?q=repo:googleapis/googleapis+%22returns+(stream+%22+language:%22Protocol+Buffer%22&type=code&p=1
 
-## Troubleshooting 
+## Troubleshooting
 
 ### Using VSCode proto extension and seeing import errors?
 

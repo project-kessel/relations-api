@@ -34,6 +34,7 @@ func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 
 	err = seedThingInDefaultWorkspace(ctx, spicedb, "thing1")
 	assert.NoError(t, err)
+	container.WaitForQuantizationInterval()
 
 	service := createLookupService(spicedb)
 
@@ -59,8 +60,7 @@ func TestLookupService_LookupSubjects_OneResult(t *testing.T) {
 	assert.NoError(t, err)
 	err = seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u1")
 	assert.NoError(t, err)
-
-	assert.NoError(t, err)
+	container.WaitForQuantizationInterval()
 
 	service := createLookupService(spicedb)
 
@@ -88,6 +88,7 @@ func TestLookupService_LookupSubjects_TwoResults(t *testing.T) {
 	assert.NoError(t, err)
 	err = seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u2")
 	assert.NoError(t, err)
+	container.WaitForQuantizationInterval()
 
 	service := createLookupService(spicedb)
 

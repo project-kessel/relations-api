@@ -19,7 +19,7 @@ pipeline {
     }
     environment {
         // --------------------------------------------
-        // Options that must be configured by app owner
+        // Options that must be configured by app owner - for the service
         // --------------------------------------------
         APP_NAME="kessel"  // name of app-sre "application" folder this component lives in
         COMPONENT_NAME="relations"  // name of app-sre "resourceTemplate" in deploy.yaml for this component

@@ -145,7 +145,7 @@ parameters:
     value: insights-ephemeral
   - description: App Image
     name: RELATIONS_IMAGE
-    value: quay.io/ciam_authz/insights-rebac
+    value: quay.io/cloudservices/kessel-relations 
   - description: Image Tag
     name: RELATIONS_IMAGE_TAG
     value: latest    

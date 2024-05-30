@@ -17,7 +17,7 @@ fi
 source ../.secrets/postgres.env
 
 # Export tags
-IMAGE=quay.io/ciam_authz/insights-rebac
+IMAGE=quay.io/cloudservices/kessel-relations
 IMAGE_TAG=latest
 
 # Function to check if a command is available

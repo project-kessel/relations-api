@@ -91,6 +91,15 @@ You should have logged into a valid openshift cluster using the oc login command
 
 ### Deploying the components
 
+#### Option 1: Using the config from app-interface (RedHat Internal only)
+
+* Create a config map inside a local directory. You can refer to [here](https://github.com/project-kessel/relations-api/blob/main/deploy/schema-configmaps/ex-schema-configmap.yaml)
+  * NOTE: Please replace the "data" section, as per your needs (the schema portion)
+* Run the following command:
+  * `bonfire deploy relations --import-configmaps  --configmaps-dir <path-to-configmaps-dir>` 
+
+#### Option 2: Using the deploy.sh script in this repository
+
 Note: the deploy script assumes you have a valid oc login and the necessary tools are in place.
 
 The [deploy script](deploy/deploy.sh) under the [deploy](deploy) folder, will deploy all the needed components.

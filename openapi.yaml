@@ -9,37 +9,38 @@ paths:
     /livez:
         get:
             tags:
-                - Health
-            operationId: Health_GetLivez
+                - KesselHealth
+            operationId: KesselHealth_GetLivez
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.health.v1.GetLivezReply'
+                                $ref: '#/components/schemas/kessel.relations.v1.GetLivezReply'
     /readyz:
         get:
             tags:
-                - Health
-            operationId: Health_GetReadyz
+                - KesselHealth
+            operationId: KesselHealth_GetReadyz
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.health.v1.GetReadyzReply'
-    /v1/check:
+                                $ref: '#/components/schemas/kessel.relations.v1.GetReadyzReply'
+    /v0/check:
         post:
             tags:
-                - Check
-            operationId: Check_Check
+                - KesselCheckService
+            description: "Checks for the existence of a single Relationship \n (a Relation between a Resource and a Subject or Subject Set)."
+            operationId: KesselCheckService_Check
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.rebac.v1.CheckRequest'
+                            $ref: '#/components/schemas/kessel.relations.v0.CheckRequest'
                 required: true
             responses:
                 "200":
@@ -47,18 +48,22 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.rebac.v1.CheckResponse'
-    /v1/relationships:
+                                $ref: '#/components/schemas/kessel.relations.v0.CheckResponse'
+    /v0/tuples:
         get:
             tags:
-                - Relationships
-            operationId: Relationships_ReadRelationships
+                - KesselTupleService
+            operationId: KesselTupleService_ReadTuples
             parameters:
-                - name: filter.objectType
+                - name: filter.resourceNamespace
                   in: query
                   schema:
                     type: string
-                - name: filter.objectId
+                - name: filter.resourceType
+                  in: query
+                  schema:
+                    type: string
+                - name: filter.resourceId
                   in: query
                   schema:
                     type: string
@@ -66,7 +71,11 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: filter.subjectFilter.relation
+                - name: filter.subjectFilter.subjectNamespace
+                  in: query
+                  schema:
+                    type: string
+                - name: filter.subjectFilter.subjectType
                   in: query
                   schema:
                     type: string
@@ -74,7 +83,7 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: filter.subjectFilter.subjectType
+                - name: filter.subjectFilter.relation
                   in: query
                   schema:
                     type: string
@@ -84,16 +93,16 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.rebac.v1.ReadRelationshipsResponse'
+                                $ref: '#/components/schemas/kessel.relations.v0.ReadTuplesResponse'
         post:
             tags:
-                - Relationships
-            operationId: Relationships_CreateRelationships
+                - KesselTupleService
+            operationId: KesselTupleService_CreateTuples
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.rebac.v1.CreateRelationshipsRequest'
+                            $ref: '#/components/schemas/kessel.relations.v0.CreateTuplesRequest'
                 required: true
             responses:
                 "200":
@@ -101,17 +110,21 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.rebac.v1.CreateRelationshipsResponse'
+                                $ref: '#/components/schemas/kessel.relations.v0.CreateTuplesResponse'
         delete:
             tags:
-                - Relationships
-            operationId: Relationships_DeleteRelationships
+                - KesselTupleService
+            operationId: KesselTupleService_DeleteTuples
             parameters:
-                - name: filter.objectType
+                - name: filter.resourceNamespace
                   in: query
                   schema:
                     type: string
-                - name: filter.objectId
+                - name: filter.resourceType
+                  in: query
+                  schema:
+                    type: string
+                - name: filter.resourceId
                   in: query
                   schema:
                     type: string
@@ -119,7 +132,11 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: filter.subjectFilter.relation
+                - name: filter.subjectFilter.subjectNamespace
+                  in: query
+                  schema:
+                    type: string
+                - name: filter.subjectFilter.subjectType
                   in: query
                   schema:
                     type: string
@@ -127,7 +144,7 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: filter.subjectFilter.subjectType
+                - name: filter.subjectFilter.relation
                   in: query
                   schema:
                     type: string
@@ -137,76 +154,90 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.rebac.v1.DeleteRelationshipsResponse'
+                                $ref: '#/components/schemas/kessel.relations.v0.DeleteTuplesResponse'
 components:
     schemas:
-        api.health.v1.GetLivezReply:
-            type: object
-            properties: {}
-        api.health.v1.GetReadyzReply:
-            type: object
-            properties: {}
-        api.rebac.v1.CheckRequest:
+        kessel.relations.v0.CheckRequest:
             type: object
             properties:
-                object:
-                    $ref: '#/components/schemas/api.rebac.v1.ObjectReference'
+                resource:
+                    $ref: '#/components/schemas/kessel.relations.v0.ObjectReference'
                 relation:
                     type: string
                 subject:
-                    $ref: '#/components/schemas/api.rebac.v1.SubjectReference'
-        api.rebac.v1.CheckResponse:
+                    $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
+        kessel.relations.v0.CheckResponse:
             type: object
             properties:
                 allowed:
                     type: integer
                     format: enum
-        api.rebac.v1.CreateRelationshipsRequest:
+        kessel.relations.v0.CreateTuplesRequest:
             type: object
             properties:
-                touch:
+                upsert:
                     type: boolean
-                relationships:
+                    description: "Whether or not the request should ignore existing tuples (`true`),\n or if the request should fail if the same tuple already exists (`false`).\n \n Defaults to `false`."
+                tuples:
                     type: array
                     items:
-                        $ref: '#/components/schemas/api.rebac.v1.Relationship'
-        api.rebac.v1.CreateRelationshipsResponse:
+                        $ref: '#/components/schemas/kessel.relations.v0.Relationship'
+        kessel.relations.v0.CreateTuplesResponse:
             type: object
             properties: {}
-        api.rebac.v1.DeleteRelationshipsResponse:
+        kessel.relations.v0.DeleteTuplesResponse:
             type: object
             properties: {}
-        api.rebac.v1.ObjectReference:
+        kessel.relations.v0.ObjectReference:
             type: object
             properties:
                 type:
-                    type: string
+                    $ref: '#/components/schemas/kessel.relations.v0.ObjectType'
                 id:
                     type: string
-        api.rebac.v1.ReadRelationshipsResponse:
+        kessel.relations.v0.ObjectType:
             type: object
             properties:
-                relationships:
+                namespace:
+                    type: string
+                type:
+                    type: string
+        kessel.relations.v0.ReadTuplesResponse:
+            type: object
+            properties:
+                tuples:
                     type: array
                     items:
-                        $ref: '#/components/schemas/api.rebac.v1.Relationship'
-        api.rebac.v1.Relationship:
+                        $ref: '#/components/schemas/kessel.relations.v0.Relationship'
+        kessel.relations.v0.Relationship:
             type: object
             properties:
-                object:
-                    $ref: '#/components/schemas/api.rebac.v1.ObjectReference'
+                resource:
+                    $ref: '#/components/schemas/kessel.relations.v0.ObjectReference'
                 relation:
                     type: string
                 subject:
-                    $ref: '#/components/schemas/api.rebac.v1.SubjectReference'
-        api.rebac.v1.SubjectReference:
+                    $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
+            description: "A _Relationship_ is the realization of a _Relation_ (a string) \n between a _Resource_ and a _Subject_ or a _Subject Set_ (known as a Userset in Zanzibar).\n\n All Relationships are object-object relations.\n \"Resource\" and \"Subject\" are relative terms which define the direction of a Relation.\n That is, Relations are unidirectional.\n If you reverse the Subject and Resource, it is a different Relation and a different Relationship.\n Conventionally, we generally refer to the Resource first, then Subject,\n following the direction of typical graph traversal (Resource to Subject)."
+        kessel.relations.v0.SubjectReference:
             type: object
             properties:
                 relation:
                     type: string
-                object:
-                    $ref: '#/components/schemas/api.rebac.v1.ObjectReference'
+                    description: |-
+                        An optional relation which points to a set of Subjects instead of the single Subject.
+                         e.g. "members" or "owners" of a group identified in `subject`.
+                subject:
+                    $ref: '#/components/schemas/kessel.relations.v0.ObjectReference'
+            description: A reference to a Subject or, if a `relation` is provided, a Subject Set.
+        kessel.relations.v1.GetLivezReply:
+            type: object
+            properties: {}
+        kessel.relations.v1.GetReadyzReply:
+            type: object
+            properties: {}
 tags:
-    - name: Check
-    - name: Health
-    - name: Relationships
+    - name: KesselCheckService
+    - name: KesselHealth
+    - name: KesselTupleService
+      description: "KesselTupleServices manages the persisted _Tuples_ stored in the system..\n \n A Tuple is an explicitly stated, persistent relation \n between a Resource and a Subject or Subject Set. \n It has the same _shape_ as a Relationship but is not the same thing as a Relationship.\n \n A single Tuple may result in zero-to-many Relationships."

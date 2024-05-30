@@ -6,11 +6,11 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	pb "ciam-rebac/api/rebac/v1"
+	pb "ciam-rebac/api/relations/v0"
 )
 
 type RelationshipsService struct {
-	pb.UnimplementedRelationshipsServer
+	pb.UnimplementedKesselTupleServiceServer
 	createUsecase *biz.CreateRelationshipsUsecase
 	readUsecase   *biz.ReadRelationshipsUsecase
 	deleteUsecase *biz.DeleteRelationshipsUsecase
@@ -26,30 +26,30 @@ func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelatio
 	}
 }
 
-func (s *RelationshipsService) CreateRelationships(ctx context.Context, req *pb.CreateRelationshipsRequest) (*pb.CreateRelationshipsResponse, error) {
+func (s *RelationshipsService) CreateRelationships(ctx context.Context, req *pb.CreateTuplesRequest) (*pb.CreateTuplesResponse, error) {
 	s.log.Infof("Create relationships request: %v", req)
 
-	err := s.createUsecase.CreateRelationships(ctx, req.Relationships, req.GetTouch())
+	err := s.createUsecase.CreateRelationships(ctx, req.Tuples, req.GetUpsert()) //The generated .GetUpsert() defaults to false
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.CreateRelationshipsResponse{}, nil
+	return &pb.CreateTuplesResponse{}, nil
 }
 
-func (s *RelationshipsService) ReadRelationships(ctx context.Context, req *pb.ReadRelationshipsRequest) (*pb.ReadRelationshipsResponse, error) {
+func (s *RelationshipsService) ReadRelationships(ctx context.Context, req *pb.ReadTuplesRequest) (*pb.ReadTuplesResponse, error) {
 	s.log.Infof("Read relationships request: %v", req)
 
 	if relationships, err := s.readUsecase.ReadRelationships(ctx, req.GetFilter()); err != nil {
 		return nil, err
 	} else {
-		return &pb.ReadRelationshipsResponse{
-			Relationships: relationships,
+		return &pb.ReadTuplesResponse{
+			Tuples: relationships,
 		}, nil
 	}
 }
 
-func (s *RelationshipsService) DeleteRelationships(ctx context.Context, req *pb.DeleteRelationshipsRequest) (*pb.DeleteRelationshipsResponse, error) {
+func (s *RelationshipsService) DeleteRelationships(ctx context.Context, req *pb.DeleteTuplesRequest) (*pb.DeleteTuplesResponse, error) {
 	s.log.Infof("Delete relationships request: %v", req)
 
 	err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter)
@@ -57,5 +57,5 @@ func (s *RelationshipsService) DeleteRelationships(ctx context.Context, req *pb.
 		return nil, err
 	}
 
-	return &pb.DeleteRelationshipsResponse{}, nil
+	return &pb.DeleteTuplesResponse{}, nil
 }

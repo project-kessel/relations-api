@@ -8,7 +8,7 @@ option go_package = "ciam-rebac/api/health/v1;v1";
 option java_multiple_files = true;
 option java_package = "org.projectkessel.api.relations.v1";
 
-service Health {
+service KesselHealth {
 	rpc GetLivez (GetLivezRequest) returns (GetLivezReply){
 		option (google.api.http) = {
 			get: "/livez"

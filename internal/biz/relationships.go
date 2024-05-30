@@ -1,7 +1,7 @@
 package biz
 
 import (
-	v1 "ciam-rebac/api/rebac/v1"
+	v0 "ciam-rebac/api/relations/v0"
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -11,10 +11,10 @@ import (
 type TouchSemantics bool
 
 type ZanzibarRepository interface {
-	Check(ctx context.Context, request *v1.CheckRequest) (*v1.CheckResponse, error)
-	CreateRelationships(context.Context, []*v1.Relationship, TouchSemantics) error
-	ReadRelationships(context.Context, *v1.RelationshipFilter) ([]*v1.Relationship, error)
-	DeleteRelationships(context.Context, *v1.RelationshipFilter) error
+	Check(ctx context.Context, request *v0.CheckRequest) (*v0.CheckResponse, error)
+	CreateRelationships(context.Context, []*v0.Relationship, TouchSemantics) error
+	ReadRelationships(context.Context, *v0.RelationTupleFilter) ([]*v0.Relationship, error)
+	DeleteRelationships(context.Context, *v0.RelationTupleFilter) error
 }
 
 type CheckUsecase struct {
@@ -26,7 +26,7 @@ func NewCheckUsecase(repo ZanzibarRepository, logger log.Logger) *CheckUsecase {
 	return &CheckUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *CheckUsecase) Check(ctx context.Context, check *v1.CheckRequest) (*v1.CheckResponse, error) {
+func (rc *CheckUsecase) Check(ctx context.Context, check *v0.CheckRequest) (*v0.CheckResponse, error) {
 	rc.log.WithContext(ctx).Infof("Check: %v", check)
 	return rc.repo.Check(ctx, check)
 }
@@ -40,7 +40,7 @@ func NewCreateRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *
 	return &CreateRelationshipsUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *CreateRelationshipsUsecase) CreateRelationships(ctx context.Context, r []*v1.Relationship, touch bool) error {
+func (rc *CreateRelationshipsUsecase) CreateRelationships(ctx context.Context, r []*v0.Relationship, touch bool) error {
 	rc.log.WithContext(ctx).Infof("CreateRelationships: %v %s", r, touch)
 	return rc.repo.CreateRelationships(ctx, r, TouchSemantics(touch))
 }
@@ -54,7 +54,7 @@ func NewReadRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *Re
 	return &ReadRelationshipsUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *ReadRelationshipsUsecase) ReadRelationships(ctx context.Context, r *v1.RelationshipFilter) ([]*v1.Relationship, error) {
+func (rc *ReadRelationshipsUsecase) ReadRelationships(ctx context.Context, r *v0.RelationTupleFilter) ([]*v0.Relationship, error) {
 	rc.log.WithContext(ctx).Infof("ReadRelationships: %v", r)
 	return rc.repo.ReadRelationships(ctx, r)
 }
@@ -68,7 +68,7 @@ func NewDeleteRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *
 	return &DeleteRelationshipsUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *DeleteRelationshipsUsecase) DeleteRelationships(ctx context.Context, r *v1.RelationshipFilter) error {
+func (rc *DeleteRelationshipsUsecase) DeleteRelationships(ctx context.Context, r *v0.RelationTupleFilter) error {
 	rc.log.WithContext(ctx).Infof("DeleteRelationships: %v", r)
 	return rc.repo.DeleteRelationships(ctx, r)
 }

@@ -2,7 +2,7 @@
 set -e
 
 # Define the minimum required version
-MIN_BONFIRE_VERSION="5.7.2"
+MIN_BONFIRE_VERSION="5.8.0"
 
 RBAC_ARGUMENT="$1"
 RBAC_DIR="$2"

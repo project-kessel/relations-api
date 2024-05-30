@@ -1,18 +1,19 @@
 package service
 
 import (
-	v1 "ciam-rebac/api/rebac/v1"
+	v0 "ciam-rebac/api/relations/v0"
 	"ciam-rebac/internal/biz"
 	"ciam-rebac/internal/data"
 	"context"
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"os"
-	"testing"
 )
 
 var container *data.LocalSpiceDbContainer
@@ -44,34 +45,34 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
-	expected := createRelationship("bob", "user", "", "member", "group", "bob_club")
+	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
 
-	req := &v1.CreateRelationshipsRequest{
-		Relationships: []*v1.Relationship{
+	req := &v0.CreateTuplesRequest{
+		Tuples: []*v0.Relationship{
 			expected,
 		},
 	}
 	_, err = relationshipsService.CreateRelationships(ctx, req)
 	assert.NoError(t, err)
 
-	readReq := &v1.ReadRelationshipsRequest{Filter: &v1.RelationshipFilter{
-		ObjectId:   "bob_club",
-		ObjectType: "group",
-		Relation:   "member",
-		SubjectFilter: &v1.SubjectFilter{
-			SubjectId:   "bob",
-			SubjectType: "user",
+	readReq := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
+		ResourceId:   pointerize("bob_club"),
+		ResourceType: pointerize("group"),
+		Relation:     pointerize("member"),
+		SubjectFilter: &v0.SubjectFilter{
+			SubjectId:   pointerize("bob"),
+			SubjectType: pointerize("user"),
 		},
 	},
 	}
 	response, err := relationshipsService.ReadRelationships(ctx, readReq)
 	assert.NoError(t, err)
-	responseRelationships := response.Relationships
+	responseRelationships := response.Tuples
 	for _, actual := range responseRelationships {
-		assert.Equal(t, expected.Object.Id, actual.Object.Id)
-		assert.Equal(t, expected.Object.Type, actual.Object.Type)
-		assert.Equal(t, expected.Subject.Object.Id, actual.Subject.Object.Id)
-		assert.Equal(t, expected.Subject.Object.Type, actual.Subject.Object.Type)
+		assert.Equal(t, expected.Resource.Id, actual.Resource.Id)
+		assert.Equal(t, expected.Resource.Type.Type, actual.Resource.Type.Type)
+		assert.Equal(t, expected.Subject.Subject.Id, actual.Subject.Subject.Id)
+		assert.Equal(t, expected.Subject.Subject.Type.Type, actual.Subject.Subject.Type.Type)
 		assert.Equal(t, expected.Relation, actual.Relation)
 	}
 
@@ -83,33 +84,33 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 	assert.NoError(t, err)
 
 	ctx := context.Background()
-	expected := createRelationship("bob", "user", "", "member", "group", "bob_club")
-	req := &v1.CreateRelationshipsRequest{
-		Relationships: []*v1.Relationship{
+	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
+	req := &v0.CreateTuplesRequest{
+		Tuples: []*v0.Relationship{
 			expected,
 		},
 	}
 	_, err = relationshipsService.CreateRelationships(ctx, req)
 	assert.NoError(t, err)
 
-	readReq := &v1.ReadRelationshipsRequest{Filter: &v1.RelationshipFilter{
-		ObjectId:   "bob_club",
-		ObjectType: "group",
-		Relation:   "member",
-		SubjectFilter: &v1.SubjectFilter{
-			SubjectId:   "bob",
-			SubjectType: "user",
+	readReq := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
+		ResourceId:   pointerize("bob_club"),
+		ResourceType: pointerize("group"),
+		Relation:     pointerize("member"),
+		SubjectFilter: &v0.SubjectFilter{
+			SubjectId:   pointerize("bob"),
+			SubjectType: pointerize("user"),
 		},
 	},
 	}
 	response, err := relationshipsService.ReadRelationships(ctx, readReq)
 	assert.NoError(t, err)
-	responseRelationships := response.Relationships
+	responseRelationships := response.Tuples
 	for _, actual := range responseRelationships {
-		assert.Equal(t, expected.Object.Id, actual.Object.Id)
-		assert.Equal(t, expected.Object.Type, actual.Object.Type)
-		assert.Equal(t, expected.Subject.Object.Id, actual.Subject.Object.Id)
-		assert.Equal(t, expected.Subject.Object.Type, actual.Subject.Object.Type)
+		assert.Equal(t, expected.Resource.Id, actual.Resource.Id)
+		assert.Equal(t, expected.Resource.Type.Type, actual.Resource.Type.Type)
+		assert.Equal(t, expected.Subject.Subject.Id, actual.Subject.Subject.Id)
+		assert.Equal(t, expected.Subject.Subject.Type.Type, actual.Subject.Subject.Type.Type)
 		assert.Equal(t, expected.Relation, actual.Relation)
 	}
 
@@ -124,9 +125,9 @@ func TestRelationshipsService_CreateRelationshipsWithBadSubjectType(t *testing.T
 	assert.NoError(t, err)
 	ctx := context.Background()
 	badSubjectType := "not_a_user"
-	expected := createRelationship("bob", badSubjectType, "", "member", "group", "bob_club")
-	req := &v1.CreateRelationshipsRequest{
-		Relationships: []*v1.Relationship{
+	expected := createRelationship("bob", simple_type(badSubjectType), "", "member", simple_type("group"), "bob_club")
+	req := &v0.CreateTuplesRequest{
+		Tuples: []*v0.Relationship{
 			expected,
 		},
 	}
@@ -142,9 +143,9 @@ func TestRelationshipsService_CreateRelationshipsWithBadObjectType(t *testing.T)
 	assert.NoError(t, err)
 	ctx := context.Background()
 	badObjectType := "not_an_object"
-	expected := createRelationship("bob", "user", "", "member", badObjectType, "bob_club")
-	req := &v1.CreateRelationshipsRequest{
-		Relationships: []*v1.Relationship{
+	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type(badObjectType), "bob_club")
+	req := &v0.CreateTuplesRequest{
+		Tuples: []*v0.Relationship{
 			expected,
 		},
 	}
@@ -159,41 +160,41 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
 
-	expected := createRelationship("bob", "user", "", "member", "group", "bob_club")
+	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
 
 	ctx := context.Background()
-	req := &v1.CreateRelationshipsRequest{
-		Relationships: []*v1.Relationship{
+	req := &v0.CreateTuplesRequest{
+		Tuples: []*v0.Relationship{
 			expected,
 		},
 	}
 	_, err = relationshipsService.CreateRelationships(ctx, req)
 	assert.NoError(t, err)
 
-	delreq := &v1.DeleteRelationshipsRequest{Filter: &v1.RelationshipFilter{
-		ObjectId:   "bob_club",
-		ObjectType: "group",
-		Relation:   "member",
-		SubjectFilter: &v1.SubjectFilter{
-			SubjectId:   "bob",
-			SubjectType: "user",
+	delreq := &v0.DeleteTuplesRequest{Filter: &v0.RelationTupleFilter{
+		ResourceId:   pointerize("bob_club"),
+		ResourceType: pointerize("group"),
+		Relation:     pointerize("member"),
+		SubjectFilter: &v0.SubjectFilter{
+			SubjectId:   pointerize("bob"),
+			SubjectType: pointerize("user"),
 		},
 	}}
 	_, err = relationshipsService.DeleteRelationships(ctx, delreq)
 	assert.NoError(t, err)
 
-	readReq := &v1.ReadRelationshipsRequest{Filter: &v1.RelationshipFilter{
-		ObjectId:   "bob_club",
-		ObjectType: "group",
-		Relation:   "member",
-		SubjectFilter: &v1.SubjectFilter{
-			SubjectId:   "bob",
-			SubjectType: "user",
+	readReq := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
+		ResourceId:   pointerize("bob_club"),
+		ResourceType: pointerize("group"),
+		Relation:     pointerize("member"),
+		SubjectFilter: &v0.SubjectFilter{
+			SubjectId:   pointerize("bob"),
+			SubjectType: pointerize("user"),
 		},
 	},
 	}
 	response, err := relationshipsService.ReadRelationships(ctx, readReq)
-	assert.Equal(t, 0, len(response.Relationships))
+	assert.Equal(t, 0, len(response.Tuples))
 	assert.NoError(t, err)
 }
 
@@ -231,36 +232,48 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase)
 
 	ctx := context.Background()
-	req := &v1.ReadRelationshipsRequest{Filter: &v1.RelationshipFilter{
-		ObjectId:   "bob_club",
-		ObjectType: "group",
-		Relation:   "member",
-		SubjectFilter: &v1.SubjectFilter{
-			SubjectId:   "bob",
-			SubjectType: "user",
+	req := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
+		ResourceId:   pointerize("bob_club"),
+		ResourceType: pointerize("group"),
+		Relation:     pointerize("member"),
+		SubjectFilter: &v0.SubjectFilter{
+			SubjectId:   pointerize("bob"),
+			SubjectType: pointerize("user"),
 		},
 	},
 	}
 	readResponse, err := relationshipsService.ReadRelationships(ctx, req)
-	assert.Equal(t, 0, len(readResponse.Relationships))
+	assert.Equal(t, 0, len(readResponse.Tuples))
 	assert.NoError(t, err)
 }
-func createRelationship(subjectId string, subjectType string, subjectRelationship string, relationship string, objectType string, objectId string) *v1.Relationship {
-	subject := &v1.SubjectReference{
-		Object: &v1.ObjectReference{
+
+func simple_type(typename string) *v0.ObjectType {
+	return &v0.ObjectType{Type: typename}
+}
+
+func pointerize(value string) *string { //Used to turn string literals into pointers
+	return &value
+}
+
+func createRelationship(subjectId string, subjectType *v0.ObjectType, subjectRelationship string, relationship string, objectType *v0.ObjectType, objectId string) *v0.Relationship {
+	subject := &v0.SubjectReference{
+		Subject: &v0.ObjectReference{
 			Type: subjectType,
 			Id:   subjectId,
 		},
-		Relation: subjectRelationship,
 	}
 
-	object := &v1.ObjectReference{
+	if subjectRelationship != "" {
+		subject.Relation = &subjectRelationship
+	}
+
+	resource := &v0.ObjectReference{
 		Type: objectType,
 		Id:   objectId,
 	}
 
-	return &v1.Relationship{
-		Object:   object,
+	return &v0.Relationship{
+		Resource: resource,
 		Relation: relationship,
 		Subject:  subject,
 	}

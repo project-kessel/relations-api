@@ -3,13 +3,14 @@ package service
 import (
 	"ciam-rebac/internal/biz"
 	"context"
+
 	"github.com/go-kratos/kratos/v2/log"
 
-	pb "ciam-rebac/api/rebac/v1"
+	pb "ciam-rebac/api/relations/v0"
 )
 
 type CheckService struct {
-	pb.UnimplementedCheckServer
+	pb.UnimplementedKesselCheckServiceServer
 	check *biz.CheckUsecase
 	log   *log.Helper
 }

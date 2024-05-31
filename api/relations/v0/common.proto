@@ -4,7 +4,7 @@ package kessel.relations.v0;
 
 option go_package = "ciam-rebac/api/relations/v0;v0";
 option java_multiple_files = true;
-option java_package = "org.projectkessel.api.relations.v0";
+option java_package = "org.project_kessel.api.relations.v0";
 
 // A _Relationship_ is the realization of a _Relation_ (a string) 
 // between a _Resource_ and a _Subject_ or a _Subject Set_ (known as a Userset in Zanzibar).

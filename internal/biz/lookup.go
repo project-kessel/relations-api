@@ -32,13 +32,13 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequ
 		continuation = ContinuationToken(*req.ContinuationToken)
 	}
 
-	if req.Object == nil {
+	if req.Resource == nil {
 		return nil, nil, errors.BadRequest("Invalid request", "Object is required")
 	}
 
 	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, req.SubjectRelation, req.Relation, &v0.ObjectReference{
-		Type: req.Object.Type, //Need null check
-		Id:   req.Object.Id,
+		Type: req.Resource.Type, //Need null check
+		Id:   req.Resource.Id,
 	}, limit, continuation)
 
 	if err != nil {

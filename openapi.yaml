@@ -167,10 +167,14 @@ paths:
     /v1/subjects:
         get:
             tags:
-                - Lookup
-            operationId: Lookup_Subjects
+                - KesselLookupService
+            operationId: KesselLookupService_LookupSubjects
             parameters:
-                - name: subjectType
+                - name: subjectType.namespace
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectType.type
                   in: query
                   schema:
                     type: string
@@ -182,15 +186,15 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: object.type.namespace
+                - name: resource.type.namespace
                   in: query
                   schema:
                     type: string
-                - name: object.type.type
+                - name: resource.type.type
                   in: query
                   schema:
                     type: string
-                - name: object.id
+                - name: resource.id
                   in: query
                   schema:
                     type: string
@@ -301,6 +305,6 @@ components:
 tags:
     - name: KesselCheckService
     - name: KesselHealth
+    - name: KesselLookupService
     - name: KesselTupleService
       description: "KesselTupleServices manages the persisted _Tuples_ stored in the system..\n \n A Tuple is an explicitly stated, persistent relation \n between a Resource and a Subject or Subject Set. \n It has the same _shape_ as a Relationship but is not the same thing as a Relationship.\n \n A single Tuple may result in zero-to-many Relationships."
-    - name: Lookup

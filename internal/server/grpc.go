@@ -31,6 +31,6 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 	v0.RegisterKesselTupleServiceServer(srv, relations)
 	v0.RegisterKesselCheckServiceServer(srv, check)
 	h.RegisterKesselHealthServer(srv, health)
-	v0.RegisterLookupServer(srv, subjects)
+	v0.RegisterKesselLookupServiceServer(srv, subjects)
 	return srv
 }

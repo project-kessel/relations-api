@@ -21,7 +21,7 @@ func TestLookupService_LookupSubjects_EmptyRequest(t *testing.T) {
 	assert.NoError(t, err)
 	service := createLookupService(spicedb)
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
-	err = service.Subjects(&v0.LookupSubjectsRequest{}, responseCollector)
+	err = service.LookupSubjects(&v0.LookupSubjectsRequest{}, responseCollector)
 
 	assert.Error(t, err)
 }
@@ -39,10 +39,10 @@ func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 	service := createLookupService(spicedb)
 
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
-	err = service.Subjects(&v0.LookupSubjectsRequest{
-		SubjectType: "user",
+	err = service.LookupSubjects(&v0.LookupSubjectsRequest{
+		SubjectType: simple_type("user"),
 		Relation:    "view",
-		Object:      &v0.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
+		Resource:    &v0.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
 	results := responseCollector.GetResponses()
@@ -65,10 +65,10 @@ func TestLookupService_LookupSubjects_OneResult(t *testing.T) {
 	service := createLookupService(spicedb)
 
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
-	err = service.Subjects(&v0.LookupSubjectsRequest{
-		SubjectType: "user",
+	err = service.LookupSubjects(&v0.LookupSubjectsRequest{
+		SubjectType: simple_type("user"),
 		Relation:    "view",
-		Object:      &v0.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
+		Resource:    &v0.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
 	ids := responseCollector.GetIDs()
@@ -93,10 +93,10 @@ func TestLookupService_LookupSubjects_TwoResults(t *testing.T) {
 	service := createLookupService(spicedb)
 
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
-	err = service.Subjects(&v0.LookupSubjectsRequest{
-		SubjectType: "user",
+	err = service.LookupSubjects(&v0.LookupSubjectsRequest{
+		SubjectType: simple_type("user"),
 		Relation:    "view",
-		Object:      &v0.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
+		Resource:    &v0.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
 	ids := responseCollector.GetIDs()

@@ -6,7 +6,7 @@ import (
 )
 
 type LookupService struct {
-	pb.UnimplementedLookupServer
+	pb.UnimplementedKesselLookupServiceServer
 	subjectsUsecase *biz.GetSubjectsUsecase
 }
 
@@ -17,7 +17,7 @@ func NewLookupService(subjectsUseCase *biz.GetSubjectsUsecase) *LookupService {
 
 }
 
-func (s *LookupService) Subjects(req *pb.LookupSubjectsRequest, conn pb.Lookup_SubjectsServer) error {
+func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.KesselLookupService_LookupSubjectsServer) error {
 	ctx := conn.Context()
 
 	subs, errs, err := s.subjectsUsecase.Get(ctx, req)

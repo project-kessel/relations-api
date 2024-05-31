@@ -77,7 +77,7 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 	return &SpiceDbRepository{client}, cleanup, nil
 }
 
-func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type, subject_relation, relation string, object *apiV0.ObjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.SubjectResult, chan error, error) {
+func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *apiV0.ObjectType, subject_relation, relation string, object *apiV0.ObjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.SubjectResult, chan error, error) {
 	var cursor *v1.Cursor = nil
 	if continuation != "" {
 		cursor = &v1.Cursor{
@@ -91,7 +91,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type, su
 			ObjectId:   object.Id,
 		},
 		Permission:              relation,
-		SubjectObjectType:       subject_type,
+		SubjectObjectType:       kesselTypeToSpiceDBType(subject_type),
 		OptionalSubjectRelation: subject_relation,
 		OptionalConcreteLimit:   limit,
 		OptionalCursor:          cursor,
@@ -125,7 +125,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type, su
 			subjects <- &biz.SubjectResult{
 				Subject: &apiV0.SubjectReference{
 					Subject: &apiV0.ObjectReference{
-						Type: spicedbTypeToKesselType(subject_type),
+						Type: subject_type,
 						Id:   subj.SubjectObjectId,
 					},
 				},

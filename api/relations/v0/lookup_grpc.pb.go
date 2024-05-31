@@ -19,30 +19,30 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Lookup_Subjects_FullMethodName = "/kessel.relations.v0.Lookup/Subjects"
+	KesselLookupService_LookupSubjects_FullMethodName = "/kessel.relations.v0.KesselLookupService/LookupSubjects"
 )
 
-// LookupClient is the client API for Lookup service.
+// KesselLookupServiceClient is the client API for KesselLookupService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type LookupClient interface {
-	Subjects(ctx context.Context, in *LookupSubjectsRequest, opts ...grpc.CallOption) (Lookup_SubjectsClient, error)
+type KesselLookupServiceClient interface {
+	LookupSubjects(ctx context.Context, in *LookupSubjectsRequest, opts ...grpc.CallOption) (KesselLookupService_LookupSubjectsClient, error)
 }
 
-type lookupClient struct {
+type kesselLookupServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewLookupClient(cc grpc.ClientConnInterface) LookupClient {
-	return &lookupClient{cc}
+func NewKesselLookupServiceClient(cc grpc.ClientConnInterface) KesselLookupServiceClient {
+	return &kesselLookupServiceClient{cc}
 }
 
-func (c *lookupClient) Subjects(ctx context.Context, in *LookupSubjectsRequest, opts ...grpc.CallOption) (Lookup_SubjectsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Lookup_ServiceDesc.Streams[0], Lookup_Subjects_FullMethodName, opts...)
+func (c *kesselLookupServiceClient) LookupSubjects(ctx context.Context, in *LookupSubjectsRequest, opts ...grpc.CallOption) (KesselLookupService_LookupSubjectsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &KesselLookupService_ServiceDesc.Streams[0], KesselLookupService_LookupSubjects_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &lookupSubjectsClient{stream}
+	x := &kesselLookupServiceLookupSubjectsClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -52,16 +52,16 @@ func (c *lookupClient) Subjects(ctx context.Context, in *LookupSubjectsRequest, 
 	return x, nil
 }
 
-type Lookup_SubjectsClient interface {
+type KesselLookupService_LookupSubjectsClient interface {
 	Recv() (*LookupSubjectsResponse, error)
 	grpc.ClientStream
 }
 
-type lookupSubjectsClient struct {
+type kesselLookupServiceLookupSubjectsClient struct {
 	grpc.ClientStream
 }
 
-func (x *lookupSubjectsClient) Recv() (*LookupSubjectsResponse, error) {
+func (x *kesselLookupServiceLookupSubjectsClient) Recv() (*LookupSubjectsResponse, error) {
 	m := new(LookupSubjectsResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -69,66 +69,66 @@ func (x *lookupSubjectsClient) Recv() (*LookupSubjectsResponse, error) {
 	return m, nil
 }
 
-// LookupServer is the server API for Lookup service.
-// All implementations must embed UnimplementedLookupServer
+// KesselLookupServiceServer is the server API for KesselLookupService service.
+// All implementations must embed UnimplementedKesselLookupServiceServer
 // for forward compatibility
-type LookupServer interface {
-	Subjects(*LookupSubjectsRequest, Lookup_SubjectsServer) error
-	mustEmbedUnimplementedLookupServer()
+type KesselLookupServiceServer interface {
+	LookupSubjects(*LookupSubjectsRequest, KesselLookupService_LookupSubjectsServer) error
+	mustEmbedUnimplementedKesselLookupServiceServer()
 }
 
-// UnimplementedLookupServer must be embedded to have forward compatible implementations.
-type UnimplementedLookupServer struct {
+// UnimplementedKesselLookupServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedKesselLookupServiceServer struct {
 }
 
-func (UnimplementedLookupServer) Subjects(*LookupSubjectsRequest, Lookup_SubjectsServer) error {
-	return status.Errorf(codes.Unimplemented, "method Subjects not implemented")
+func (UnimplementedKesselLookupServiceServer) LookupSubjects(*LookupSubjectsRequest, KesselLookupService_LookupSubjectsServer) error {
+	return status.Errorf(codes.Unimplemented, "method LookupSubjects not implemented")
 }
-func (UnimplementedLookupServer) mustEmbedUnimplementedLookupServer() {}
+func (UnimplementedKesselLookupServiceServer) mustEmbedUnimplementedKesselLookupServiceServer() {}
 
-// UnsafeLookupServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to LookupServer will
+// UnsafeKesselLookupServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to KesselLookupServiceServer will
 // result in compilation errors.
-type UnsafeLookupServer interface {
-	mustEmbedUnimplementedLookupServer()
+type UnsafeKesselLookupServiceServer interface {
+	mustEmbedUnimplementedKesselLookupServiceServer()
 }
 
-func RegisterLookupServer(s grpc.ServiceRegistrar, srv LookupServer) {
-	s.RegisterService(&Lookup_ServiceDesc, srv)
+func RegisterKesselLookupServiceServer(s grpc.ServiceRegistrar, srv KesselLookupServiceServer) {
+	s.RegisterService(&KesselLookupService_ServiceDesc, srv)
 }
 
-func _Lookup_Subjects_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _KesselLookupService_LookupSubjects_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(LookupSubjectsRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(LookupServer).Subjects(m, &lookupSubjectsServer{stream})
+	return srv.(KesselLookupServiceServer).LookupSubjects(m, &kesselLookupServiceLookupSubjectsServer{stream})
 }
 
-type Lookup_SubjectsServer interface {
+type KesselLookupService_LookupSubjectsServer interface {
 	Send(*LookupSubjectsResponse) error
 	grpc.ServerStream
 }
 
-type lookupSubjectsServer struct {
+type kesselLookupServiceLookupSubjectsServer struct {
 	grpc.ServerStream
 }
 
-func (x *lookupSubjectsServer) Send(m *LookupSubjectsResponse) error {
+func (x *kesselLookupServiceLookupSubjectsServer) Send(m *LookupSubjectsResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-// Lookup_ServiceDesc is the grpc.ServiceDesc for Lookup service.
+// KesselLookupService_ServiceDesc is the grpc.ServiceDesc for KesselLookupService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Lookup_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "kessel.relations.v0.Lookup",
-	HandlerType: (*LookupServer)(nil),
+var KesselLookupService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "kessel.relations.v0.KesselLookupService",
+	HandlerType: (*KesselLookupServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Subjects",
-			Handler:       _Lookup_Subjects_Handler,
+			StreamName:    "LookupSubjects",
+			Handler:       _KesselLookupService_LookupSubjects_Handler,
 			ServerStreams: true,
 		},
 	},

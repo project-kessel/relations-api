@@ -12,21 +12,20 @@ option java_package = "org.project_kessel.api.relations.v0";
 service KesselLookupService {
     rpc LookupSubjects(LookupSubjectsRequest) returns (stream LookupSubjectsResponse) {
         option (google.api.http) = {
-            get: "/v1/subjects"
+            get: "/v0/subjects"
         };
     };
 }
 
 message LookupSubjectsRequest {
     ObjectType subject_type = 1;
-    string subject_relation = 2;
+    optional string subject_relation = 2;
     string relation = 3;
     ObjectReference resource = 4;
-    optional uint32 limit = 5;
-    optional string continuation_token = 6;
+    optional RequestPagination pagination = 5;
 }
 
 message LookupSubjectsResponse {
     SubjectReference subject = 1;
-    string continuation_token = 2;
+    ResponsePagination pagination = 2;
 }

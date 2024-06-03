@@ -48,8 +48,8 @@ func (s *RelationshipsService) ReadRelationships(req *pb.ReadTuplesRequest, conn
 
 	for rel := range relationships {
 		err = conn.Send(&pb.ReadTuplesResponse{
-			Tuple:             rel.Relationship,
-			ContinuationToken: string(rel.Continuation),
+			Tuple:      rel.Relationship,
+			Pagination: &pb.ResponsePagination{ContinuationToken: string(rel.Continuation)},
 		})
 		if err != nil {
 			return err

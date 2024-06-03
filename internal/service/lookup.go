@@ -28,8 +28,8 @@ func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.Ke
 
 	for sub := range subs {
 		err = conn.Send(&pb.LookupSubjectsResponse{
-			Subject:           sub.Subject,
-			ContinuationToken: string(sub.Continuation),
+			Subject:    sub.Subject,
+			Pagination: &pb.ResponsePagination{ContinuationToken: string(sub.Continuation)},
 		})
 		if err != nil {
 			return err

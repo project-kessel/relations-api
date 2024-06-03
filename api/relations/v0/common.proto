@@ -29,6 +29,15 @@ message SubjectReference {
 	ObjectReference subject = 2;
 }
 
+message RequestPagination {
+	uint32 limit = 1;
+	optional string continuation_token = 2;
+}
+
+message ResponsePagination {
+	string continuation_token = 1;
+}
+
 message ObjectReference {
 	ObjectType type = 1;
 	string id = 2;

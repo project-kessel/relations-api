@@ -23,20 +23,28 @@ func NewGetSubjectsUseCase(repo ZanzibarRepository, logger log.Logger) *GetSubje
 
 func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequest) (chan *SubjectResult, chan error, error) {
 	limit := uint32(MaxStreamingCount)
-	if req.Limit != nil && *req.Limit < limit {
-		limit = *req.Limit
-	}
-
 	continuation := ContinuationToken("")
-	if req.ContinuationToken != nil {
-		continuation = ContinuationToken(*req.ContinuationToken)
+	subjectRelation := ""
+
+	if req.Pagination != nil {
+		if req.Pagination.Limit < limit {
+			limit = req.Pagination.Limit
+		}
+
+		if req.Pagination.ContinuationToken != nil {
+			continuation = ContinuationToken(*req.Pagination.ContinuationToken)
+		}
 	}
 
 	if req.Resource == nil {
 		return nil, nil, errors.BadRequest("Invalid request", "Object is required")
 	}
 
-	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, req.SubjectRelation, req.Relation, &v0.ObjectReference{
+	if req.SubjectRelation != nil {
+		subjectRelation = *req.SubjectRelation
+	}
+
+	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, subjectRelation, req.Relation, &v0.ObjectReference{
 		Type: req.Resource.Type, //Need null check
 		Id:   req.Resource.Id,
 	}, limit, continuation)

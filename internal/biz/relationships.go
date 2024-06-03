@@ -69,13 +69,16 @@ func (rc *ReadRelationshipsUsecase) ReadRelationships(ctx context.Context, req *
 	rc.log.WithContext(ctx).Infof("ReadRelationships: %v", req)
 
 	limit := uint32(MaxStreamingCount)
-	if req.Limit != nil && *req.Limit < limit {
-		limit = *req.Limit
-	}
-
 	continuation := ContinuationToken("")
-	if req.ContinuationToken != nil {
-		continuation = ContinuationToken(*req.ContinuationToken)
+
+	if req.Pagination != nil {
+		if req.Pagination.Limit < limit {
+			limit = req.Pagination.Limit
+		}
+
+		if req.Pagination.ContinuationToken != nil {
+			continuation = ContinuationToken(*req.Pagination.ContinuationToken)
+		}
 	}
 
 	relationships, errs, err := rc.repo.ReadRelationships(ctx, req.Filter, limit, continuation)

@@ -49,6 +49,56 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v0.CheckResponse'
+    /v0/subjects:
+        get:
+            tags:
+                - KesselLookupService
+            operationId: KesselLookupService_LookupSubjects
+            parameters:
+                - name: subjectType.namespace
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectType.type
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectRelation
+                  in: query
+                  schema:
+                    type: string
+                - name: relation
+                  in: query
+                  schema:
+                    type: string
+                - name: resource.type.namespace
+                  in: query
+                  schema:
+                    type: string
+                - name: resource.type.type
+                  in: query
+                  schema:
+                    type: string
+                - name: resource.id
+                  in: query
+                  schema:
+                    type: string
+                - name: pagination.limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pagination.continuationToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v0.LookupSubjectsResponse'
     /v0/tuples:
         get:
             tags:
@@ -87,12 +137,12 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: limit
+                - name: pagination.limit
                   in: query
                   schema:
                     type: integer
                     format: uint32
-                - name: continuationToken
+                - name: pagination.continuationToken
                   in: query
                   schema:
                     type: string
@@ -164,56 +214,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v0.DeleteTuplesResponse'
-    /v1/subjects:
-        get:
-            tags:
-                - KesselLookupService
-            operationId: KesselLookupService_LookupSubjects
-            parameters:
-                - name: subjectType.namespace
-                  in: query
-                  schema:
-                    type: string
-                - name: subjectType.type
-                  in: query
-                  schema:
-                    type: string
-                - name: subjectRelation
-                  in: query
-                  schema:
-                    type: string
-                - name: relation
-                  in: query
-                  schema:
-                    type: string
-                - name: resource.type.namespace
-                  in: query
-                  schema:
-                    type: string
-                - name: resource.type.type
-                  in: query
-                  schema:
-                    type: string
-                - name: resource.id
-                  in: query
-                  schema:
-                    type: string
-                - name: limit
-                  in: query
-                  schema:
-                    type: integer
-                    format: uint32
-                - name: continuationToken
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/kessel.relations.v0.LookupSubjectsResponse'
 components:
     schemas:
         kessel.relations.v0.CheckRequest:
@@ -252,8 +252,8 @@ components:
             properties:
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
-                continuationToken:
-                    type: string
+                pagination:
+                    $ref: '#/components/schemas/kessel.relations.v0.ResponsePagination'
         kessel.relations.v0.ObjectReference:
             type: object
             properties:
@@ -273,8 +273,8 @@ components:
             properties:
                 tuple:
                     $ref: '#/components/schemas/kessel.relations.v0.Relationship'
-                continuationToken:
-                    type: string
+                pagination:
+                    $ref: '#/components/schemas/kessel.relations.v0.ResponsePagination'
         kessel.relations.v0.Relationship:
             type: object
             properties:
@@ -285,6 +285,11 @@ components:
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
             description: "A _Relationship_ is the realization of a _Relation_ (a string) \n between a _Resource_ and a _Subject_ or a _Subject Set_ (known as a Userset in Zanzibar).\n\n All Relationships are object-object relations.\n \"Resource\" and \"Subject\" are relative terms which define the direction of a Relation.\n That is, Relations are unidirectional.\n If you reverse the Subject and Resource, it is a different Relation and a different Relationship.\n Conventionally, we generally refer to the Resource first, then Subject,\n following the direction of typical graph traversal (Resource to Subject)."
+        kessel.relations.v0.ResponsePagination:
+            type: object
+            properties:
+                continuationToken:
+                    type: string
         kessel.relations.v0.SubjectReference:
             type: object
             properties:

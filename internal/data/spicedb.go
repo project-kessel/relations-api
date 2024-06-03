@@ -92,6 +92,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 		},
 		Permission:              relation,
 		SubjectObjectType:       kesselTypeToSpiceDBType(subject_type),
+		WildcardOption:          v1.LookupSubjectsRequest_WILDCARD_OPTION_EXCLUDE_WILDCARDS,
 		OptionalSubjectRelation: subject_relation,
 		OptionalConcreteLimit:   limit,
 		OptionalCursor:          cursor,

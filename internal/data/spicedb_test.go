@@ -178,7 +178,7 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 		return
 	}
 
-	readrels, err := spiceDbRepo.ReadRelationships(ctx, &apiV0.RelationTupleFilter{
+	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV0.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
@@ -186,12 +186,13 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
-	})
+	}, 0, "")
 
 	if !assert.NoError(t, err) {
 		return
 	}
 
+	readrels := spiceRelChanToSlice(readRelChan)
 	assert.Equal(t, 1, len(readrels))
 }
 
@@ -214,7 +215,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 		return
 	}
 
-	readrels, err := spiceDbRepo.ReadRelationships(ctx, &apiV0.RelationTupleFilter{
+	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV0.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
@@ -222,12 +223,13 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
-	})
+	}, 0, "")
 
 	if !assert.NoError(t, err) {
 		return
 	}
 
+	readrels := spiceRelChanToSlice(readRelChan)
 	assert.Equal(t, 1, len(readrels))
 
 	err = spiceDbRepo.DeleteRelationships(ctx, &apiV0.RelationTupleFilter{
@@ -244,7 +246,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 		return
 	}
 
-	readrels, err = spiceDbRepo.ReadRelationships(ctx, &apiV0.RelationTupleFilter{
+	readRelChan, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV0.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
@@ -252,12 +254,13 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
-	})
+	}, 0, "")
 
 	if !assert.NoError(t, err) {
 		return
 	}
 
+	readrels = spiceRelChanToSlice(readRelChan)
 	assert.Equal(t, 0, len(readrels))
 
 }
@@ -377,4 +380,12 @@ func createRelationship(subjectId string, subjectType *apiV0.ObjectType, subject
 		Relation: relationship,
 		Subject:  subject,
 	}
+}
+
+func spiceRelChanToSlice(c chan *biz.RelationshipResult) []*biz.RelationshipResult {
+	s := make([]*biz.RelationshipResult, 0)
+	for i := range c {
+		s = append(s, i)
+	}
+	return s
 }

@@ -49,6 +49,56 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v0.CheckResponse'
+    /v0/subjects:
+        get:
+            tags:
+                - KesselLookupService
+            operationId: KesselLookupService_LookupSubjects
+            parameters:
+                - name: resource.type.namespace
+                  in: query
+                  schema:
+                    type: string
+                - name: resource.type.type
+                  in: query
+                  schema:
+                    type: string
+                - name: resource.id
+                  in: query
+                  schema:
+                    type: string
+                - name: relation
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectType.namespace
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectType.type
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectRelation
+                  in: query
+                  schema:
+                    type: string
+                - name: pagination.limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pagination.continuationToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v0.LookupSubjectsResponse'
     /v0/tuples:
         get:
             tags:
@@ -84,6 +134,15 @@ paths:
                   schema:
                     type: string
                 - name: filter.subjectFilter.relation
+                  in: query
+                  schema:
+                    type: string
+                - name: pagination.limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pagination.continuationToken
                   in: query
                   schema:
                     type: string
@@ -188,6 +247,13 @@ components:
         kessel.relations.v0.DeleteTuplesResponse:
             type: object
             properties: {}
+        kessel.relations.v0.LookupSubjectsResponse:
+            type: object
+            properties:
+                subject:
+                    $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
+                pagination:
+                    $ref: '#/components/schemas/kessel.relations.v0.ResponsePagination'
         kessel.relations.v0.ObjectReference:
             type: object
             properties:
@@ -205,10 +271,10 @@ components:
         kessel.relations.v0.ReadTuplesResponse:
             type: object
             properties:
-                tuples:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/kessel.relations.v0.Relationship'
+                tuple:
+                    $ref: '#/components/schemas/kessel.relations.v0.Relationship'
+                pagination:
+                    $ref: '#/components/schemas/kessel.relations.v0.ResponsePagination'
         kessel.relations.v0.Relationship:
             type: object
             properties:
@@ -219,6 +285,11 @@ components:
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
             description: "A _Relationship_ is the realization of a _Relation_ (a string) \n between a _Resource_ and a _Subject_ or a _Subject Set_ (known as a Userset in Zanzibar).\n\n All Relationships are object-object relations.\n \"Resource\" and \"Subject\" are relative terms which define the direction of a Relation.\n That is, Relations are unidirectional.\n If you reverse the Subject and Resource, it is a different Relation and a different Relationship.\n Conventionally, we generally refer to the Resource first, then Subject,\n following the direction of typical graph traversal (Resource to Subject)."
+        kessel.relations.v0.ResponsePagination:
+            type: object
+            properties:
+                continuationToken:
+                    type: string
         kessel.relations.v0.SubjectReference:
             type: object
             properties:
@@ -239,5 +310,6 @@ components:
 tags:
     - name: KesselCheckService
     - name: KesselHealth
+    - name: KesselLookupService
     - name: KesselTupleService
       description: "KesselTupleServices manages the persisted _Tuples_ stored in the system..\n \n A Tuple is an explicitly stated, persistent relation \n between a Resource and a Subject or Subject Set. \n It has the same _shape_ as a Relationship but is not the same thing as a Relationship.\n \n A single Tuple may result in zero-to-many Relationships."

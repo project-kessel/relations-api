@@ -23,7 +23,7 @@ service KesselTupleService {
 			body: "*"
 		};
 	};
-	rpc ReadTuples (ReadTuplesRequest) returns (ReadTuplesResponse) {
+	rpc ReadTuples (ReadTuplesRequest) returns (stream ReadTuplesResponse) {
 		option (google.api.http) = {
 			get: "/v0/tuples"
 		};
@@ -47,9 +47,11 @@ message CreateTuplesResponse {}
 
 message ReadTuplesRequest {
 	RelationTupleFilter filter = 1;
+	optional RequestPagination pagination = 2;
 }
 message ReadTuplesResponse {
-	repeated Relationship tuples = 1;
+	Relationship tuple = 1;
+	ResponsePagination pagination = 2;
 }
 
 message DeleteTuplesRequest {

@@ -2,7 +2,7 @@ package server
 
 import (
 	h "ciam-rebac/api/health/v1"
-	v1 "ciam-rebac/api/rebac/v1"
+	v0 "ciam-rebac/api/relations/v0"
 	"ciam-rebac/internal/conf"
 	"ciam-rebac/internal/service"
 
@@ -12,7 +12,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, health *service.HealthService, check *service.CheckService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, health *service.HealthService, check *service.CheckService, subjects *service.LookupService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -28,8 +28,9 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterRelationshipsServer(srv, relations)
-	v1.RegisterCheckServer(srv, check)
-	h.RegisterHealthServer(srv, health)
+	v0.RegisterKesselTupleServiceServer(srv, relations)
+	v0.RegisterKesselCheckServiceServer(srv, check)
+	h.RegisterKesselHealthServer(srv, health)
+	v0.RegisterKesselLookupServiceServer(srv, subjects)
 	return srv
 }

@@ -1,7 +1,7 @@
 package biz
 
 import (
-	v1 "ciam-rebac/api/rebac/v1"
+	v0 "ciam-rebac/api/relations/v0"
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -10,11 +10,22 @@ import (
 // relationship domain objects re-used from the api layer for now, but otherwise would be defined here
 type TouchSemantics bool
 
+type ContinuationToken string
+type SubjectResult struct {
+	Subject      *v0.SubjectReference
+	Continuation ContinuationToken
+}
+type RelationshipResult struct {
+	Relationship *v0.Relationship
+	Continuation ContinuationToken
+}
+
 type ZanzibarRepository interface {
-	Check(ctx context.Context, request *v1.CheckRequest) (*v1.CheckResponse, error)
-	CreateRelationships(context.Context, []*v1.Relationship, TouchSemantics) error
-	ReadRelationships(context.Context, *v1.RelationshipFilter) ([]*v1.Relationship, error)
-	DeleteRelationships(context.Context, *v1.RelationshipFilter) error
+	Check(ctx context.Context, request *v0.CheckRequest) (*v0.CheckResponse, error)
+	CreateRelationships(context.Context, []*v0.Relationship, TouchSemantics) error
+	ReadRelationships(ctx context.Context, filter *v0.RelationTupleFilter, limit uint32, continuation ContinuationToken) (chan *RelationshipResult, chan error, error)
+	DeleteRelationships(context.Context, *v0.RelationTupleFilter) error
+	LookupSubjects(ctx context.Context, subjectType *v0.ObjectType, subject_relation, relation string, resource *v0.ObjectReference, limit uint32, continuation ContinuationToken) (chan *SubjectResult, chan error, error)
 }
 
 type CheckUsecase struct {
@@ -26,7 +37,7 @@ func NewCheckUsecase(repo ZanzibarRepository, logger log.Logger) *CheckUsecase {
 	return &CheckUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *CheckUsecase) Check(ctx context.Context, check *v1.CheckRequest) (*v1.CheckResponse, error) {
+func (rc *CheckUsecase) Check(ctx context.Context, check *v0.CheckRequest) (*v0.CheckResponse, error) {
 	rc.log.WithContext(ctx).Infof("Check: %v", check)
 	return rc.repo.Check(ctx, check)
 }
@@ -40,7 +51,7 @@ func NewCreateRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *
 	return &CreateRelationshipsUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *CreateRelationshipsUsecase) CreateRelationships(ctx context.Context, r []*v1.Relationship, touch bool) error {
+func (rc *CreateRelationshipsUsecase) CreateRelationships(ctx context.Context, r []*v0.Relationship, touch bool) error {
 	rc.log.WithContext(ctx).Infof("CreateRelationships: %v %s", r, touch)
 	return rc.repo.CreateRelationships(ctx, r, TouchSemantics(touch))
 }
@@ -54,9 +65,29 @@ func NewReadRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *Re
 	return &ReadRelationshipsUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *ReadRelationshipsUsecase) ReadRelationships(ctx context.Context, r *v1.RelationshipFilter) ([]*v1.Relationship, error) {
-	rc.log.WithContext(ctx).Infof("ReadRelationships: %v", r)
-	return rc.repo.ReadRelationships(ctx, r)
+func (rc *ReadRelationshipsUsecase) ReadRelationships(ctx context.Context, req *v0.ReadTuplesRequest) (chan *RelationshipResult, chan error, error) {
+	rc.log.WithContext(ctx).Infof("ReadRelationships: %v", req)
+
+	limit := uint32(MaxStreamingCount)
+	continuation := ContinuationToken("")
+
+	if req.Pagination != nil {
+		if req.Pagination.Limit < limit {
+			limit = req.Pagination.Limit
+		}
+
+		if req.Pagination.ContinuationToken != nil {
+			continuation = ContinuationToken(*req.Pagination.ContinuationToken)
+		}
+	}
+
+	relationships, errs, err := rc.repo.ReadRelationships(ctx, req.Filter, limit, continuation)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return relationships, errs, nil
 }
 
 type DeleteRelationshipsUsecase struct {
@@ -68,7 +99,7 @@ func NewDeleteRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *
 	return &DeleteRelationshipsUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *DeleteRelationshipsUsecase) DeleteRelationships(ctx context.Context, r *v1.RelationshipFilter) error {
+func (rc *DeleteRelationshipsUsecase) DeleteRelationships(ctx context.Context, r *v0.RelationTupleFilter) error {
 	rc.log.WithContext(ctx).Infof("DeleteRelationships: %v", r)
 	return rc.repo.DeleteRelationships(ctx, r)
 }

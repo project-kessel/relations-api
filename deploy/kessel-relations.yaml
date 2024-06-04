@@ -148,4 +148,4 @@ parameters:
     value: quay.io/cloudservices/kessel-relations 
   - description: Image Tag
     name: RELATIONS_IMAGE_TAG
-    value: latest    
+    value: 10b13ce    

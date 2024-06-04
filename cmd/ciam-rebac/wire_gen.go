@@ -35,8 +35,10 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	healthService := service.NewHealthService()
 	checkUsecase := biz.NewCheckUsecase(spiceDbRepository, logger)
 	checkService := service.NewCheckService(logger, checkUsecase)
-	grpcServer := server.NewGRPCServer(confServer, relationshipsService, healthService, checkService, logger)
-	httpServer := server.NewHTTPServer(confServer, relationshipsService, healthService, checkService, logger)
+	getSubjectsUsecase := biz.NewGetSubjectsUseCase(spiceDbRepository, logger)
+	lookupService := service.NewLookupService(getSubjectsUsecase)
+	grpcServer := server.NewGRPCServer(confServer, relationshipsService, healthService, checkService, lookupService, logger)
+	httpServer := server.NewHTTPServer(confServer, relationshipsService, healthService, checkService, lookupService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

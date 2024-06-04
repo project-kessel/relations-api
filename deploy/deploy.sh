@@ -18,7 +18,7 @@ source ../.secrets/postgres.env
 
 # Export tags
 IMAGE=quay.io/cloudservices/kessel-relations
-IMAGE_TAG=latest
+IMAGE_TAG=10b13ce
 
 # Function to check if a command is available
 command_exists() {

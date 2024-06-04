@@ -55,22 +55,6 @@ paths:
                 - KesselLookupService
             operationId: KesselLookupService_LookupSubjects
             parameters:
-                - name: subjectType.namespace
-                  in: query
-                  schema:
-                    type: string
-                - name: subjectType.type
-                  in: query
-                  schema:
-                    type: string
-                - name: subjectRelation
-                  in: query
-                  schema:
-                    type: string
-                - name: relation
-                  in: query
-                  schema:
-                    type: string
                 - name: resource.type.namespace
                   in: query
                   schema:
@@ -80,6 +64,22 @@ paths:
                   schema:
                     type: string
                 - name: resource.id
+                  in: query
+                  schema:
+                    type: string
+                - name: relation
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectType.namespace
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectType.type
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectRelation
                   in: query
                   schema:
                     type: string

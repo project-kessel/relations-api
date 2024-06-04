@@ -18,10 +18,10 @@ service KesselLookupService {
 }
 
 message LookupSubjectsRequest {
-    ObjectType subject_type = 1;
-    optional string subject_relation = 2;
-    string relation = 3;
-    ObjectReference resource = 4;
+    ObjectReference resource = 1;
+    string relation = 2;
+    ObjectType subject_type = 3;
+    optional string subject_relation = 4;
     optional RequestPagination pagination = 5;
 }
 

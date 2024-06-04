@@ -158,3 +158,21 @@ Example:
 - Updates config bonfire file and add rbac component
 - Deploys rbac together with relationships application
   - Hardcoded image is used with grpc client for calling relationships
+
+### Running IQE Tests
+
+It is possible to run the [IQE Relations API Plugin](https://gitlab.cee.redhat.com/insights-qe/iqe-relations-api-plugin) tests against the service using the `bonfire deploy-iqe-cji` command.
+
+#### Without RBAC deployed
+
+```
+bonfire deploy-iqe-cji relationships --env ephemeral_no_rbac --namespace `oc project -q`
+```
+
+#### With RBAC deployed
+
+```
+bonfire deploy-iqe-cji relationships --env ephemeral --namespace `oc project -q`
+```
+
+_Note: for more options: `bonfire deploy-iqe-cji --help`_

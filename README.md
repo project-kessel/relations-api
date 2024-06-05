@@ -161,7 +161,7 @@ Example:
 
 ### Running IQE Tests
 
-It is possible to run the [IQE Relations API Plugin](https://gitlab.cee.redhat.com/insights-qe/iqe-relations-api-plugin) tests against the service using the `bonfire deploy-iqe-cji` command.
+It is possible to run the IQE Relations API Plugin tests against the service using the `bonfire deploy-iqe-cji` command.
 
 #### Without RBAC deployed
 

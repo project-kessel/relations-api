@@ -76,10 +76,10 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 	for _, resp := range responseRelationships {
 		assert.Equal(t, expected.Resource.Id, resp.Tuple.Resource.Id)
 		assert.Equal(t, expected.Resource.Type.Namespace, resp.Tuple.Resource.Type.Namespace)
-		assert.Equal(t, expected.Resource.Type.Type, resp.Tuple.Resource.Type.Type)
+		assert.Equal(t, expected.Resource.Type.Name, resp.Tuple.Resource.Type.Name)
 		assert.Equal(t, expected.Subject.Subject.Id, resp.Tuple.Subject.Subject.Id)
 		assert.Equal(t, expected.Subject.Subject.Type.Namespace, resp.Tuple.Subject.Subject.Type.Namespace)
-		assert.Equal(t, expected.Subject.Subject.Type.Type, resp.Tuple.Subject.Subject.Type.Type)
+		assert.Equal(t, expected.Subject.Subject.Type.Name, resp.Tuple.Subject.Subject.Type.Name)
 		assert.Equal(t, expected.Relation, resp.Tuple.Relation)
 	}
 
@@ -120,10 +120,10 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 	for _, resp := range responseRelationships {
 		assert.Equal(t, expected.Resource.Id, resp.Tuple.Resource.Id)
 		assert.Equal(t, expected.Resource.Type.Namespace, resp.Tuple.Resource.Type.Namespace)
-		assert.Equal(t, expected.Resource.Type.Type, resp.Tuple.Resource.Type.Type)
+		assert.Equal(t, expected.Resource.Type.Name, resp.Tuple.Resource.Type.Name)
 		assert.Equal(t, expected.Subject.Subject.Id, resp.Tuple.Subject.Subject.Id)
 		assert.Equal(t, expected.Subject.Subject.Type.Namespace, resp.Tuple.Subject.Subject.Type.Namespace)
-		assert.Equal(t, expected.Subject.Subject.Type.Type, resp.Tuple.Subject.Subject.Type.Type)
+		assert.Equal(t, expected.Subject.Subject.Type.Name, resp.Tuple.Subject.Subject.Type.Name)
 		assert.Equal(t, expected.Relation, resp.Tuple.Relation)
 	}
 
@@ -286,7 +286,7 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 }
 
 func simple_type(typename string) *v0.ObjectType {
-	return &v0.ObjectType{Type: typename}
+	return &v0.ObjectType{Name: typename}
 }
 
 func pointerize(value string) *string { //Used to turn string literals into pointers

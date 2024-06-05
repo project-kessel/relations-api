@@ -45,5 +45,5 @@ message ObjectReference {
 
 message ObjectType {
 	string namespace = 1;
-	string type = 2;
+	string name = 2;
 }

@@ -59,7 +59,7 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: resource.type.type
+                - name: resource.type.name
                   in: query
                   schema:
                     type: string
@@ -75,7 +75,7 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: subjectType.type
+                - name: subjectType.name
                   in: query
                   schema:
                     type: string
@@ -266,7 +266,7 @@ components:
             properties:
                 namespace:
                     type: string
-                type:
+                name:
                     type: string
         kessel.relations.v0.ReadTuplesResponse:
             type: object

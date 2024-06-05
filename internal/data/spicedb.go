@@ -297,10 +297,10 @@ func spicedbTypeToKesselType(spicedbType string) *apiV0.ObjectType {
 	parts := strings.Split(spicedbType, "/")
 	switch len(parts) {
 	case 1:
-		kesselType.Type = parts[0]
+		kesselType.Name = parts[0]
 	case 2:
 		kesselType.Namespace = parts[0]
-		kesselType.Type = parts[1]
+		kesselType.Name = parts[1]
 	default:
 		return nil //?? Error?
 	}
@@ -310,10 +310,10 @@ func spicedbTypeToKesselType(spicedbType string) *apiV0.ObjectType {
 
 func kesselTypeToSpiceDBType(kesselType *apiV0.ObjectType) string {
 	if kesselType.Namespace != "" {
-		return fmt.Sprintf("%s/%s", kesselType.Namespace, kesselType.Type)
+		return fmt.Sprintf("%s/%s", kesselType.Namespace, kesselType.Name)
 	}
 
-	return kesselType.Type
+	return kesselType.Name
 }
 
 func optionalStringToStringPointer(optional string) *string {

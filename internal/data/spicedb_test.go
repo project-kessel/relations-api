@@ -351,7 +351,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 }
 
 func simple_type(typename string) *apiV0.ObjectType {
-	return &apiV0.ObjectType{Type: typename}
+	return &apiV0.ObjectType{Name: typename}
 }
 
 func pointerize(value string) *string { //Used to turn string literals into pointers

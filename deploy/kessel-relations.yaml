@@ -111,6 +111,8 @@ objects:
       name: relations
     spec:
       envName: ${ENV_NAME}
+      testing:
+        iqePlugin: relations_api
       replicas: 1
       deployments:
         - name: relations

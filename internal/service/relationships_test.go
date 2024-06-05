@@ -53,7 +53,7 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 			expected,
 		},
 	}
-	_, err = relationshipsService.CreateRelationships(ctx, req)
+	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.NoError(t, err)
 
 	readReq := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
@@ -67,7 +67,7 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 	},
 	}
 	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
-	err = relationshipsService.ReadRelationships(readReq, collectingServer)
+	err = relationshipsService.ReadTuples(readReq, collectingServer)
 	if err != nil {
 		t.FailNow()
 	}
@@ -97,7 +97,7 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 			expected,
 		},
 	}
-	_, err = relationshipsService.CreateRelationships(ctx, req)
+	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.NoError(t, err)
 
 	readReq := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
@@ -111,7 +111,7 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 	},
 	}
 	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
-	err = relationshipsService.ReadRelationships(readReq, collectingServer)
+	err = relationshipsService.ReadTuples(readReq, collectingServer)
 	if err != nil {
 		t.FailNow()
 	}
@@ -127,7 +127,7 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 		assert.Equal(t, expected.Relation, resp.Tuple.Relation)
 	}
 
-	_, err = relationshipsService.CreateRelationships(ctx, req)
+	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.Equal(t, status.Convert(err).Code(), codes.AlreadyExists)
 
 }
@@ -144,7 +144,7 @@ func TestRelationshipsService_CreateRelationshipsWithBadSubjectType(t *testing.T
 			expected,
 		},
 	}
-	_, err = relationshipsService.CreateRelationships(ctx, req)
+	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.Error(t, err)
 	assert.Equal(t, status.Convert(err).Code(), codes.FailedPrecondition)
 	assert.Contains(t, err.Error(), "object definition `"+badSubjectType+"` not found")
@@ -162,7 +162,7 @@ func TestRelationshipsService_CreateRelationshipsWithBadObjectType(t *testing.T)
 			expected,
 		},
 	}
-	_, err = relationshipsService.CreateRelationships(ctx, req)
+	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.Error(t, err)
 	assert.Equal(t, status.Convert(err).Code(), codes.FailedPrecondition)
 	assert.Contains(t, err.Error(), "object definition `"+badObjectType+"` not found")
@@ -181,7 +181,7 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 			expected,
 		},
 	}
-	_, err = relationshipsService.CreateRelationships(ctx, req)
+	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.NoError(t, err)
 
 	delreq := &v0.DeleteTuplesRequest{Filter: &v0.RelationTupleFilter{
@@ -193,7 +193,7 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 			SubjectType: pointerize("user"),
 		},
 	}}
-	_, err = relationshipsService.DeleteRelationships(ctx, delreq)
+	_, err = relationshipsService.DeleteTuples(ctx, delreq)
 	assert.NoError(t, err)
 
 	readReq := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
@@ -208,7 +208,7 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	}
 
 	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
-	err = relationshipsService.ReadRelationships(readReq, collectingServer)
+	err = relationshipsService.ReadTuples(readReq, collectingServer)
 	if err != nil {
 		t.FailNow()
 	}
@@ -260,7 +260,7 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 			expected,
 		},
 	}
-	_, err = relationshipsService.CreateRelationships(ctx, reqCr)
+	_, err = relationshipsService.CreateTuples(ctx, reqCr)
 	assert.NoError(t, err)
 
 	req := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
@@ -275,7 +275,7 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 	}
 
 	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
-	err = relationshipsService.ReadRelationships(req, collectingServer)
+	err = relationshipsService.ReadTuples(req, collectingServer)
 	if err != nil {
 		t.FailNow()
 	}
@@ -317,7 +317,7 @@ func createRelationship(subjectId string, subjectType *v0.ObjectType, subjectRel
 	}
 }
 
-// Below is the boilerplate for creating test servers for streaming ReadRelationships rpc
+// Below is the boilerplate for creating test servers for streaming ReadTuples rpc
 
 func NewRelationships_ReadRelationshipsServerStub(ctx context.Context) *Relationships_ReadRelationshipsServerStub {
 	return &Relationships_ReadRelationshipsServerStub{

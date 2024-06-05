@@ -26,7 +26,7 @@ func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelatio
 	}
 }
 
-func (s *RelationshipsService) CreateRelationships(ctx context.Context, req *pb.CreateTuplesRequest) (*pb.CreateTuplesResponse, error) {
+func (s *RelationshipsService) CreateTuples(ctx context.Context, req *pb.CreateTuplesRequest) (*pb.CreateTuplesResponse, error) {
 	s.log.Infof("Create relationships request: %v", req)
 
 	err := s.createUsecase.CreateRelationships(ctx, req.Tuples, req.GetUpsert()) //The generated .GetUpsert() defaults to false
@@ -37,7 +37,7 @@ func (s *RelationshipsService) CreateRelationships(ctx context.Context, req *pb.
 	return &pb.CreateTuplesResponse{}, nil
 }
 
-func (s *RelationshipsService) ReadRelationships(req *pb.ReadTuplesRequest, conn pb.KesselTupleService_ReadTuplesServer) error {
+func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.KesselTupleService_ReadTuplesServer) error {
 	ctx := conn.Context()
 
 	relationships, errs, err := s.readUsecase.ReadRelationships(ctx, req)
@@ -64,7 +64,7 @@ func (s *RelationshipsService) ReadRelationships(req *pb.ReadTuplesRequest, conn
 	return nil
 }
 
-func (s *RelationshipsService) DeleteRelationships(ctx context.Context, req *pb.DeleteTuplesRequest) (*pb.DeleteTuplesResponse, error) {
+func (s *RelationshipsService) DeleteTuples(ctx context.Context, req *pb.DeleteTuplesRequest) (*pb.DeleteTuplesResponse, error) {
 	s.log.Infof("Delete relationships request: %v", req)
 
 	err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter)

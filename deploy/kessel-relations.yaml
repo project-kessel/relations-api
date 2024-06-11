@@ -17,7 +17,7 @@ objects:
       name: dev-spicedb-config
     stringData:
       preshared_key: "averysecretpresharedkey"
-      datastore_uri: postgres://authz:SuperSecretPassword@postgres:5432/authz?sslmode=disable      
+      datastore_uri: postgres://authz:SuperSecretPassword@postgres:5432/authz?sslmode=disable
   - apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -44,12 +44,12 @@ objects:
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: POSTGRESQL_USER            
+                  key: POSTGRESQL_USER
             - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: POSTGRESQL_PASSWORD               
+                  key: POSTGRESQL_PASSWORD
             - name: PGDATA
               value: /temp/data
             image: registry.redhat.io/rhel9/postgresql-15:1-54
@@ -104,7 +104,7 @@ objects:
                 - name: spicedb
                   volumeMounts:
                   - name: bootstrap
-                    mountPath: /etc/bootstrap      
+                    mountPath: /etc/bootstrap
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:
@@ -137,8 +137,8 @@ objects:
           webServices:
             public:
               enabled: true
-              apiPath: authz        
-parameters:        
+              apiPath: authz
+parameters:
   - description: Name of the ClowdApp
     name: CLOWDAPP_NAME
     value: relations
@@ -147,7 +147,7 @@ parameters:
     value: insights-ephemeral
   - description: App Image
     name: RELATIONS_IMAGE
-    value: quay.io/cloudservices/kessel-relations 
+    value: quay.io/cloudservices/kessel-relations
   - description: Image Tag
     name: RELATIONS_IMAGE_TAG
-    value: 10b13ce    
+    value: latest

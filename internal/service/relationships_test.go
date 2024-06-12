@@ -207,6 +207,8 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	},
 	}
 
+	container.WaitForQuantizationInterval()
+
 	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
 	err = relationshipsService.ReadTuples(readReq, collectingServer)
 	if err != nil {

@@ -18,13 +18,5 @@ else
     echo "Podman not found. Please install either Docker or Podman to proceed."
     exit 1
   fi
-
-   # Check if Podman is installed
-    if command_exists docker-compose; then
-      echo "docker-compose is installed."
-    else
-      echo "docker-compose not found. Please install either docker-compose or podman-compose to proceed."
-      exit 1
-    fi
 fi
 

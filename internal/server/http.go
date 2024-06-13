@@ -67,7 +67,12 @@ func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, 
 			nethttp.Error(writer, "error grpc stream", nethttp.StatusInternalServerError)
 			return
 		}
-		var responses []*v0.LookupSubjectsResponse
+		flusher, ok := writer.(nethttp.Flusher)
+		if !ok {
+			nethttp.Error(writer, "Streaming unsupported!", nethttp.StatusInternalServerError)
+			return
+		}
+		encoder := json.NewEncoder(writer)
 		for {
 			response, err := stream.Recv()
 			if err == io.EOF {
@@ -77,14 +82,12 @@ func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, 
 				nethttp.Error(writer, "Failed to receive data from lookup subject stream: "+err.Error(), nethttp.StatusInternalServerError)
 				return
 			}
-			writer.Header().Set("Content-Type", "application/json")
-			writer.Header().Set("Transfer-Encoding", "chunked")
 
-			responses = append(responses, response)
-		}
-		if err := json.NewEncoder(writer).Encode(responses); err != nil {
-			nethttp.Error(writer, "Failed to encode lookup subject response: "+err.Error(), nethttp.StatusInternalServerError)
-			return
+			if err := encoder.Encode(response); err != nil {
+				nethttp.Error(writer, "Failed to encode lookup subject response: "+err.Error(), nethttp.StatusInternalServerError)
+				return
+			}
+			flusher.Flush()
 		}
 	})
 	return srv

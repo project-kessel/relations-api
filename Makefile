@@ -1,9 +1,7 @@
 GOHOSTOS:=$(shell go env GOHOSTOS)
 GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
-
-DOCKER ?= docker
-DOCKER_CONFIG="${PWD}/.docker"
+DOCKER := $(shell type -P podman || type -P docker)
 
 ifeq ($(GOHOSTOS), windows)
 	#the `find.exe` is different from `find` in bash/shell.

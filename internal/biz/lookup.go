@@ -50,6 +50,11 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequ
 		return nil, nil, errors.BadRequest("Invalid request", "Subject type is required")
 	}
 
+	if req.Relation == "" {
+		s.log.WithContext(ctx).Infof("Missing relation in request %v", req)
+		return nil, nil, errors.BadRequest("Invalid request", "Relation is required")
+	}
+
 	if req.Resource.Type == nil {
 		s.log.WithContext(ctx).Infof("Missing Resource Type in request %v", req)
 		return nil, nil, errors.BadRequest("Invalid request", "Resource Type is required")

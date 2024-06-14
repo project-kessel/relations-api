@@ -287,6 +287,72 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
+	t.Parallel()
+	ctx := context.TODO()
+
+	logger := log.With(log.NewStdLogger(os.Stdout),
+		"ts", log.DefaultTimestamp,
+		"caller", log.DefaultCaller,
+		"trace.id", tracing.TraceID(),
+		"span.id", tracing.SpanID(),
+	)
+	spiceDbRepository, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	createRelationshipsUsecase := biz.NewCreateRelationshipsUsecase(spiceDbRepository, logger)
+	readRelationshipsUsecase := biz.NewReadRelationshipsUsecase(spiceDbRepository, logger)
+	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
+	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase)
+
+	expected1 := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
+	expected2 := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "other_bob_club")
+
+	reqCr := &v0.CreateTuplesRequest{
+		Tuples: []*v0.Relationship{
+			expected1,
+			expected2,
+		},
+	}
+	_, err = relationshipsService.CreateTuples(ctx, reqCr)
+	assert.NoError(t, err)
+	container.WaitForQuantizationInterval()
+
+	req := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
+		ResourceType: pointerize("group"),
+		Relation:     pointerize("member"),
+		SubjectFilter: &v0.SubjectFilter{
+			SubjectId:   pointerize("bob"),
+			SubjectType: pointerize("user"),
+		},
+	},
+		Pagination: &v0.RequestPagination{
+			Limit: 1,
+		},
+	}
+
+	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
+	for {
+		beforeLength := len(collectingServer.responses)
+		err = relationshipsService.ReadTuples(req, collectingServer)
+		if err != nil {
+			t.FailNow()
+		}
+		afterLength := len(collectingServer.responses)
+
+		assert.GreaterOrEqual(t, 1, afterLength-beforeLength)
+
+		if beforeLength == afterLength {
+			break
+		}
+
+		req.Pagination.ContinuationToken = collectingServer.GetLatestContinuation()
+	}
+
+	assert.Equal(t, 2, len(collectingServer.responses))
+	assert.NoError(t, err)
+}
+
 func simple_type(typename string) *v0.ObjectType {
 	return &v0.ObjectType{Name: typename}
 }
@@ -333,6 +399,34 @@ type Relationships_ReadRelationshipsServerStub struct {
 	grpc.ServerStream
 	responses []*v0.ReadTuplesResponse
 	ctx       context.Context
+}
+
+func (x *Relationships_ReadRelationshipsServerStub) GetDistinctTuples() []*v0.Relationship {
+	set := make(map[*v0.Relationship]bool)
+
+	for _, response := range x.responses {
+		set[response.Tuple] = true
+	}
+
+	results := make([]*v0.Relationship, 0, len(set))
+	for tuple, found := range set {
+		if !found {
+			continue
+		}
+
+		results = append(results, tuple)
+	}
+
+	return results
+}
+
+func (x *Relationships_ReadRelationshipsServerStub) GetLatestContinuation() *string {
+	if len(x.responses) == 0 {
+		return nil
+	}
+
+	response := x.responses[len(x.responses)-1]
+	return &response.Pagination.ContinuationToken
 }
 
 func (x *Relationships_ReadRelationshipsServerStub) Send(m *v0.ReadTuplesResponse) error {

@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   rebac:
     image: "quay.io/cloudservices/kessel-relations:latest"

@@ -21,6 +21,8 @@ See also:
 
 `make build`
 
+(Configs must be specified to run binary, e.g. `./bin/ciam-rebac -conf configs`, or run make target, below.)
+
 ### Run
 
 `make run`
@@ -49,6 +51,10 @@ go build -o ./bin/ ./...
 ```
 # Generate API files (include: pb.go, http, grpc, validate, swagger) by proto file
 make api
+
+# Generate config code
+make config
+
 # Generate all files
 make all
 ```
@@ -66,17 +72,26 @@ wire
 
 ## Spicedb using docker/podman
 
-### Run the spicedb
+### Run spicedb and postgresql db with docker/podman compose
 
 `make spicedb`
 
-### Run the insights-rebac with docker compose
+This is a good option for keeping spicedb running in the background while the rebac service is run via
+`make run`, the binary or via the IDE (run/debug) during local development.
+
+### Run the insights-rebac and spicedb with docker/podman compose
 
 `make rebac`
 
-### teardown spicedb and postgresql db
+This runs everything and is a good option for testing a built rebac container image with the running binary.
+
+### Teardown spicedb and postgresql db (brought up with docker/podman compose, as above)
 
 `make spicedb/teardown`
+
+### Teardown rebac and dependencies (brought up with docker/podman compose, as above)
+
+`make rebac/teardown`
 
 ### Deploy Rebac and Spicedb using kind/kubernetes
 

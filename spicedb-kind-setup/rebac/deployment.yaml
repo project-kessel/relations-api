@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: relationships
-          image: quay.io/ciam_authz/insights-rebac:latest
+          image: quay.io/cloudservices/kessel-relations:latest
           ports:
             - containerPort: 8000
             - containerPort: 9000

@@ -4,6 +4,8 @@ package kessel.relations.v0;
 
 import "google/api/annotations.proto";
 import "relations/v0/common.proto";
+import "validate/validate.proto";
+
 
 option go_package = "github.com/project-kessel/relations-api/api/relations/v0";
 option java_multiple_files = true;
@@ -21,9 +23,9 @@ service KesselCheckService {
 }
 
 message CheckRequest {
-	ObjectReference resource = 1;
-	string relation = 2;
-	SubjectReference subject = 3;
+	ObjectReference resource = 1 [(validate.rules).any.required = true];
+	string relation = 2 [(validate.rules).string.min_len = 1];
+	SubjectReference subject = 3 [(validate.rules).any.required = true];
 }
 
 message CheckResponse {

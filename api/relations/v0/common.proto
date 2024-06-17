@@ -20,7 +20,7 @@ option java_package = "org.project_kessel.api.relations.v0";
 message Relationship {
 	ObjectReference resource = 1 [(validate.rules).any.required = true]; 
 	string relation = 2 [(validate.rules).string.min_len = 1];
-	SubjectReference subject = 3;
+	SubjectReference subject = 3 [(validate.rules).any.required = true];
 }
 
 // A reference to a Subject or, if a `relation` is provided, a Subject Set.
@@ -28,11 +28,11 @@ message SubjectReference {
 	// An optional relation which points to a set of Subjects instead of the single Subject.
 	// e.g. "members" or "owners" of a group identified in `subject`.
 	optional string relation = 1;
-	ObjectReference subject = 2;
+	ObjectReference subject = 2 [(validate.rules).any.required = true];
 }
 
 message RequestPagination {
-	uint32 limit = 1;
+	uint32 limit = 1 [(validate.rules).uint32 = {gt: 0}];
 	optional string continuation_token = 2;
 }
 
@@ -46,6 +46,6 @@ message ObjectReference {
 }
 
 message ObjectType {
-	string namespace = 1;
-	string name = 2;
+	string namespace = 1 [(validate.rules).string.min_len = 1];
+	string name = 2 [(validate.rules).string.min_len = 1];
 }

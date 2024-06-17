@@ -83,33 +83,19 @@ func (m *Relationship) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if all {
-		switch v := interface{}(m.GetSubject()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, RelationshipValidationError{
-					field:  "Subject",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, RelationshipValidationError{
-					field:  "Subject",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
+	if m.GetSubject() == nil {
+		err := RelationshipValidationError{
+			field:  "Subject",
+			reason: "value is required",
 		}
-	} else if v, ok := interface{}(m.GetSubject()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return RelationshipValidationError{
-				field:  "Subject",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+		if !all {
+			return err
 		}
+		errors = append(errors, err)
+	}
+
+	if a := m.GetSubject(); a != nil {
+
 	}
 
 	if len(errors) > 0 {
@@ -211,33 +197,19 @@ func (m *SubjectReference) validate(all bool) error {
 
 	var errors []error
 
-	if all {
-		switch v := interface{}(m.GetSubject()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, SubjectReferenceValidationError{
-					field:  "Subject",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, SubjectReferenceValidationError{
-					field:  "Subject",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
+	if m.GetSubject() == nil {
+		err := SubjectReferenceValidationError{
+			field:  "Subject",
+			reason: "value is required",
 		}
-	} else if v, ok := interface{}(m.GetSubject()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return SubjectReferenceValidationError{
-				field:  "Subject",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+		if !all {
+			return err
 		}
+		errors = append(errors, err)
+	}
+
+	if a := m.GetSubject(); a != nil {
+
 	}
 
 	if m.Relation != nil {
@@ -344,7 +316,16 @@ func (m *RequestPagination) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Limit
+	if m.GetLimit() <= 0 {
+		err := RequestPaginationValidationError{
+			field:  "Limit",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if m.ContinuationToken != nil {
 		// no validation rules for ContinuationToken
@@ -682,9 +663,27 @@ func (m *ObjectType) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Namespace
+	if utf8.RuneCountInString(m.GetNamespace()) < 1 {
+		err := ObjectTypeValidationError{
+			field:  "Namespace",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for Name
+	if utf8.RuneCountInString(m.GetName()) < 1 {
+		err := ObjectTypeValidationError{
+			field:  "Name",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return ObjectTypeMultiError(errors)

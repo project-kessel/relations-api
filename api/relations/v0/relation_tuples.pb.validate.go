@@ -278,33 +278,19 @@ func (m *ReadTuplesRequest) validate(all bool) error {
 
 	var errors []error
 
-	if all {
-		switch v := interface{}(m.GetFilter()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ReadTuplesRequestValidationError{
-					field:  "Filter",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ReadTuplesRequestValidationError{
-					field:  "Filter",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
+	if m.GetFilter() == nil {
+		err := ReadTuplesRequestValidationError{
+			field:  "Filter",
+			reason: "value is required",
 		}
-	} else if v, ok := interface{}(m.GetFilter()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ReadTuplesRequestValidationError{
-				field:  "Filter",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+		if !all {
+			return err
 		}
+		errors = append(errors, err)
+	}
+
+	if a := m.GetFilter(); a != nil {
+
 	}
 
 	if m.Pagination != nil {
@@ -602,33 +588,19 @@ func (m *DeleteTuplesRequest) validate(all bool) error {
 
 	var errors []error
 
-	if all {
-		switch v := interface{}(m.GetFilter()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, DeleteTuplesRequestValidationError{
-					field:  "Filter",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, DeleteTuplesRequestValidationError{
-					field:  "Filter",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
+	if m.GetFilter() == nil {
+		err := DeleteTuplesRequestValidationError{
+			field:  "Filter",
+			reason: "value is required",
 		}
-	} else if v, ok := interface{}(m.GetFilter()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return DeleteTuplesRequestValidationError{
-				field:  "Filter",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+		if !all {
+			return err
 		}
+		errors = append(errors, err)
+	}
+
+	if a := m.GetFilter(); a != nil {
+
 	}
 
 	if len(errors) > 0 {

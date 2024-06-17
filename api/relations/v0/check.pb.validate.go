@@ -57,64 +57,45 @@ func (m *CheckRequest) validate(all bool) error {
 
 	var errors []error
 
-	if all {
-		switch v := interface{}(m.GetResource()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CheckRequestValidationError{
-					field:  "Resource",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CheckRequestValidationError{
-					field:  "Resource",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
+	if m.GetResource() == nil {
+		err := CheckRequestValidationError{
+			field:  "Resource",
+			reason: "value is required",
 		}
-	} else if v, ok := interface{}(m.GetResource()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CheckRequestValidationError{
-				field:  "Resource",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+		if !all {
+			return err
 		}
+		errors = append(errors, err)
 	}
 
-	// no validation rules for Relation
+	if a := m.GetResource(); a != nil {
 
-	if all {
-		switch v := interface{}(m.GetSubject()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CheckRequestValidationError{
-					field:  "Subject",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CheckRequestValidationError{
-					field:  "Subject",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
+	}
+
+	if utf8.RuneCountInString(m.GetRelation()) < 1 {
+		err := CheckRequestValidationError{
+			field:  "Relation",
+			reason: "value length must be at least 1 runes",
 		}
-	} else if v, ok := interface{}(m.GetSubject()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CheckRequestValidationError{
-				field:  "Subject",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+		if !all {
+			return err
 		}
+		errors = append(errors, err)
+	}
+
+	if m.GetSubject() == nil {
+		err := CheckRequestValidationError{
+			field:  "Subject",
+			reason: "value is required",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if a := m.GetSubject(); a != nil {
+
 	}
 
 	if len(errors) > 0 {

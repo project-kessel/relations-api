@@ -9,6 +9,6 @@ server:
 data:
   spiceDb:
     useTLS: false
-    endpoint: "${ENDPOINT:spicedb:50051}"
+    endpoint: "${ENDPOINT:0.0.0.0:50051}"
     token: "${PRESHARED}" # token takes precedence over tokenFile
     tokenFile: "${PRESHARED_FILE:.secrets/local-spicedb-secret}"

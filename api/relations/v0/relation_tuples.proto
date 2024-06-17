@@ -4,6 +4,7 @@ package kessel.relations.v0;
 
 import "google/api/annotations.proto";
 import "relations/v0/common.proto";
+import "validate/validate.proto";
 
 option go_package = "github.com/project-kessel/relations-api/api/relations/v0";
 option java_multiple_files = true;
@@ -41,7 +42,7 @@ message CreateTuplesRequest {
 	// 
 	// Defaults to `false`.
 	bool upsert = 1;
-	repeated Relationship tuples = 2;
+	repeated Relationship tuples = 2 [(validate.rules).any.required = true];
 }
 message CreateTuplesResponse {}
 

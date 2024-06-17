@@ -36,13 +36,13 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequ
 		}
 	}
 
-	if err := req.Validate(); err != nil {
+	if err := req.ValidateAll(); err != nil {
 		s.log.WithContext(ctx).Error("Request failed to pass validation: %v", req)
 		return nil, nil, errors.BadRequest("Invalid request", err.Error())
 	}
 
-	if err := req.Resource.Validate(); err != nil {
-		s.log.WithContext(ctx).Error("Request failed to pass validation: %v", req)
+	if err := req.Resource.ValidateAll(); err != nil {
+		s.log.WithContext(ctx).Error("Resource failed to pass validation: %v", req)
 		return nil, nil, errors.BadRequest("Invalid request", err.Error())
 	}
 

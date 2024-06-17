@@ -68,8 +68,21 @@ generate:
 # generate all
 all:
 	make api;
+	make validate;
 	make config;
 	make generate;
+
+
+# generate validate proto
+validate:
+	protoc --proto_path=./api \
+	       --proto_path=./third_party \
+ 	       --go_out=paths=source_relative:./api \
+ 	       --go-http_out=paths=source_relative:./api \
+ 	       --go-grpc_out=paths=source_relative:./api \
+	       --openapi_out=fq_schema_naming=true,default_response=false:. \
+           --validate_out=paths=source_relative,lang=go:./api \
+	       $(API_PROTO_FILES)
 
 # run go linter with the repositories lint config
 .PHONY: lint

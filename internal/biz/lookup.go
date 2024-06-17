@@ -36,33 +36,18 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequ
 		}
 	}
 
-	if req.Resource == nil {
-		s.log.WithContext(ctx).Infof("Missing Resource in request %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", "Object is required")
+	if err := req.Validate(); err != nil {
+		s.log.WithContext(ctx).Error("Request failed to pass validation: %v", req)
+		return nil, nil, errors.BadRequest("Invalid request", err.Error())
+	}
+
+	if err := req.Resource.Validate(); err != nil {
+		s.log.WithContext(ctx).Error("Request failed to pass validation: %v", req)
+		return nil, nil, errors.BadRequest("Invalid request", err.Error())
 	}
 
 	if req.SubjectRelation != nil {
 		subjectRelation = *req.SubjectRelation
-	}
-
-	if req.SubjectType == nil {
-		s.log.WithContext(ctx).Infof("Missing SubjectType in request %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", "Subject type is required")
-	}
-
-	if req.Relation == "" {
-		s.log.WithContext(ctx).Infof("Missing relation in request %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", "Relation is required")
-	}
-
-	if req.Resource.Type == nil {
-		s.log.WithContext(ctx).Infof("Missing Resource Type in request %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", "Resource Type is required")
-	}
-
-	if req.Resource.Id == "" {
-		s.log.WithContext(ctx).Infof("Missing Resource Id in request %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", "Resource Id is required")
 	}
 
 	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, subjectRelation, req.Relation, &v0.ObjectReference{

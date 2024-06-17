@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/go-kratos/kratos/v2/errors"
 	pb "github.com/project-kessel/relations-api/api/relations/v0"
 	"github.com/project-kessel/relations-api/internal/biz"
 )
@@ -19,6 +20,14 @@ func NewLookupService(subjectsUseCase *biz.GetSubjectsUsecase) *LookupService {
 
 func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.KesselLookupService_LookupSubjectsServer) error {
 	ctx := conn.Context()
+
+	if err := req.ValidateAll(); err != nil {
+		return errors.BadRequest("Invalid request", err.Error())
+	}
+
+	if err := req.Resource.ValidateAll(); err != nil {
+		return errors.BadRequest("Invalid request", err.Error())
+	}
 
 	subs, errs, err := s.subjectsUsecase.Get(ctx, req)
 

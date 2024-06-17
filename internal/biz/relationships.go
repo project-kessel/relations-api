@@ -4,7 +4,6 @@ import (
 	"context"
 	v0 "github.com/project-kessel/relations-api/api/relations/v0"
 
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -54,14 +53,6 @@ func NewCreateRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *
 
 func (rc *CreateRelationshipsUsecase) CreateRelationships(ctx context.Context, r []*v0.Relationship, touch bool) error {
 	rc.log.WithContext(ctx).Infof("CreateTuples: %v %s", r, touch)
-
-	for idx := range r {
-		if err := r[idx].ValidateAll(); err != nil {
-			rc.log.Infof("Request failed to pass validation %v", r[idx])
-			return errors.BadRequest("Invalid request", err.Error())
-		}
-	}
-
 	return rc.repo.CreateRelationships(ctx, r, TouchSemantics(touch))
 }
 

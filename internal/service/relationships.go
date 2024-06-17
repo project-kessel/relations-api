@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/project-kessel/relations-api/internal/biz"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 
 	pb "github.com/project-kessel/relations-api/api/relations/v0"
@@ -28,6 +29,13 @@ func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelatio
 
 func (s *RelationshipsService) CreateTuples(ctx context.Context, req *pb.CreateTuplesRequest) (*pb.CreateTuplesResponse, error) {
 	s.log.Infof("Create relationships request: %v", req)
+
+	for idx := range req.Tuples {
+		if err := req.Tuples[idx].ValidateAll(); err != nil {
+			s.log.Infof("Request failed to pass validation: %v", req.Tuples[idx])
+			return nil, errors.BadRequest("Invalid request", err.Error())
+		}
+	}
 
 	err := s.createUsecase.CreateRelationships(ctx, req.Tuples, req.GetUpsert()) //The generated .GetUpsert() defaults to false
 	if err != nil {

@@ -4,7 +4,6 @@ import (
 	"context"
 	v0 "github.com/project-kessel/relations-api/api/relations/v0"
 
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -34,16 +33,6 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequ
 		if req.Pagination.ContinuationToken != nil {
 			continuation = ContinuationToken(*req.Pagination.ContinuationToken)
 		}
-	}
-
-	if err := req.ValidateAll(); err != nil {
-		s.log.WithContext(ctx).Error("Request failed to pass validation: %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", err.Error())
-	}
-
-	if err := req.Resource.ValidateAll(); err != nil {
-		s.log.WithContext(ctx).Error("Resource failed to pass validation: %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", err.Error())
 	}
 
 	if req.SubjectRelation != nil {

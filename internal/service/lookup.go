@@ -19,8 +19,6 @@ func NewLookupService(subjectsUseCase *biz.GetSubjectsUsecase) *LookupService {
 }
 
 func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.KesselLookupService_LookupSubjectsServer) error {
-	ctx := conn.Context()
-
 	if err := req.ValidateAll(); err != nil {
 		return errors.BadRequest("Invalid request", err.Error())
 	}
@@ -28,6 +26,8 @@ func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.Ke
 	if err := req.Resource.ValidateAll(); err != nil {
 		return errors.BadRequest("Invalid request", err.Error())
 	}
+
+	ctx := conn.Context()
 
 	subs, errs, err := s.subjectsUsecase.Get(ctx, req)
 

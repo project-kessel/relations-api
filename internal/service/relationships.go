@@ -46,6 +46,11 @@ func (s *RelationshipsService) CreateTuples(ctx context.Context, req *pb.CreateT
 }
 
 func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.KesselTupleService_ReadTuplesServer) error {
+	if err := req.ValidateAll(); err != nil {
+		s.log.Infof("Request failed to pass validation: %v", req)
+		return errors.BadRequest("Invalid request", err.Error())
+	}
+
 	ctx := conn.Context()
 
 	relationships, errs, err := s.readUsecase.ReadRelationships(ctx, req)
@@ -74,6 +79,11 @@ func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.Kes
 
 func (s *RelationshipsService) DeleteTuples(ctx context.Context, req *pb.DeleteTuplesRequest) (*pb.DeleteTuplesResponse, error) {
 	s.log.Infof("Delete relationships request: %v", req)
+
+	if err := req.ValidateAll(); err != nil {
+		s.log.Infof("Request failed to pass validation: %v", req)
+		return nil, errors.BadRequest("Invalid request", err.Error())
+	}
 
 	err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter)
 	if err != nil {

@@ -147,7 +147,7 @@ func (l *LocalSpiceDbContainer) CreateSpiceDbRepository() (*SpiceDbRepository, e
 		return nil, err
 	}
 
-	tmpDir, err := os.MkdirTemp("", "rebac")
+	tmpDir, err := os.MkdirTemp("", "relations-api")
 	if err != nil {
 		return nil, err
 	}

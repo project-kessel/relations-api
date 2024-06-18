@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"github.com/authzed/authzed-go/v1"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/project-kessel/relations-api/internal/conf"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
-	"relations-api/internal/conf"
 	"runtime"
 	"time"
 

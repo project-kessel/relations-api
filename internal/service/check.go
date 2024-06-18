@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"relations-api/internal/biz"
+	"github.com/project-kessel/relations-api/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	pb "relations-api/api/relations/v0"
+	pb "github.com/project-kessel/relations-api/api/relations/v0"
 )
 
 type CheckService struct {

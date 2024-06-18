@@ -5,7 +5,7 @@ import (
 	"github.com/go-kratos/kratos/v2/config/env"
 	"os"
 
-	"relations-api/internal/conf"
+	"github.com/project-kessel/relations-api/internal/conf"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"

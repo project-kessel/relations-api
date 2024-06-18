@@ -2,7 +2,7 @@ package data
 
 import (
 	"github.com/google/wire"
-	"relations-api/internal/biz"
+	"github.com/project-kessel/relations-api/internal/biz"
 )
 
 // ProviderSet is data providers.

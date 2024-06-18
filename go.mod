@@ -1,4 +1,4 @@
-module relations-api
+module github.com/project-kessel/relations-api
 
 go 1.21
 

@@ -3,9 +3,9 @@ package data
 import (
 	"context"
 	"fmt"
+	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
+	"github.com/project-kessel/relations-api/internal/biz"
 	"os"
-	apiV0 "relations-api/api/relations/v0"
-	"relations-api/internal/biz"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"

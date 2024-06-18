@@ -1,8 +1,8 @@
 package service
 
 import (
-	pb "relations-api/api/relations/v0"
-	"relations-api/internal/biz"
+	pb "github.com/project-kessel/relations-api/api/relations/v0"
+	"github.com/project-kessel/relations-api/internal/biz"
 )
 
 type LookupService struct {

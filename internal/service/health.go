@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	pb "relations-api/api/health/v1"
+	pb "github.com/project-kessel/relations-api/api/health/v1"
 )
 
 type HealthService struct {

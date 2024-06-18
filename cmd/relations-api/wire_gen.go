@@ -9,11 +9,11 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"relations-api/internal/biz"
-	"relations-api/internal/conf"
-	"relations-api/internal/data"
-	"relations-api/internal/server"
-	"relations-api/internal/service"
+	"github.com/project-kessel/relations-api/internal/biz"
+	"github.com/project-kessel/relations-api/internal/conf"
+	"github.com/project-kessel/relations-api/internal/data"
+	"github.com/project-kessel/relations-api/internal/server"
+	"github.com/project-kessel/relations-api/internal/service"
 )
 
 import (

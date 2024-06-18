@@ -79,7 +79,7 @@ wire
 This is a good option for keeping spicedb running in the background while the rebac service is run via
 `make run`, the binary or via the IDE (run/debug) during local development.
 
-### Run the insights-rebac and spicedb with docker/podman compose
+### Run the relations-api and spicedb with docker/podman compose
 
 `make rebac`
 

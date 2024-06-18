@@ -90,7 +90,7 @@ spicedb:
 .PHONY: spicedb
 
 rebac:
-	./spicedb/start-insights-rebac.sh
+	./spicedb/start-relations-api.sh
 .PHONY: rebac
 
 rebac/teardown:

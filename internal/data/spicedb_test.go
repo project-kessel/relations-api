@@ -1,10 +1,10 @@
 package data
 
 import (
-	apiV0 "ciam-rebac/api/relations/v0"
-	"ciam-rebac/internal/biz"
 	"context"
 	"fmt"
+	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
+	"github.com/project-kessel/relations-api/internal/biz"
 	"os"
 	"testing"
 

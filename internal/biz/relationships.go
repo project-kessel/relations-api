@@ -1,8 +1,8 @@
 package biz
 
 import (
-	v0 "ciam-rebac/api/relations/v0"
 	"context"
+	v0 "github.com/project-kessel/relations-api/api/relations/v0"
 
 	"github.com/go-kratos/kratos/v2/log"
 )

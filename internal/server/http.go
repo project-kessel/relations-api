@@ -1,10 +1,10 @@
 package server
 
 import (
-	h "ciam-rebac/api/health/v1"
-	v0 "ciam-rebac/api/relations/v0"
-	"ciam-rebac/internal/conf"
-	"ciam-rebac/internal/service"
+	h "github.com/project-kessel/relations-api/api/health/v1"
+	v0 "github.com/project-kessel/relations-api/api/relations/v0"
+	"github.com/project-kessel/relations-api/internal/conf"
+	"github.com/project-kessel/relations-api/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"

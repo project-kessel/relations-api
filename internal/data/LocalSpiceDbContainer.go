@@ -1,7 +1,6 @@
 package data
 
 import (
-	"ciam-rebac/internal/conf"
 	"context"
 	"crypto/rand"
 	"encoding/base64"
@@ -9,6 +8,7 @@ import (
 	"fmt"
 	"github.com/authzed/authzed-go/v1"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/project-kessel/relations-api/internal/conf"
 	"io"
 	"os"
 	"path"
@@ -147,7 +147,7 @@ func (l *LocalSpiceDbContainer) CreateSpiceDbRepository() (*SpiceDbRepository, e
 		return nil, err
 	}
 
-	tmpDir, err := os.MkdirTemp("", "rebac")
+	tmpDir, err := os.MkdirTemp("", "relations-api")
 	if err != nil {
 		return nil, err
 	}

@@ -1,12 +1,12 @@
 package service
 
 import (
-	"ciam-rebac/internal/biz"
 	"context"
+	"relations-api/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	pb "ciam-rebac/api/relations/v0"
+	pb "relations-api/api/relations/v0"
 )
 
 type CheckService struct {

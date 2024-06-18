@@ -112,7 +112,7 @@ kind/teardown:
 .PHONY: run
 # run api locally
 run: build
-	 ./bin/ciam-rebac -conf configs
+	 ./bin/relations-api -conf configs
 
 # show help
 help:

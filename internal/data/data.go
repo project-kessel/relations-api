@@ -1,8 +1,8 @@
 package data
 
 import (
-	"ciam-rebac/internal/biz"
 	"github.com/google/wire"
+	"relations-api/internal/biz"
 )
 
 // ProviderSet is data providers.

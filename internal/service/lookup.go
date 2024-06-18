@@ -1,8 +1,8 @@
 package service
 
 import (
-	pb "ciam-rebac/api/relations/v0"
-	"ciam-rebac/internal/biz"
+	pb "relations-api/api/relations/v0"
+	"relations-api/internal/biz"
 )
 
 type LookupService struct {

@@ -1,11 +1,11 @@
 package service
 
 import (
-	v0 "ciam-rebac/api/relations/v0"
-	"ciam-rebac/internal/biz"
-	"ciam-rebac/internal/data"
 	"context"
 	"os"
+	v0 "relations-api/api/relations/v0"
+	"relations-api/internal/biz"
+	"relations-api/internal/data"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"

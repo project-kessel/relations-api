@@ -1,14 +1,14 @@
 package data
 
 import (
-	apiV0 "ciam-rebac/api/relations/v0"
-	"ciam-rebac/internal/biz"
-	"ciam-rebac/internal/conf"
 	"context"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	apiV0 "relations-api/api/relations/v0"
+	"relations-api/internal/biz"
+	"relations-api/internal/conf"
 	"strings"
 
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"

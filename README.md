@@ -21,7 +21,7 @@ See also:
 
 `make build`
 
-(Configs must be specified to run binary, e.g. `./bin/ciam-rebac -conf configs`, or run make target, below.)
+(Configs must be specified to run binary, e.g. `./bin/relations-api -conf configs`, or run make target, below.)
 
 ### Run
 

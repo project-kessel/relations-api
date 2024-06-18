@@ -1,7 +1,6 @@
 package data
 
 import (
-	"ciam-rebac/internal/conf"
 	"context"
 	"crypto/rand"
 	"encoding/base64"
@@ -13,6 +12,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"relations-api/internal/conf"
 	"runtime"
 	"time"
 

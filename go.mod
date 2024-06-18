@@ -1,4 +1,4 @@
-module ciam-rebac
+module relations-api
 
 go 1.21
 

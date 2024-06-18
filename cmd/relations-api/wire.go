@@ -6,11 +6,11 @@
 package main
 
 import (
-	"ciam-rebac/internal/biz"
-	"ciam-rebac/internal/conf"
-	"ciam-rebac/internal/data"
-	"ciam-rebac/internal/server"
-	"ciam-rebac/internal/service"
+	"relations-api/internal/biz"
+	"relations-api/internal/conf"
+	"relations-api/internal/data"
+	"relations-api/internal/server"
+	"relations-api/internal/service"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"

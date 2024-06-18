@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	pb "ciam-rebac/api/health/v1"
+	pb "relations-api/api/health/v1"
 )
 
 type HealthService struct {

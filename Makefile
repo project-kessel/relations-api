@@ -105,6 +105,10 @@ kind/rebac:
 	./spicedb-kind-setup/setup.sh
 .PHONY: kind/spicedb
 
+kind/teardown:
+	./spicedb-kind-setup/teardown.sh
+.PHONY: kind/teardown
+
 .PHONY: run
 # run api locally
 run: build

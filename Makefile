@@ -112,7 +112,7 @@ kind/teardown:
 .PHONY: run
 # run api locally
 run: build
-	 ./bin/relations-api -conf configs
+	 ./bin/kessel-relations -conf configs
 
 # show help
 help:

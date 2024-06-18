@@ -74,28 +74,28 @@ wire
 
 ### Run spicedb and postgresql db with docker/podman compose
 
-`make spicedb`
+`make spicedb-up`
 
-This is a good option for keeping spicedb running in the background while the rebac service is run via
+This is a good option for keeping spicedb running in the background while the relations-api service is run via
 `make run`, the binary or via the IDE (run/debug) during local development.
 
 ### Run the relations-api and spicedb with docker/podman compose
 
-`make rebac`
+`make relations-api-up`
 
-This runs everything and is a good option for testing a built rebac container image with the running binary.
+This runs everything and is a good option for testing a built relations-api container image with the running binary.
 
 ### Teardown spicedb and postgresql db (brought up with docker/podman compose, as above)
 
-`make spicedb/teardown`
+`make spicedb-down`
 
-### Teardown rebac and dependencies (brought up with docker/podman compose, as above)
+### Teardown relations-api and dependencies (brought up with docker/podman compose, as above)
 
-`make rebac/teardown`
+`make relations-api-down`
 
-### Deploy Rebac and Spicedb using kind/kubernetes
+### Deploy relations-api and spicedb using kind/kubernetes
 
-`make kind/rebac`
+`make kind/relations-api`
 
 ### Docker
 
@@ -159,7 +159,7 @@ You should be able to use the public route (relations-\*) created by the clowder
 This is demonstrating calling relationship api from rbac service in ephemeral environment.
 
 ```
-./deploy.sh rbac <path_to_local_copy_of_insights_rbac>
+./deploy.sh rbac <path_to_local_copy_of_relations-api>
 ```
 
 `path_to_local_copy_of_insights_rbac` is this [repository](https://github.com/RedHatInsights/insights-rbac)

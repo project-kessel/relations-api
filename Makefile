@@ -85,25 +85,25 @@ pr-check:
 	make lint;
 	make build;
 
-spicedb:
+spicedb-up:
 	./spicedb/start-spicedb.sh
-.PHONY: spicedb
+.PHONY: spicedb-up
 
-rebac:
+relations-api-up:
 	./spicedb/start-relations-api.sh
-.PHONY: rebac
+.PHONY: relations-api-up
 
-rebac/teardown:
-	./spicedb/teardownrebac.sh
-.PHONY: rebac/teardown
+relations-api-down:
+	./spicedb/stop-relations-api.sh
+.PHONY: relations-api-down
 
-spicedb/teardown:
+spicedb-down:
 	./spicedb/teardown.sh
-.PHONY: spicedb/teardown
+.PHONY: spicedb-down
 
-kind/rebac:
+kind/relations-api:
 	./spicedb-kind-setup/setup.sh
-.PHONY: kind/spicedb
+.PHONY: kind/relations-api
 
 kind/teardown:
 	./spicedb-kind-setup/teardown.sh

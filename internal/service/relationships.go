@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+
 	"github.com/project-kessel/relations-api/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -28,7 +30,7 @@ func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelatio
 }
 
 func (s *RelationshipsService) CreateTuples(ctx context.Context, req *pb.CreateTuplesRequest) (*pb.CreateTuplesResponse, error) {
-	s.log.Infof("Create relationships request: %v", req)
+	s.log.Debugf("Create tuples request: %v", req)
 
 	for idx := range req.Tuples {
 		if err := req.Tuples[idx].ValidateAll(); err != nil {
@@ -39,7 +41,7 @@ func (s *RelationshipsService) CreateTuples(ctx context.Context, req *pb.CreateT
 
 	err := s.createUsecase.CreateRelationships(ctx, req.Tuples, req.GetUpsert()) //The generated .GetUpsert() defaults to false
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error creating tuples (original request: %v) failed: %w", req, err)
 	}
 
 	return &pb.CreateTuplesResponse{}, nil
@@ -52,11 +54,12 @@ func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.Kes
 	}
 
 	ctx := conn.Context()
+	s.log.Debugf("Read tuples request: %v", req)
 
 	relationships, errs, err := s.readUsecase.ReadRelationships(ctx, req)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("error retrieving tuples (original request: %v): %w", req, err)
 	}
 
 	for rel := range relationships {
@@ -65,20 +68,20 @@ func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.Kes
 			Pagination: &pb.ResponsePagination{ContinuationToken: string(rel.Continuation)},
 		})
 		if err != nil {
-			return err
+			return fmt.Errorf("error sending retrieved tuple to the client (original request: %v): %w", req, err)
 		}
 	}
 
 	err, ok := <-errs
 	if ok {
-		return err
+		return fmt.Errorf("error received from Zanzibar backend while streaming tuples (original request: %v): %w", req, err)
 	}
 
 	return nil
 }
 
 func (s *RelationshipsService) DeleteTuples(ctx context.Context, req *pb.DeleteTuplesRequest) (*pb.DeleteTuplesResponse, error) {
-	s.log.Infof("Delete relationships request: %v", req)
+	s.log.Debugf("Delete tuples request: %v", req)
 
 	if err := req.ValidateAll(); err != nil {
 		s.log.Infof("Request failed to pass validation: %v", req)
@@ -87,7 +90,7 @@ func (s *RelationshipsService) DeleteTuples(ctx context.Context, req *pb.DeleteT
 
 	err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error deleting tuples (original request: %v): %w", req, err)
 	}
 
 	return &pb.DeleteTuplesResponse{}, nil

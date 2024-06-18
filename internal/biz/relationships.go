@@ -38,7 +38,6 @@ func NewCheckUsecase(repo ZanzibarRepository, logger log.Logger) *CheckUsecase {
 }
 
 func (rc *CheckUsecase) Check(ctx context.Context, check *v0.CheckRequest) (*v0.CheckResponse, error) {
-	rc.log.WithContext(ctx).Infof("Check: %v", check)
 	return rc.repo.Check(ctx, check)
 }
 
@@ -52,7 +51,6 @@ func NewCreateRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *
 }
 
 func (rc *CreateRelationshipsUsecase) CreateRelationships(ctx context.Context, r []*v0.Relationship, touch bool) error {
-	rc.log.WithContext(ctx).Infof("CreateTuples: %v %s", r, touch)
 	return rc.repo.CreateRelationships(ctx, r, TouchSemantics(touch))
 }
 
@@ -66,8 +64,6 @@ func NewReadRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *Re
 }
 
 func (rc *ReadRelationshipsUsecase) ReadRelationships(ctx context.Context, req *v0.ReadTuplesRequest) (chan *RelationshipResult, chan error, error) {
-	rc.log.WithContext(ctx).Infof("ReadTuples: %v", req)
-
 	limit := uint32(MaxStreamingCount)
 	continuation := ContinuationToken("")
 
@@ -100,6 +96,5 @@ func NewDeleteRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *
 }
 
 func (rc *DeleteRelationshipsUsecase) DeleteRelationships(ctx context.Context, r *v0.RelationTupleFilter) error {
-	rc.log.WithContext(ctx).Infof("DeleteTuples: %v", r)
 	return rc.repo.DeleteRelationships(ctx, r)
 }

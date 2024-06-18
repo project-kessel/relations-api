@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	pb "github.com/project-kessel/relations-api/api/relations/v0"
@@ -37,7 +39,7 @@ func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.Ke
 	subs, errs, err := s.subjectsUsecase.Get(ctx, req)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("error retrieving subjects (original request: %v): %w", req, err)
 	}
 
 	for sub := range subs {
@@ -46,13 +48,13 @@ func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.Ke
 			Pagination: &pb.ResponsePagination{ContinuationToken: string(sub.Continuation)},
 		})
 		if err != nil {
-			return err
+			return fmt.Errorf("error sending retrieved subject to the client (original request: %v): %w", req, err)
 		}
 	}
 
 	err, ok := <-errs
 	if ok {
-		return err
+		return fmt.Errorf("error received while streaming subjects from Zanzibar backend (original request: %v) %w", req, err)
 	}
 
 	return nil

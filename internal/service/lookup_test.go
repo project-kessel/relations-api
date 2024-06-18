@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
+	"os"
+	"testing"
+
 	v0 "github.com/project-kessel/relations-api/api/relations/v0"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/data"
-	"os"
-	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"

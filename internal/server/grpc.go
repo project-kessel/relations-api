@@ -7,6 +7,7 @@ import (
 	"github.com/project-kessel/relations-api/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
@@ -18,6 +19,7 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 		grpc.Middleware(
 			recovery.Recovery(),
 			validate.Validator(),
+			logging.Server(logger),
 		),
 	}
 	if c.Grpc.Network != "" {

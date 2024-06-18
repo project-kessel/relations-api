@@ -128,13 +128,14 @@ if [[ "$RBAC_ARGUMENT" == "rbac" ]]; then
   echo ""
   echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/rbac/v1/status/"
   echo ""
-  echo "Relations - Read(GET) - Sample CURL request"
-  echo ""
-  echo "curl -v -u ${USER}:${PASSWORD} '${BASE_URL}/api/authz/v1/relationships?filter.objectType=group&filter.objectId=bob_club&filter.relation=member'"
-  echo ""
+  # Revisit after the HTTP streaming decision
+  # echo "Relations - Read(GET) - Sample CURL request"
+  # echo ""
+  # echo "curl -v -u ${USER}:${PASSWORD} '${BASE_URL}/api/authz/v1/relationships?filter.objectType=group&filter.objectId=bob_club&filter.relation=member'"
+  # echo ""
 fi
 
 echo "Relations - Write(POST) - Sample CURL request"
 echo ""
-JSON_DATA='{"touch":true,"relationships":[{"object":{"type":"group","id":"bob_club"},"relation":"member","subject":{"object":{"type":"user","id":"bob"}}}]}'
-echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v1/relationships -H 'Content-Type: application/json' -d '$JSON_DATA'"
+JSON_DATA='{ "tuples": [{"resource": {"type": {"type": "group"},"id": "bob_club2"},"relation": "member","subject": {"subject": {"type": {"type": "user"},"id": "bob2"}}}]}'
+echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v0/tuples -H 'Content-Type: application/json' -d '$JSON_DATA'"

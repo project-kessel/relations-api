@@ -66,6 +66,7 @@ done
 echo "Route"
 kubectl get ingresses.networking.k8s.io -n spicedb
 
-echo "Sample curl to relationships api"
+echo "Relations - Write(POST) - Sample CURL request"
 echo ""
-echo  "curl http://relationships.127.0.0.1.nip.io/api/authz/v1/relationships -d '{ "touch": true, "relationships": [{"object": {"type": "group","id": "bob_club"},"relation": "member","subject": {"object": {"type": "user","id": "bob"}}}]}'"
+JSON_DATA='{ "tuples": [{"resource": {"type": {"type": "group"},"id": "bob_club2"},"relation": "member","subject": {"subject": {"type": {"type": "user"},"id": "bob2"}}}]}'
+echo "curl -v http://relationships.127.0.0.1.nip.io:8000/api/authz/v0/tuples -H 'Content-Type: application/json' -d '$JSON_DATA'"

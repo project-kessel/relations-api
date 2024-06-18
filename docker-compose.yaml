@@ -1,5 +1,5 @@
 services:
-  rebac:
+  relations-api:
     image: "quay.io/cloudservices/kessel-relations:latest"
     environment:
       - "SPICEDB_PRESHARED=${SPICEDB_GRPC_PRESHARED_KEY}"
@@ -7,7 +7,7 @@ services:
       - "SPICEDB_ENDPOINT=spicedb:50051"
     build:
       dockerfile: Dockerfile
-    profiles: ["rebac"]
+    profiles: ["relations-api"]
     secrets:
       - spicedb_pre_shared
     restart: "always"

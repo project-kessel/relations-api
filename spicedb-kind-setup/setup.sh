@@ -53,10 +53,10 @@ done
 echo "spicedb is ready"
 kubectl get ingresses.networking.k8s.io -n spicedb
 
-echo "Deploying rebac service"
-kubectl apply -f ./spicedb-kind-setup/rebac/secret.yaml -n spicedb
-kubectl apply -f ./spicedb-kind-setup/rebac/deployment.yaml -n spicedb
-kubectl apply -f ./spicedb-kind-setup/rebac/svc.yaml -n spicedb
+echo "Deploying relations-api service"
+kubectl apply -f ./spicedb-kind-setup/relations-api/secret.yaml -n spicedb
+kubectl apply -f ./spicedb-kind-setup/relations-api/deployment.yaml -n spicedb
+kubectl apply -f ./spicedb-kind-setup/relations-api/svc.yaml -n spicedb
 
 while [[ -z $(kubectl get deployments.apps -n spicedb relationships -o jsonpath="{.status.readyReplicas}" 2>/dev/null) ]]; do
   echo "still waiting for relationships"

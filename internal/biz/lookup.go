@@ -2,10 +2,8 @@ package biz
 
 import (
 	"context"
-	v0 "github.com/project-kessel/relations-api/api/relations/v0"
 
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
+	v0 "github.com/project-kessel/relations-api/api/relations/v0"
 )
 
 const (
@@ -14,11 +12,10 @@ const (
 
 type GetSubjectsUsecase struct {
 	repo ZanzibarRepository
-	log  *log.Helper
 }
 
-func NewGetSubjectsUseCase(repo ZanzibarRepository, logger log.Logger) *GetSubjectsUsecase {
-	return &GetSubjectsUsecase{repo: repo, log: log.NewHelper(logger)}
+func NewGetSubjectsUseCase(repo ZanzibarRepository) *GetSubjectsUsecase {
+	return &GetSubjectsUsecase{repo: repo}
 }
 
 func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequest) (chan *SubjectResult, chan error, error) {
@@ -36,33 +33,8 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequ
 		}
 	}
 
-	if req.Resource == nil {
-		s.log.WithContext(ctx).Infof("Missing Resource in request %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", "Object is required")
-	}
-
 	if req.SubjectRelation != nil {
 		subjectRelation = *req.SubjectRelation
-	}
-
-	if req.SubjectType == nil {
-		s.log.WithContext(ctx).Infof("Missing SubjectType in request %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", "Subject type is required")
-	}
-
-	if req.Relation == "" {
-		s.log.WithContext(ctx).Infof("Missing relation in request %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", "Relation is required")
-	}
-
-	if req.Resource.Type == nil {
-		s.log.WithContext(ctx).Infof("Missing Resource Type in request %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", "Resource Type is required")
-	}
-
-	if req.Resource.Id == "" {
-		s.log.WithContext(ctx).Infof("Missing Resource Id in request %v", req)
-		return nil, nil, errors.BadRequest("Invalid request", "Resource Id is required")
 	}
 
 	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, subjectRelation, req.Relation, &v0.ObjectReference{

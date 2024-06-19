@@ -111,7 +111,7 @@ func createLookupService(spicedb *data.SpiceDbRepository) *LookupService {
 		"trace.id", tracing.TraceID(),
 		"span.id", tracing.SpanID(),
 	)
-	return NewLookupService(biz.NewGetSubjectsUseCase(spicedb, logger))
+	return NewLookupService(logger, biz.NewGetSubjectsUseCase(spicedb))
 }
 func seedThingInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepository, thing string) error {
 	return spicedb.CreateRelationships(ctx, []*v0.Relationship{

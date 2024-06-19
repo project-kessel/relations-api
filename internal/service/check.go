@@ -27,7 +27,7 @@ func NewCheckService(logger log.Logger, checkUseCase *biz.CheckUsecase) *CheckSe
 func (s *CheckService) Check(ctx context.Context, req *pb.CheckRequest) (*pb.CheckResponse, error) {
 	resp, err := s.check.Check(ctx, req)
 	if err != nil {
-		return resp, fmt.Errorf("failed to perform check (%v): %w", req, err)
+		return resp, fmt.Errorf("failed to perform check: %w", err)
 	}
 	return resp, nil
 }

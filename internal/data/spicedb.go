@@ -96,7 +96,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 	client, err := s.client.LookupSubjects(ctx, req)
 
 	if err != nil {
-		return nil, nil, fmt.Errorf("error invoking LookupSubjects (%v) in SpiceDB: %w", req, err)
+		return nil, nil, fmt.Errorf("error invoking LookupSubjects in SpiceDB: %w", err)
 	}
 
 	subjects := make(chan *biz.SubjectResult)
@@ -107,7 +107,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 			msg, err := client.Recv()
 			if err != nil {
 				if !errors.Is(err, io.EOF) {
-					errs <- fmt.Errorf("error receiving subject from SpiceDB (original request: %v): %w", req, err)
+					errs <- fmt.Errorf("error receiving subject from SpiceDB: %w", err)
 				}
 				close(errs)
 				close(subjects)
@@ -179,7 +179,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV0
 	client, err := s.client.ReadRelationships(ctx, req)
 
 	if err != nil {
-		return nil, nil, fmt.Errorf("error invoking WriteRelationships (%v) in SpiceDB: %w", req, err)
+		return nil, nil, fmt.Errorf("error invoking WriteRelationships in SpiceDB: %w", err)
 	}
 
 	relationshipTuples := make(chan *biz.RelationshipResult)
@@ -233,7 +233,7 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 
 	// TODO: we have not specified an option in our API to allow partial deletions, so currently it's all or nothing
 	if err != nil {
-		return fmt.Errorf("error invoking DeleteRelationships (%v) in SpiceDB %w", req, err)
+		return fmt.Errorf("error invoking DeleteRelationships in SpiceDB %w", err)
 	}
 
 	return nil
@@ -259,7 +259,7 @@ func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV0.CheckRequest
 	}
 	checkResponse, err := s.client.CheckPermission(ctx, req)
 	if err != nil {
-		return &apiV0.CheckResponse{Allowed: apiV0.CheckResponse_ALLOWED_UNSPECIFIED}, fmt.Errorf("error invoking CheckPermission(%v) in SpiceDB: %w", req, err)
+		return &apiV0.CheckResponse{Allowed: apiV0.CheckResponse_ALLOWED_UNSPECIFIED}, fmt.Errorf("error invoking CheckPermission in SpiceDB: %w", err)
 	}
 
 	if checkResponse.Permissionship == v1.CheckPermissionResponse_PERMISSIONSHIP_HAS_PERMISSION {

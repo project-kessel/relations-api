@@ -30,10 +30,13 @@ init:
 .PHONY: config
 # generate internal proto
 config:
-	protoc --proto_path=./internal \
-	       --proto_path=./third_party \
- 	       --go_out=paths=source_relative:./internal \
-	       $(INTERNAL_PROTO_FILES)
+	@$(DOCKER) build -t custom-protoc ./api
+	@$(DOCKER) run -t --rm -v $(PWD)/internal:/internal -v $(PWD)/third_party:/third_party \
+	custom-protoc sh -c "protoc \
+		--proto_path=./internal \
+		--proto_path=./third_party \
+		--go_out=paths=source_relative:./internal \
+		$(INTERNAL_PROTO_FILES)"
 
 .PHONY: api
 # generate api proto

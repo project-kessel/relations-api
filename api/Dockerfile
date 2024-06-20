@@ -1,5 +1,4 @@
-# FROM golang:latest AS builder
-FROM registry.access.redhat.com/ubi9/ubi-minimal:latest AS builder
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10 AS builder
 
 ARG TARGETARCH
 USER root
@@ -22,7 +21,7 @@ RUN go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
 RUN go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest 
 RUN go install github.com/envoyproxy/protoc-gen-validate@latest
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10
 
 COPY --from=builder /usr/local/bin/protoc /usr/local/bin/protoc
 COPY --from=builder /root/go/bin/protoc-gen-go /usr/local/bin/protoc-gen-go

@@ -73,6 +73,7 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 	if err != nil {
 		log.Fatalf("Could not connect to Docker: %s", err)
 	}
+	targetArch := "amd64" // or "arm64", depending on your needs
 
 	name := strings.Trim(container.Name(), "/")
 	endpoint := fmt.Sprintf("SPICEDB_ENDPOINT=%s:%s", name, "50051")
@@ -81,6 +82,9 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 		Dockerfile: "Dockerfile", // Path to your Dockerfile
 		ContextDir: "../",        // Context directory for the Dockerfile
 		Platform:   "linux/amd64",
+		BuildArgs: []docker.BuildArg{
+			{Name: "TARGETARCH", Value: targetArch},
+		},
 	}, &dockertest.RunOptions{
 		Name:      "rel",
 		Env:       []string{endpoint, presharedSecret},

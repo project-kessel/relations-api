@@ -132,6 +132,20 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 
 }
 
+// nil tuples in CreateRelationshipsRequest should be equivalent to an empty list of tuples (and not error)
+func TestRelationshipsService_CreateRelationshipsWithNilRelationshipsSlice(t *testing.T) {
+	t.Parallel()
+	err, relationshipsService := setup(t)
+	assert.NoError(t, err)
+	ctx := context.Background()
+
+	req := &v0.CreateTuplesRequest{
+		Tuples: nil,
+	}
+	_, err = relationshipsService.CreateTuples(ctx, req)
+	assert.NoError(t, err)
+}
+
 func TestRelationshipsService_CreateRelationshipsWithBadSubjectType(t *testing.T) {
 	t.Parallel()
 	err, relationshipsService := setup(t)

@@ -42,7 +42,7 @@ message CreateTuplesRequest {
 	// 
 	// Defaults to `false`.
 	bool upsert = 1;
-	repeated Relationship tuples = 2 [(validate.rules).any.required = true];
+	repeated Relationship tuples = 2;
 }
 message CreateTuplesResponse {}
 

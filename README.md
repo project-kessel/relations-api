@@ -12,11 +12,6 @@ To get necessary build and generation dependencies:
 make init
 ```
 
-See also:
-
-- https://protobuf.dev/getting-started/gotutorial/#compiling-protocol-buffers
-- https://go-kratos.dev/en/docs/getting-started/start/
-
 ### Build
 
 `make build`

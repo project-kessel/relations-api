@@ -11,7 +11,7 @@ RUN ln -s /usr/local/go/bin/go /usr/local/bin/go
 
 
 # Install protoc
-RUN curl -L -o protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v27.1/protoc-27.1-linux-x86_64.zip \
+RUN curl -L -o protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protoc-25.1-linux-x86_64.zip \
     && unzip protoc.zip -d /usr/local/ && rm protoc.zip
 
 # Install protoc plugins

@@ -9,7 +9,8 @@ import (
 	"github.com/authzed/authzed-go/v1"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/ory/dockertest/docker"
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
 	"github.com/project-kessel/relations-api/internal/conf"
 	"io"
 	"os"
@@ -21,8 +22,6 @@ import (
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	"github.com/ory/dockertest"
 )
 
 const (

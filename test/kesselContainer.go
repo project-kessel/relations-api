@@ -2,13 +2,14 @@ package test
 
 import (
 	"fmt"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/ory/dockertest"
-	"github.com/ory/dockertest/docker"
-	"github.com/project-kessel/relations-api/internal/data"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
+	"github.com/project-kessel/relations-api/internal/data"
 )
 
 // LocalKesselContainer struct that holds pointers to the localKesselContainer, dockertest pool and exposes the port
@@ -79,6 +80,7 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 	resource, err := pool.BuildAndRunWithBuildOptions(&dockertest.BuildOptions{
 		Dockerfile: "Dockerfile", // Path to your Dockerfile
 		ContextDir: "../",        // Context directory for the Dockerfile
+		Platform:   "linux/amd64",
 	}, &dockertest.RunOptions{
 		Name:      "rel",
 		Env:       []string{endpoint, presharedSecret},

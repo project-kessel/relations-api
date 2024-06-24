@@ -7,7 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/authzed/authzed-go/v1"
+
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
 	"github.com/project-kessel/relations-api/internal/conf"
 	"io"
 	"os"
@@ -19,8 +22,6 @@ import (
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	"github.com/ory/dockertest"
 )
 
 const (
@@ -40,10 +41,16 @@ type LocalSpiceDbContainer struct {
 	port      string
 	container *dockertest.Resource
 	pool      *dockertest.Pool
+	name      string
+}
+
+type ContainerOptions struct {
+	Logger  log.Logger
+	Network *docker.Network
 }
 
 // CreateContainer creates a new SpiceDbContainer using dockertest
-func CreateContainer(logger log.Logger) (*LocalSpiceDbContainer, error) {
+func CreateContainer(opts *ContainerOptions) (*LocalSpiceDbContainer, error) {
 	pool, err := dockertest.NewPool("") // Empty string uses default docker env
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to docker: %w", err)
@@ -74,13 +81,17 @@ func CreateContainer(logger log.Logger) (*LocalSpiceDbContainer, error) {
 		mounts = append(mounts, path.Join(basepath, SpicedbRelationsBootstrapFile)+":/mnt/spicedb_bootstrap_relations.yaml")
 	}
 
-	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+	runopt := &dockertest.RunOptions{
 		Repository:   SpicedbImage,
 		Tag:          SpicedbVersion, // Replace this with an actual version
 		Cmd:          cmd,
 		Mounts:       mounts,
 		ExposedPorts: []string{"50051/tcp", "50052/tcp"},
-	})
+	}
+	if opts.Network != nil {
+		runopt.NetworkID = opts.Network.ID
+	}
+	resource, err := pool.RunWithOptions(runopt)
 
 	if err != nil {
 		return nil, fmt.Errorf("could not start spicedb resource: %w", err)
@@ -90,7 +101,7 @@ func CreateContainer(logger log.Logger) (*LocalSpiceDbContainer, error) {
 
 	// Give the service time to boot.
 	cErr := pool.Retry(func() error {
-		log.NewHelper(logger).Info("Attempting to connect to spicedb...")
+		log.NewHelper(opts.Logger).Info("Attempting to connect to spicedb...")
 
 		conn, err := grpc.NewClient(
 			fmt.Sprintf("localhost:%s", port),
@@ -113,7 +124,8 @@ func CreateContainer(logger log.Logger) (*LocalSpiceDbContainer, error) {
 	}
 
 	return &LocalSpiceDbContainer{
-		logger:    logger,
+		name:      resource.Container.Name,
+		logger:    opts.Logger,
 		port:      port,
 		container: resource,
 		pool:      pool,
@@ -123,6 +135,11 @@ func CreateContainer(logger log.Logger) (*LocalSpiceDbContainer, error) {
 // Port returns the Port the container is listening
 func (l *LocalSpiceDbContainer) Port() string {
 	return l.port
+}
+
+// Name returns the container name
+func (l *LocalSpiceDbContainer) Name() string {
+	return l.name
 }
 
 // NewToken returns a new token used for the container so a new store is created in serve-testing

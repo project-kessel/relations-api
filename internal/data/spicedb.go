@@ -72,13 +72,19 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 	}
 
 	// wait upto 30 seconds to confirm spicedb is connected
-	deadline := time.Now().Add(time.Second * 30)
-	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
 	_, err = client.ReadSchema(ctx, &v1.ReadSchemaRequest{}, grpc.WaitForReady(true))
 	if err != nil {
 		return nil, nil, fmt.Errorf("error trying to reach SpiceDB: %w", err)
+	}
+
+	select {
+	case <-ctx.Done():
+		log.NewHelper(logger).Errorf("timeout exceeded waiting for spicedb %w", ctx.Err())
+	default:
+		log.NewHelper(logger).Infof("Successfully connected to SpiceDB")
 	}
 
 	cleanup := func() {

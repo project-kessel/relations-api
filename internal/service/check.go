@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+
 	"github.com/project-kessel/relations-api/internal/biz"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 
 	pb "github.com/project-kessel/relations-api/api/relations/v0"
@@ -24,6 +26,22 @@ func NewCheckService(logger log.Logger, checkUseCase *biz.CheckUsecase) *CheckSe
 
 func (s *CheckService) Check(ctx context.Context, req *pb.CheckRequest) (*pb.CheckResponse, error) {
 	s.log.Infof("Check permission: %v", req)
+
+	if err := req.ValidateAll(); err != nil {
+		s.log.Infof("Request failed to pass validation: %v", req)
+		return nil, errors.BadRequest("Invalid request", err.Error())
+	}
+
+	if err := req.Subject.ValidateAll(); err != nil {
+		s.log.Infof("Subject failed to pass validation: %v", req)
+		return nil, errors.BadRequest("Invalid request", err.Error())
+	}
+
+	if err := req.Resource.ValidateAll(); err != nil {
+		s.log.Infof("Resource failed to pass validation: %v", req)
+		return nil, errors.BadRequest("Invalid request", err.Error())
+	}
+
 	resp, err := s.check.Check(ctx, req)
 	if err != nil {
 		s.log.Errorf("Failed to perform check %v", err)

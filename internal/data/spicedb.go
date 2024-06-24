@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
-	"github.com/project-kessel/relations-api/internal/biz"
-	"github.com/project-kessel/relations-api/internal/conf"
 	"io"
 	"os"
 	"strings"
+	"time"
+
+	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
+	"github.com/project-kessel/relations-api/internal/biz"
+	"github.com/project-kessel/relations-api/internal/conf"
 
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/authzed/authzed-go/v1"
@@ -30,7 +32,6 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.EmptyDialOption{})
-	//TODO: add a flag to enable/disable grpc.WithBlock
 
 	var token string
 	var err error
@@ -68,6 +69,16 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 		log.NewHelper(logger).Error(err)
 
 		return nil, nil, err
+	}
+
+	// wait upto 30 seconds to confirm spicedb is connected
+	deadline := time.Now().Add(time.Second * 30)
+	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	defer cancel()
+
+	_, err = client.ReadSchema(ctx, &v1.ReadSchemaRequest{}, grpc.WaitForReady(true))
+	if err != nil {
+		return nil, nil, fmt.Errorf("error trying to reach SpiceDB: %w", err)
 	}
 
 	cleanup := func() {

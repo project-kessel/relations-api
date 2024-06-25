@@ -49,6 +49,56 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v0.CheckResponse'
+    /v0/resources:
+        get:
+            tags:
+                - KesselLookupService
+            operationId: KesselLookupService_LookupResources
+            parameters:
+                - name: resource.type.namespace
+                  in: query
+                  schema:
+                    type: string
+                - name: resource.type.name
+                  in: query
+                  schema:
+                    type: string
+                - name: resource.id
+                  in: query
+                  schema:
+                    type: string
+                - name: relation
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectType.namespace
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectType.name
+                  in: query
+                  schema:
+                    type: string
+                - name: subjectRelation
+                  in: query
+                  schema:
+                    type: string
+                - name: pagination.limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pagination.continuationToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v0.LookupResourcesResponse'
     /v0/subjects:
         get:
             tags:
@@ -247,6 +297,13 @@ components:
         kessel.relations.v0.DeleteTuplesResponse:
             type: object
             properties: {}
+        kessel.relations.v0.LookupResourcesResponse:
+            type: object
+            properties:
+                resource:
+                    $ref: '#/components/schemas/kessel.relations.v0.ObjectReference'
+                pagination:
+                    $ref: '#/components/schemas/kessel.relations.v0.ResponsePagination'
         kessel.relations.v0.LookupSubjectsResponse:
             type: object
             properties:

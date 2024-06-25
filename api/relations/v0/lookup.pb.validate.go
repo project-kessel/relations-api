@@ -83,9 +83,9 @@ func (m *LookupResourcesRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetSubjectType() == nil {
+	if m.GetSubject() == nil {
 		err := LookupResourcesRequestValidationError{
-			field:  "SubjectType",
+			field:  "Subject",
 			reason: "value is required",
 		}
 		if !all {
@@ -94,12 +94,8 @@ func (m *LookupResourcesRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if a := m.GetSubjectType(); a != nil {
+	if a := m.GetSubject(); a != nil {
 
-	}
-
-	if m.SubjectRelation != nil {
-		// no validation rules for SubjectRelation
 	}
 
 	if m.Pagination != nil {

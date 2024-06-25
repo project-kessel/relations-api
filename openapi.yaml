@@ -55,15 +55,11 @@ paths:
                 - KesselLookupService
             operationId: KesselLookupService_LookupResources
             parameters:
-                - name: resource.type.namespace
+                - name: resource.namespace
                   in: query
                   schema:
                     type: string
-                - name: resource.type.name
-                  in: query
-                  schema:
-                    type: string
-                - name: resource.id
+                - name: resource.name
                   in: query
                   schema:
                     type: string
@@ -71,15 +67,22 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: subjectType.namespace
+                - name: subject.relation
+                  in: query
+                  description: |-
+                    An optional relation which points to a set of Subjects instead of the single Subject.
+                     e.g. "members" or "owners" of a group identified in `subject`.
+                  schema:
+                    type: string
+                - name: subject.subject.type.namespace
                   in: query
                   schema:
                     type: string
-                - name: subjectType.name
+                - name: subject.subject.type.name
                   in: query
                   schema:
                     type: string
-                - name: subjectRelation
+                - name: subject.subject.id
                   in: query
                   schema:
                     type: string

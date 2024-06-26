@@ -22,7 +22,13 @@ service KesselHealth {
 }
 
 message GetLivezRequest {}
-message GetLivezReply {}
+message GetLivezReply {
+	string status = 1;
+	uint32 code = 2;
+}
 
 message GetReadyzRequest {}
-message GetReadyzReply {}
+message GetReadyzReply {
+	string status = 1;
+	uint32 code = 2;
+}

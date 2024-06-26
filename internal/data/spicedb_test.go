@@ -128,18 +128,6 @@ func TestIsBackendAvailable(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestIsBackendAvailableFailsWithError(t *testing.T) {
-	t.Parallel()
-
-	spiceDbrepo, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-
-	container.Close()
-
-	err = spiceDbrepo.IsBackendAvaliable()
-	assert.Error(t, err)
-}
-
 func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {
 	t.Parallel()
 

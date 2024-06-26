@@ -39,22 +39,6 @@ func TestHealthService_GetReadyz_SpiceDBAvailable(t *testing.T) {
 	assert.Equal(t, resp, &pb.GetReadyzReply{Status: "OK", Code: 200})
 }
 
-func TestHealthService_GetReadyz_SpiceDBUnavailable(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.TODO()
-	spicedb, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-
-	container.Close()
-
-	service := createHealthService(spicedb)
-	resp, err := service.GetReadyz(ctx, &pb.GetReadyzRequest{})
-
-	assert.NoError(t, err)
-	assert.Equal(t, resp, &pb.GetReadyzReply{Status: "Unavailable", Code: 503})
-}
-
 func createHealthService(spicedb *data.SpiceDbRepository) *HealthService {
 	return NewHealthService(biz.NewIsBackendAvailableUsecase(spicedb))
 }

@@ -4,6 +4,7 @@ import (
 	h "github.com/project-kessel/relations-api/api/health/v1"
 	v0 "github.com/project-kessel/relations-api/api/relations/v0"
 	"github.com/project-kessel/relations-api/internal/conf"
+	"github.com/project-kessel/relations-api/internal/server/middleware"
 	"github.com/project-kessel/relations-api/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -21,7 +22,7 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 			validate.Validator(),
 			logging.Server(logger),
 		),
-		grpc.StreamInterceptor(StreamLogInterceptor(logger)),
+		grpc.StreamInterceptor(middleware.StreamLogInterceptor(logger)),
 	}
 	if c.Grpc.Network != "" {
 		opts = append(opts, grpc.Network(c.Grpc.Network))

@@ -82,6 +82,10 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 		return nil, nil, fmt.Errorf("error creating grpc health client: %w", err)
 	}
 	healthClient := grpc_health_v1.NewHealthClient(conn)
+	_, err = client.ReadSchema(context.TODO(), &v1.ReadSchemaRequest{})
+	if err != nil {
+		return nil, nil, fmt.Errorf("error testing connection to SpiceDB: %w", err)
+	}
 
 	cleanup := func() {
 		log.NewHelper(logger).Info("spicedb connection cleanup requested (nothing to clean up)")

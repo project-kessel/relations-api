@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+
 	"github.com/project-kessel/relations-api/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -23,11 +25,9 @@ func NewCheckService(logger log.Logger, checkUseCase *biz.CheckUsecase) *CheckSe
 }
 
 func (s *CheckService) Check(ctx context.Context, req *pb.CheckRequest) (*pb.CheckResponse, error) {
-	s.log.Infof("Check permission: %v", req)
 	resp, err := s.check.Check(ctx, req)
 	if err != nil {
-		s.log.Errorf("Failed to perform check %v", err)
-		return resp, err
+		return resp, fmt.Errorf("failed to perform check: %w", err)
 	}
 	return resp, nil
 }

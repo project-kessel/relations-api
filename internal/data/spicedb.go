@@ -347,7 +347,17 @@ func (s *SpiceDbRepository) IsBackendAvaliable() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := s.healthClient.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
+	resp, err := s.healthClient.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
+	if err != nil {
+		return err
+	}
+
+	switch resp.Status {
+	case grpc_health_v1.HealthCheckResponse_NOT_SERVING, grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN:
+		return err
+	case grpc_health_v1.HealthCheckResponse_SERVING:
+		return nil
+	}
 	return err
 }
 

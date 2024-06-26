@@ -3,14 +3,18 @@ package test
 import (
 	"context"
 	"fmt"
+	"os"
+	"sync"
+	"testing"
+	"time"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	v0 "github.com/project-kessel/relations-api/api/relations/v0"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"os"
-	"testing"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 var localKesselContainer *LocalKesselContainer
@@ -30,10 +34,30 @@ func TestMain(m *testing.M) {
 		os.Exit(-1)
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func(p string) {
+		err := waitForServiceToBeReady(p)
+		if err != nil {
+			panic(fmt.Errorf("Error waiting for Kessel Relations to start: %w", err))
+		}
+		wg.Done()
+	}(localKesselContainer.gRPCport)
+
+	wg.Add(1)
+	go func(p string) {
+		err := waitForServiceToBeReady(p)
+		if err != nil {
+			panic(fmt.Errorf("Error waiting for SpiceDB to start: %w", err))
+		}
+		wg.Done()
+	}(localKesselContainer.spicedbContainer.Port())
+
+	wg.Wait()
+
 	result := m.Run()
 
 	localKesselContainer.Close()
-	localKesselContainer.spicedbContainer.Close()
 	os.Exit(result)
 }
 
@@ -188,4 +212,35 @@ func createRelations(subName string, subId string, relation string, resouceName 
 		},
 	}
 	return rels
+}
+
+func waitForServiceToBeReady(port string) error {
+	address := fmt.Sprintf("localhost:%s", port)
+	limit := 30
+	wait := 250 * time.Millisecond
+	started := time.Now()
+
+	for i := 0; i < limit; i++ {
+		conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			time.Sleep(wait)
+			continue
+		}
+		client := grpc_health_v1.NewHealthClient(conn)
+		resp, err := client.Check(context.TODO(), &grpc_health_v1.HealthCheckRequest{})
+		if err != nil {
+			time.Sleep(wait)
+			continue
+		}
+
+		switch resp.Status {
+		case grpc_health_v1.HealthCheckResponse_NOT_SERVING, grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN:
+			time.Sleep(wait)
+			continue
+		case grpc_health_v1.HealthCheckResponse_SERVING:
+			return nil
+		}
+	}
+
+	return fmt.Errorf("the health endpoint didn't respond successfully within %f seconds.", time.Since(started).Seconds())
 }

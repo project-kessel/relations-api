@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
-	"github.com/project-kessel/relations-api/internal/biz"
-	"github.com/project-kessel/relations-api/internal/conf"
 	"io"
 	"os"
 	"strings"
+
+	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
+	"github.com/project-kessel/relations-api/internal/biz"
+	"github.com/project-kessel/relations-api/internal/conf"
 
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/authzed/authzed-go/v1"
@@ -63,6 +64,11 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("error creating spicedb client: %w", err)
+	}
+
+	_, err = client.ReadSchema(context.TODO(), &v1.ReadSchemaRequest{})
+	if err != nil {
+		return nil, nil, fmt.Errorf("error testing connection to SpiceDB: %w", err)
 	}
 
 	cleanup := func() {

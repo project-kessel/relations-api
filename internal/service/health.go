@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	pb "github.com/project-kessel/relations-api/api/health/v1"
 	"google.golang.org/grpc"
@@ -21,8 +22,8 @@ func (s *HealthService) GetLivez(ctx context.Context, req *pb.GetLivezRequest) (
 	return &pb.GetLivezReply{Status: "OK", Code: 200}, nil
 }
 func (s *HealthService) GetReadyz(ctx context.Context, req *pb.GetReadyzRequest) (*pb.GetReadyzReply, error) {
-	check := checkSpiceDBReadyz()
-	if check {
+	ready := checkSpiceDBReadyz()
+	if ready {
 		return &pb.GetReadyzReply{Status: "OK", Code: 200}, nil
 	}
 	return &pb.GetReadyzReply{Status: "Unavailable", Code: 503}, nil
@@ -38,7 +39,10 @@ func checkSpiceDBReadyz() bool {
 	}
 
 	client := grpc_health_v1.NewHealthClient(conn)
-	resp, err := client.Check(context.Background(), &grpc_health_v1.HealthCheckRequest{})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := client.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
 	if err != nil {
 		return false
 	}

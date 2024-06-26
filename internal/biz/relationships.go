@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+
 	v0 "github.com/project-kessel/relations-api/api/relations/v0"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -32,6 +33,7 @@ type ZanzibarRepository interface {
 	DeleteRelationships(context.Context, *v0.RelationTupleFilter) error
 	LookupSubjects(ctx context.Context, subjectType *v0.ObjectType, subject_relation, relation string, resource *v0.ObjectReference, limit uint32, continuation ContinuationToken) (chan *SubjectResult, chan error, error)
 	LookupResources(ctx context.Context, resouce_type *v0.ObjectType, relation string, subject *v0.SubjectReference, limit uint32, continuation ContinuationToken) (chan *ResourceResult, chan error, error)
+	IsBackendAvaliable() error
 }
 
 type CheckUsecase struct {
@@ -45,6 +47,18 @@ func NewCheckUsecase(repo ZanzibarRepository, logger log.Logger) *CheckUsecase {
 
 func (rc *CheckUsecase) Check(ctx context.Context, check *v0.CheckRequest) (*v0.CheckResponse, error) {
 	return rc.repo.Check(ctx, check)
+}
+
+type IsBackendAvaliableUsecase struct {
+	repo ZanzibarRepository
+}
+
+func NewIsBackendAvailableUsecase(repo ZanzibarRepository) *IsBackendAvaliableUsecase {
+	return &IsBackendAvaliableUsecase{repo: repo}
+}
+
+func (rc *IsBackendAvaliableUsecase) IsBackendAvailable() error {
+	return rc.repo.IsBackendAvaliable()
 }
 
 type CreateRelationshipsUsecase struct {

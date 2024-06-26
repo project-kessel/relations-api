@@ -87,6 +87,16 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 		return nil, nil, fmt.Errorf("error testing connection to SpiceDB: %w", err)
 	}
 
+	// Create health client for readyz
+	conn, err := grpc.NewClient(
+		c.SpiceDb.Endpoint,
+		opts...,
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error creating grpc health client: %w", err)
+	}
+	healthClient := grpc_health_v1.NewHealthClient(conn)
+
 	cleanup := func() {
 		log.NewHelper(logger).Info("spicedb connection cleanup requested (nothing to clean up)")
 	}

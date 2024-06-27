@@ -39,7 +39,7 @@ config:
 api:
 	@echo "Generating api protos"
 	@$(DOCKER) build -t custom-protoc ./api
-	@$(DOCKER) run -t --rm -v $(PWD)/api:/api -v $(PWD)/third_party:/third_party \
+	@$(DOCKER) run -t --rm -v $(PWD)/api:/api -v $(PWD)/openapi.yaml:/openapi.yaml -v $(PWD)/third_party:/third_party \
     custom-protoc sh -c "protoc \
 		--proto_path=./api \
 		--proto_path=./third_party \

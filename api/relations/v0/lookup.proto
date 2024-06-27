@@ -17,6 +17,23 @@ service KesselLookupService {
             get: "/v0/subjects"
         };
     };
+    rpc LookupResources(LookupResourcesRequest) returns (stream LookupResourcesResponse) {
+        option (google.api.http) = {
+            get: "/v0/resources"
+        };
+    };
+}
+
+message LookupResourcesRequest {
+    ObjectType resource_type = 1 [(validate.rules).any.required = true];
+    string relation = 2 [(validate.rules).string.min_len = 1];
+    SubjectReference subject = 3 [(validate.rules).any.required = true];
+    optional RequestPagination pagination = 4;
+}
+
+message LookupResourcesResponse {
+    ObjectReference resource = 1;
+    ResponsePagination pagination = 2;
 }
 
 message LookupSubjectsRequest {

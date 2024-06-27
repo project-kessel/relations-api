@@ -15,6 +15,11 @@ type SubjectResult struct {
 	Subject      *v0.SubjectReference
 	Continuation ContinuationToken
 }
+type ResourceResult struct {
+	Resource     *v0.ObjectReference
+	Continuation ContinuationToken
+}
+
 type RelationshipResult struct {
 	Relationship *v0.Relationship
 	Continuation ContinuationToken
@@ -26,6 +31,7 @@ type ZanzibarRepository interface {
 	ReadRelationships(ctx context.Context, filter *v0.RelationTupleFilter, limit uint32, continuation ContinuationToken) (chan *RelationshipResult, chan error, error)
 	DeleteRelationships(context.Context, *v0.RelationTupleFilter) error
 	LookupSubjects(ctx context.Context, subjectType *v0.ObjectType, subject_relation, relation string, resource *v0.ObjectReference, limit uint32, continuation ContinuationToken) (chan *SubjectResult, chan error, error)
+	LookupResources(ctx context.Context, resouce_type *v0.ObjectType, relation string, subject *v0.SubjectReference, limit uint32, continuation ContinuationToken) (chan *ResourceResult, chan error, error)
 }
 
 type CheckUsecase struct {

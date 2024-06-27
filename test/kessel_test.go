@@ -39,6 +39,7 @@ func TestMain(m *testing.M) {
 	go func(p string) {
 		err := waitForServiceToBeReady(p)
 		if err != nil {
+			localKesselContainer.Close()
 			panic(fmt.Errorf("Error waiting for Kessel Relations to start: %w", err))
 		}
 		wg.Done()
@@ -48,6 +49,7 @@ func TestMain(m *testing.M) {
 	go func(p string) {
 		err := waitForServiceToBeReady(p)
 		if err != nil {
+			localKesselContainer.Close()
 			panic(fmt.Errorf("Error waiting for SpiceDB to start: %w", err))
 		}
 		wg.Done()
@@ -179,6 +181,34 @@ func TestKesselAPIGRPC_LookupSubjects(t *testing.T) {
 			Resource:    &v0.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
 			Relation:    "view",
 			SubjectType: simple_type("user"),
+		})
+	assert.NoError(t, err)
+}
+
+func TestKesselAPIGRPC_LookupResources(t *testing.T) {
+	t.Parallel()
+	conn, err := grpc.NewClient(
+		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	client := v0.NewKesselLookupServiceClient(conn)
+
+	_, err = client.LookupResources(
+		context.Background(), &v0.LookupResourcesRequest{
+			ResourceType: &v0.ObjectType{Name: "group"},
+			Relation:     "member",
+			Subject: &v0.SubjectReference{
+				Subject: &v0.ObjectReference{
+					Type: &v0.ObjectType{
+						Name: "user",
+					},
+					Id: "bob",
+				},
+			},
 		})
 	assert.NoError(t, err)
 }

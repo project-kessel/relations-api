@@ -35,6 +35,342 @@ var (
 	_ = sort.Sort
 )
 
+// Validate checks the field values on LookupResourcesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *LookupResourcesRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on LookupResourcesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// LookupResourcesRequestMultiError, or nil if none found.
+func (m *LookupResourcesRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *LookupResourcesRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetResourceType() == nil {
+		err := LookupResourcesRequestValidationError{
+			field:  "ResourceType",
+			reason: "value is required",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if a := m.GetResourceType(); a != nil {
+
+	}
+
+	if utf8.RuneCountInString(m.GetRelation()) < 1 {
+		err := LookupResourcesRequestValidationError{
+			field:  "Relation",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetSubject() == nil {
+		err := LookupResourcesRequestValidationError{
+			field:  "Subject",
+			reason: "value is required",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if a := m.GetSubject(); a != nil {
+
+	}
+
+	if m.Pagination != nil {
+
+		if all {
+			switch v := interface{}(m.GetPagination()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, LookupResourcesRequestValidationError{
+						field:  "Pagination",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, LookupResourcesRequestValidationError{
+						field:  "Pagination",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetPagination()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return LookupResourcesRequestValidationError{
+					field:  "Pagination",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return LookupResourcesRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// LookupResourcesRequestMultiError is an error wrapping multiple validation
+// errors returned by LookupResourcesRequest.ValidateAll() if the designated
+// constraints aren't met.
+type LookupResourcesRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m LookupResourcesRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m LookupResourcesRequestMultiError) AllErrors() []error { return m }
+
+// LookupResourcesRequestValidationError is the validation error returned by
+// LookupResourcesRequest.Validate if the designated constraints aren't met.
+type LookupResourcesRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e LookupResourcesRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e LookupResourcesRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e LookupResourcesRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e LookupResourcesRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e LookupResourcesRequestValidationError) ErrorName() string {
+	return "LookupResourcesRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e LookupResourcesRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sLookupResourcesRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = LookupResourcesRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = LookupResourcesRequestValidationError{}
+
+// Validate checks the field values on LookupResourcesResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *LookupResourcesResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on LookupResourcesResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// LookupResourcesResponseMultiError, or nil if none found.
+func (m *LookupResourcesResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *LookupResourcesResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetResource()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, LookupResourcesResponseValidationError{
+					field:  "Resource",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, LookupResourcesResponseValidationError{
+					field:  "Resource",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetResource()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return LookupResourcesResponseValidationError{
+				field:  "Resource",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetPagination()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, LookupResourcesResponseValidationError{
+					field:  "Pagination",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, LookupResourcesResponseValidationError{
+					field:  "Pagination",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetPagination()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return LookupResourcesResponseValidationError{
+				field:  "Pagination",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return LookupResourcesResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// LookupResourcesResponseMultiError is an error wrapping multiple validation
+// errors returned by LookupResourcesResponse.ValidateAll() if the designated
+// constraints aren't met.
+type LookupResourcesResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m LookupResourcesResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m LookupResourcesResponseMultiError) AllErrors() []error { return m }
+
+// LookupResourcesResponseValidationError is the validation error returned by
+// LookupResourcesResponse.Validate if the designated constraints aren't met.
+type LookupResourcesResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e LookupResourcesResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e LookupResourcesResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e LookupResourcesResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e LookupResourcesResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e LookupResourcesResponseValidationError) ErrorName() string {
+	return "LookupResourcesResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e LookupResourcesResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sLookupResourcesResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = LookupResourcesResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = LookupResourcesResponseValidationError{}
+
 // Validate checks the field values on LookupSubjectsRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

@@ -11,14 +11,16 @@ import (
 
 type LookupService struct {
 	pb.UnimplementedKesselLookupServiceServer
-	subjectsUsecase *biz.GetSubjectsUsecase
-	log             *log.Helper
+	subjectsUsecase  *biz.GetSubjectsUsecase
+	resourcesUsecase *biz.GetResourcesUsecase
+	log              *log.Helper
 }
 
-func NewLookupService(logger log.Logger, subjectsUseCase *biz.GetSubjectsUsecase) *LookupService {
+func NewLookupService(logger log.Logger, subjectsUseCase *biz.GetSubjectsUsecase, resourcesUsecase *biz.GetResourcesUsecase) *LookupService {
 	return &LookupService{
-		subjectsUsecase: subjectsUseCase,
-		log:             log.NewHelper(logger),
+		subjectsUsecase:  subjectsUseCase,
+		resourcesUsecase: resourcesUsecase,
+		log:              log.NewHelper(logger),
 	}
 
 }
@@ -56,6 +58,41 @@ func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.Ke
 	err, ok := <-errs
 	if ok {
 		return fmt.Errorf("error received while streaming subjects from Zanzibar backend: %w", err)
+	}
+
+	return nil
+}
+
+func (s *LookupService) LookupResources(req *pb.LookupResourcesRequest, conn pb.KesselLookupService_LookupResourcesServer) error {
+	if err := req.ValidateAll(); err != nil {
+		s.log.Infof("Request failed to pass validation: %v", req)
+		return errors.BadRequest("Invalid request", err.Error())
+	}
+
+	if err := req.Subject.ValidateAll(); err != nil {
+		s.log.Infof("Subject failed to pass validation: %v", req)
+		return errors.BadRequest("Invalid request", err.Error())
+	}
+
+	ctx := conn.Context()
+
+	res, errs, err := s.resourcesUsecase.Get(ctx, req)
+
+	if err != nil {
+		return err
+	}
+	for re := range res {
+		err = conn.Send(&pb.LookupResourcesResponse{
+			Resource:   re.Resource,
+			Pagination: &pb.ResponsePagination{ContinuationToken: string(re.Continuation)},
+		})
+		if err != nil {
+			return err
+		}
+	}
+	err, ok := <-errs
+	if ok {
+		return err
 	}
 
 	return nil

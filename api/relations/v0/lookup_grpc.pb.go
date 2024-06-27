@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	KesselLookupService_LookupSubjects_FullMethodName = "/kessel.relations.v0.KesselLookupService/LookupSubjects"
+	KesselLookupService_LookupSubjects_FullMethodName  = "/kessel.relations.v0.KesselLookupService/LookupSubjects"
+	KesselLookupService_LookupResources_FullMethodName = "/kessel.relations.v0.KesselLookupService/LookupResources"
 )
 
 // KesselLookupServiceClient is the client API for KesselLookupService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KesselLookupServiceClient interface {
 	LookupSubjects(ctx context.Context, in *LookupSubjectsRequest, opts ...grpc.CallOption) (KesselLookupService_LookupSubjectsClient, error)
+	LookupResources(ctx context.Context, in *LookupResourcesRequest, opts ...grpc.CallOption) (KesselLookupService_LookupResourcesClient, error)
 }
 
 type kesselLookupServiceClient struct {
@@ -70,11 +72,45 @@ func (x *kesselLookupServiceLookupSubjectsClient) Recv() (*LookupSubjectsRespons
 	return m, nil
 }
 
+func (c *kesselLookupServiceClient) LookupResources(ctx context.Context, in *LookupResourcesRequest, opts ...grpc.CallOption) (KesselLookupService_LookupResourcesClient, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &KesselLookupService_ServiceDesc.Streams[1], KesselLookupService_LookupResources_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &kesselLookupServiceLookupResourcesClient{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type KesselLookupService_LookupResourcesClient interface {
+	Recv() (*LookupResourcesResponse, error)
+	grpc.ClientStream
+}
+
+type kesselLookupServiceLookupResourcesClient struct {
+	grpc.ClientStream
+}
+
+func (x *kesselLookupServiceLookupResourcesClient) Recv() (*LookupResourcesResponse, error) {
+	m := new(LookupResourcesResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // KesselLookupServiceServer is the server API for KesselLookupService service.
 // All implementations must embed UnimplementedKesselLookupServiceServer
 // for forward compatibility
 type KesselLookupServiceServer interface {
 	LookupSubjects(*LookupSubjectsRequest, KesselLookupService_LookupSubjectsServer) error
+	LookupResources(*LookupResourcesRequest, KesselLookupService_LookupResourcesServer) error
 	mustEmbedUnimplementedKesselLookupServiceServer()
 }
 
@@ -84,6 +120,9 @@ type UnimplementedKesselLookupServiceServer struct {
 
 func (UnimplementedKesselLookupServiceServer) LookupSubjects(*LookupSubjectsRequest, KesselLookupService_LookupSubjectsServer) error {
 	return status.Errorf(codes.Unimplemented, "method LookupSubjects not implemented")
+}
+func (UnimplementedKesselLookupServiceServer) LookupResources(*LookupResourcesRequest, KesselLookupService_LookupResourcesServer) error {
+	return status.Errorf(codes.Unimplemented, "method LookupResources not implemented")
 }
 func (UnimplementedKesselLookupServiceServer) mustEmbedUnimplementedKesselLookupServiceServer() {}
 
@@ -119,6 +158,27 @@ func (x *kesselLookupServiceLookupSubjectsServer) Send(m *LookupSubjectsResponse
 	return x.ServerStream.SendMsg(m)
 }
 
+func _KesselLookupService_LookupResources_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(LookupResourcesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(KesselLookupServiceServer).LookupResources(m, &kesselLookupServiceLookupResourcesServer{ServerStream: stream})
+}
+
+type KesselLookupService_LookupResourcesServer interface {
+	Send(*LookupResourcesResponse) error
+	grpc.ServerStream
+}
+
+type kesselLookupServiceLookupResourcesServer struct {
+	grpc.ServerStream
+}
+
+func (x *kesselLookupServiceLookupResourcesServer) Send(m *LookupResourcesResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // KesselLookupService_ServiceDesc is the grpc.ServiceDesc for KesselLookupService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -130,6 +190,11 @@ var KesselLookupService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "LookupSubjects",
 			Handler:       _KesselLookupService_LookupSubjects_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "LookupResources",
+			Handler:       _KesselLookupService_LookupResources_Handler,
 			ServerStreams: true,
 		},
 	},

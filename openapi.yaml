@@ -363,10 +363,20 @@ components:
             description: A reference to a Subject or, if a `relation` is provided, a Subject Set.
         kessel.relations.v1.GetLivezReply:
             type: object
-            properties: {}
+            properties:
+                status:
+                    type: string
+                code:
+                    type: integer
+                    format: uint32
         kessel.relations.v1.GetReadyzReply:
             type: object
-            properties: {}
+            properties:
+                status:
+                    type: string
+                code:
+                    type: integer
+                    format: uint32
 tags:
     - name: KesselCheckService
     - name: KesselHealth

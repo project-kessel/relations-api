@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
 	"github.com/project-kessel/relations-api/internal/biz"
@@ -18,11 +19,13 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 // SpiceDbRepository .
 type SpiceDbRepository struct {
-	client *authzed.Client
+	client       *authzed.Client
+	healthClient grpc_health_v1.HealthClient
 }
 
 // NewSpiceDbRepository .
@@ -66,11 +69,21 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 		return nil, nil, fmt.Errorf("error creating spicedb client: %w", err)
 	}
 
+	// Create health client for readyz
+	conn, err := grpc.NewClient(
+		c.SpiceDb.Endpoint,
+		opts...,
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error creating grpc health client: %w", err)
+	}
+	healthClient := grpc_health_v1.NewHealthClient(conn)
+
 	cleanup := func() {
 		log.NewHelper(logger).Info("spicedb connection cleanup requested (nothing to clean up)")
 	}
 
-	return &SpiceDbRepository{client}, cleanup, nil
+	return &SpiceDbRepository{client, healthClient}, cleanup, nil
 }
 
 func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *apiV0.ObjectType, subject_relation, relation string, object *apiV0.ObjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.SubjectResult, chan error, error) {
@@ -324,6 +337,29 @@ func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV0.CheckRequest
 	}
 
 	return &apiV0.CheckResponse{Allowed: apiV0.CheckResponse_ALLOWED_FALSE}, nil
+}
+
+func (s *SpiceDbRepository) IsBackendAvailable() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := s.healthClient.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
+	if err != nil {
+		return err
+	}
+
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("timeout connecting to backend")
+	default:
+		switch resp.Status {
+		case grpc_health_v1.HealthCheckResponse_NOT_SERVING, grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN:
+			return fmt.Errorf("error connecting to backend: %v", resp.Status.String())
+		case grpc_health_v1.HealthCheckResponse_SERVING:
+			return nil
+		}
+	}
+	return fmt.Errorf("error connecting to backend")
 }
 
 func createSpiceDbRelationshipFilter(filter *apiV0.RelationTupleFilter) *v1.RelationshipFilter {

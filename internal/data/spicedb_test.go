@@ -3,10 +3,12 @@ package data
 import (
 	"context"
 	"fmt"
-	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
-	"github.com/project-kessel/relations-api/internal/biz"
 	"os"
 	"testing"
+
+	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
+	"github.com/project-kessel/relations-api/internal/biz"
+	"github.com/project-kessel/relations-api/internal/conf"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
@@ -115,6 +117,31 @@ func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 
 	exists := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
 	assert.True(t, exists)
+}
+
+func TestIsBackendAvailable(t *testing.T) {
+	t.Parallel()
+
+	spiceDbrepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	err = spiceDbrepo.IsBackendAvailable()
+	assert.NoError(t, err)
+}
+
+func TestIsBackendUnavailable(t *testing.T) {
+	t.Parallel()
+
+	spiceDBRepo, _, err := NewSpiceDbRepository(&conf.Data{
+		SpiceDb: &conf.Data_SpiceDb{
+			Endpoint: "-1",
+			Token:    "foobar",
+			UseTLS:   true,
+		}}, log.GetLogger())
+	assert.NoError(t, err)
+
+	err = spiceDBRepo.IsBackendAvailable()
+	assert.Error(t, err)
 }
 
 func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {

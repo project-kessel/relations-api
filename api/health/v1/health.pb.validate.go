@@ -157,6 +157,10 @@ func (m *GetLivezReply) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for Status
+
+	// no validation rules for Code
+
 	if len(errors) > 0 {
 		return GetLivezReplyMultiError(errors)
 	}
@@ -356,6 +360,10 @@ func (m *GetReadyzReply) validate(all bool) error {
 	}
 
 	var errors []error
+
+	// no validation rules for Status
+
+	// no validation rules for Code
 
 	if len(errors) > 0 {
 		return GetReadyzReplyMultiError(errors)

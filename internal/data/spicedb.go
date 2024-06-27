@@ -348,11 +348,16 @@ func (s *SpiceDbRepository) IsBackendAvailable() error {
 		return err
 	}
 
-	switch resp.Status {
-	case grpc_health_v1.HealthCheckResponse_NOT_SERVING, grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN:
-		return fmt.Errorf("error connecting to backend: %v", resp.Status.Descriptor())
-	case grpc_health_v1.HealthCheckResponse_SERVING:
-		return nil
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("timeout connecting to backend")
+	default:
+		switch resp.Status {
+		case grpc_health_v1.HealthCheckResponse_NOT_SERVING, grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN:
+			return fmt.Errorf("error connecting to backend: %v", resp.Status.String())
+		case grpc_health_v1.HealthCheckResponse_SERVING:
+			return nil
+		}
 	}
 	return fmt.Errorf("error connecting to backend")
 }

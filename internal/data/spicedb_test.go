@@ -8,6 +8,7 @@ import (
 
 	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
 	"github.com/project-kessel/relations-api/internal/biz"
+	"github.com/project-kessel/relations-api/internal/conf"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
@@ -124,8 +125,23 @@ func TestIsBackendAvailable(t *testing.T) {
 	spiceDbrepo, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	err = spiceDbrepo.IsBackendAvaliable()
+	err = spiceDbrepo.IsBackendAvailable()
 	assert.NoError(t, err)
+}
+
+func TestIsBackendUnavailable(t *testing.T) {
+	t.Parallel()
+
+	spiceDBRepo, _, err := NewSpiceDbRepository(&conf.Data{
+		SpiceDb: &conf.Data_SpiceDb{
+			Endpoint: "-1",
+			Token:    "foobar",
+			UseTLS:   true,
+		}}, log.GetLogger())
+	assert.NoError(t, err)
+
+	err = spiceDBRepo.IsBackendAvailable()
+	assert.Error(t, err)
 }
 
 func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {

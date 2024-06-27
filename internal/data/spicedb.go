@@ -13,10 +13,6 @@ import (
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/conf"
 
-	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
-	"github.com/project-kessel/relations-api/internal/biz"
-	"github.com/project-kessel/relations-api/internal/conf"
-
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/authzed/authzed-go/v1"
 	"github.com/authzed/grpcutil"
@@ -71,20 +67,6 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("error creating spicedb client: %w", err)
-	}
-
-	// Create health client for readyz
-	conn, err := grpc.NewClient(
-		c.SpiceDb.Endpoint,
-		opts...,
-	)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error creating grpc health client: %w", err)
-	}
-	healthClient := grpc_health_v1.NewHealthClient(conn)
-	_, err = client.ReadSchema(context.TODO(), &v1.ReadSchemaRequest{})
-	if err != nil {
-		return nil, nil, fmt.Errorf("error testing connection to SpiceDB: %w", err)
 	}
 
 	// Create health client for readyz
@@ -357,7 +339,7 @@ func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV0.CheckRequest
 	return &apiV0.CheckResponse{Allowed: apiV0.CheckResponse_ALLOWED_FALSE}, nil
 }
 
-func (s *SpiceDbRepository) IsBackendAvaliable() error {
+func (s *SpiceDbRepository) IsBackendAvailable() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -368,11 +350,11 @@ func (s *SpiceDbRepository) IsBackendAvaliable() error {
 
 	switch resp.Status {
 	case grpc_health_v1.HealthCheckResponse_NOT_SERVING, grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN:
-		return err
+		return fmt.Errorf("error connecting to backend: %v", resp.Status.Descriptor())
 	case grpc_health_v1.HealthCheckResponse_SERVING:
 		return nil
 	}
-	return err
+	return fmt.Errorf("error connecting to backend")
 }
 
 func createSpiceDbRelationshipFilter(filter *apiV0.RelationTupleFilter) *v1.RelationshipFilter {

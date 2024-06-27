@@ -141,6 +141,62 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 	return subjects, errs, nil
 }
 
+func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *apiV0.ObjectType, relation string, subject *apiV0.SubjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.ResourceResult, chan error, error) {
+	var cursor *v1.Cursor = nil
+	if continuation != "" {
+		cursor = &v1.Cursor{
+			Token: string(continuation),
+		}
+	}
+	client, err := s.client.LookupResources(ctx, &v1.LookupResourcesRequest{
+		ResourceObjectType: kesselTypeToSpiceDBType(resouce_type),
+		Permission:         relation,
+		Subject: &v1.SubjectReference{
+			Object: &v1.ObjectReference{
+				ObjectType: kesselTypeToSpiceDBType(subject.Subject.Type),
+				ObjectId:   subject.Subject.Id,
+			},
+		},
+		OptionalLimit:  limit,
+		OptionalCursor: cursor,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resources := make(chan *biz.ResourceResult)
+	errs := make(chan error, 1)
+
+	go func() {
+		for {
+			msg, err := client.Recv()
+			if err != nil {
+				if !errors.Is(err, io.EOF) {
+					errs <- err
+				}
+				close(errs)
+				close(resources)
+				return
+			}
+
+			continuation := biz.ContinuationToken("")
+			if msg.AfterResultCursor != nil {
+				continuation = biz.ContinuationToken(msg.AfterResultCursor.Token)
+			}
+
+			resId := msg.GetResourceObjectId()
+			resources <- &biz.ResourceResult{
+				Resource: &apiV0.ObjectReference{
+					Type: resouce_type,
+					Id:   resId,
+				},
+				Continuation: continuation,
+			}
+		}
+	}()
+	return resources, errs, nil
+}
+
 func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV0.Relationship, touch biz.TouchSemantics) error {
 	var relationshipUpdates []*v1.RelationshipUpdate
 

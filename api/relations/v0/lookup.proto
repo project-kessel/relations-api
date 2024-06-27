@@ -25,7 +25,7 @@ service KesselLookupService {
 }
 
 message LookupResourcesRequest {
-    ObjectType resource = 1 [(validate.rules).any.required = true];
+    ObjectType resource_type = 1 [(validate.rules).any.required = true];
     string relation = 2 [(validate.rules).string.min_len = 1];
     SubjectReference subject = 3 [(validate.rules).any.required = true];
     optional RequestPagination pagination = 4;

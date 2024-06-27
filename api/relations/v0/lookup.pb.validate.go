@@ -57,9 +57,9 @@ func (m *LookupResourcesRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.GetResource() == nil {
+	if m.GetResourceType() == nil {
 		err := LookupResourcesRequestValidationError{
-			field:  "Resource",
+			field:  "ResourceType",
 			reason: "value is required",
 		}
 		if !all {
@@ -68,7 +68,7 @@ func (m *LookupResourcesRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if a := m.GetResource(); a != nil {
+	if a := m.GetResourceType(); a != nil {
 
 	}
 

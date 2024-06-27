@@ -55,11 +55,11 @@ paths:
                 - KesselLookupService
             operationId: KesselLookupService_LookupResources
             parameters:
-                - name: resource.namespace
+                - name: resourceType.namespace
                   in: query
                   schema:
                     type: string
-                - name: resource.name
+                - name: resourceType.name
                   in: query
                   schema:
                     type: string

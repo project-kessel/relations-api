@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v4.25.1
-// source: relations/v0/check.proto
+// source: kessel/relations/v0/check.proto
 
 package v0
 
@@ -110,5 +110,5 @@ var KesselCheckService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "relations/v0/check.proto",
+	Metadata: "kessel/relations/v0/check.proto",
 }

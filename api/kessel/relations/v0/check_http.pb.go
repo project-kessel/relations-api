@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.7.3
 // - protoc             v4.25.1
-// source: relations/v0/check.proto
+// source: kessel/relations/v0/check.proto
 
 package v0
 

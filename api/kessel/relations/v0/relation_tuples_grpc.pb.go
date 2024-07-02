@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v4.25.1
-// source: relations/v0/relation_tuples.proto
+// source: kessel/relations/v0/relation_tuples.proto
 
 package v0
 
@@ -226,5 +226,5 @@ var KesselTupleService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "relations/v0/relation_tuples.proto",
+	Metadata: "kessel/relations/v0/relation_tuples.proto",
 }

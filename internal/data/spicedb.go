@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	apiV0 "github.com/project-kessel/relations-api/api/relations/v0"
+	apiV0 "github.com/project-kessel/relations-api/api/kessel/relations/v0"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/conf"
 

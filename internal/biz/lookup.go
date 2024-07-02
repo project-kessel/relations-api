@@ -3,7 +3,7 @@ package biz
 import (
 	"context"
 
-	v0 "github.com/project-kessel/relations-api/api/relations/v0"
+	v0 "github.com/project-kessel/relations-api/api/kessel/relations/v0"
 )
 
 const (

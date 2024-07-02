@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v4.25.1
-// source: relations/v0/lookup.proto
+// source: kessel/relations/v0/lookup.proto
 
 package v0
 
@@ -198,5 +198,5 @@ var KesselLookupService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "relations/v0/lookup.proto",
+	Metadata: "kessel/relations/v0/lookup.proto",
 }

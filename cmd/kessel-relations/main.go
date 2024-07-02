@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
-	"github.com/go-kratos/kratos/v2/config/env"
 	"os"
+	"strings"
+
+	"github.com/go-kratos/kratos/v2/config/env"
 
 	"github.com/project-kessel/relations-api/internal/conf"
 
@@ -50,15 +52,7 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 
 func main() {
 	flag.Parse()
-	logger := log.With(log.NewStdLogger(os.Stdout),
-		"ts", log.DefaultTimestamp,
-		"caller", log.DefaultCaller,
-		"service.id", id,
-		"service.name", Name,
-		"service.version", Version,
-		"trace.id", tracing.TraceID(),
-		"span.id", tracing.SpanID(),
-	)
+
 	c := config.New(
 		config.WithSource(
 			env.NewSource("SPICEDB_"),
@@ -84,7 +78,7 @@ func main() {
 	//	bc.Data.SpiceDb.Token = preshared
 	//}
 
-	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
+	app, cleanup, err := wireApp(bc.Server, bc.Data, createLogger(bc.Server))
 	if err != nil {
 		panic(err)
 	}
@@ -94,4 +88,37 @@ func main() {
 	if err := app.Run(); err != nil {
 		panic(err)
 	}
+}
+
+func createLogger(c *conf.Server) log.Logger {
+	logger := log.With(log.NewStdLogger(os.Stdout),
+		"ts", log.DefaultTimestamp,
+		"caller", log.DefaultCaller,
+		"service.id", id,
+		"service.name", Name,
+		"service.version", Version,
+		"trace.id", tracing.TraceID(),
+		"span.id", tracing.SpanID(),
+	)
+
+	var level log.Level
+	if c.MinLogLevel == nil {
+		level = log.LevelInfo
+	} else {
+		switch strings.ToUpper(*c.MinLogLevel) {
+		case "DEBUG":
+			level = log.LevelDebug
+		case "INFO":
+			level = log.LevelInfo
+		case "WARN":
+			level = log.LevelWarn
+		case "ERROR":
+			level = log.LevelError
+		case "FATAL":
+			level = log.LevelFatal
+		}
+	}
+	logger = log.NewFilter(logger, log.FilterLevel(level))
+
+	return logger
 }

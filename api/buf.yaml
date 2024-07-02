@@ -1,0 +1,11 @@
+version: v2
+name: buf.build/lennysgarage/test-kessel
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE
+deps:
+  - buf.build/googleapis/googleapis
+  - buf.build/envoyproxy/protoc-gen-validate

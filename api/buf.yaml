@@ -1,5 +1,5 @@
 version: v2
-name: buf.build/lennysgarage/test-kessel
+name: buf.build/project-kessel/relations-api
 lint:
   use:
     - DEFAULT

@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-http v2.7.3
 // - protoc             v4.25.1
-// source: kessel/relations/v0/check.proto
+// source: kessel/relations/v1beta1/check.proto
 
-package v0
+package v1beta1
 
 import (
 	context "context"
@@ -19,7 +19,7 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationKesselCheckServiceCheck = "/kessel.relations.v0.KesselCheckService/Check"
+const OperationKesselCheckServiceCheck = "/kessel.relations.v1beta1.KesselCheckService/Check"
 
 type KesselCheckServiceHTTPServer interface {
 	// Check Checks for the existence of a single Relationship
@@ -29,7 +29,7 @@ type KesselCheckServiceHTTPServer interface {
 
 func RegisterKesselCheckServiceHTTPServer(s *http.Server, srv KesselCheckServiceHTTPServer) {
 	r := s.Route("/")
-	r.POST("/v0/check", _KesselCheckService_Check0_HTTP_Handler(srv))
+	r.POST("/v1beta1/check", _KesselCheckService_Check0_HTTP_Handler(srv))
 }
 
 func _KesselCheckService_Check0_HTTP_Handler(srv KesselCheckServiceHTTPServer) func(ctx http.Context) error {
@@ -68,7 +68,7 @@ func NewKesselCheckServiceHTTPClient(client *http.Client) KesselCheckServiceHTTP
 
 func (c *KesselCheckServiceHTTPClientImpl) Check(ctx context.Context, in *CheckRequest, opts ...http.CallOption) (*CheckResponse, error) {
 	var out CheckResponse
-	pattern := "/v0/check"
+	pattern := "/v1beta1/check"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationKesselCheckServiceCheck))
 	opts = append(opts, http.PathTemplate(pattern))

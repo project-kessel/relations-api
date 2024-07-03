@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	v0 "github.com/project-kessel/relations-api/api/kessel/relations/v0"
+	v0 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/data"
 

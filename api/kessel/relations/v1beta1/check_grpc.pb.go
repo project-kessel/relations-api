@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v4.25.1
-// source: kessel/relations/v0/check.proto
+// source: kessel/relations/v1beta1/check.proto
 
-package v0
+package v1beta1
 
 import (
 	context "context"
@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	KesselCheckService_Check_FullMethodName = "/kessel.relations.v0.KesselCheckService/Check"
+	KesselCheckService_Check_FullMethodName = "/kessel.relations.v1beta1.KesselCheckService/Check"
 )
 
 // KesselCheckServiceClient is the client API for KesselCheckService service.
@@ -101,7 +101,7 @@ func _KesselCheckService_Check_Handler(srv interface{}, ctx context.Context, dec
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var KesselCheckService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "kessel.relations.v0.KesselCheckService",
+	ServiceName: "kessel.relations.v1beta1.KesselCheckService",
 	HandlerType: (*KesselCheckServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -110,5 +110,5 @@ var KesselCheckService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "kessel/relations/v0/check.proto",
+	Metadata: "kessel/relations/v1beta1/check.proto",
 }

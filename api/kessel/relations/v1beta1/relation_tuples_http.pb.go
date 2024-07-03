@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-http v2.7.3
 // - protoc             v4.25.1
-// source: kessel/relations/v0/relation_tuples.proto
+// source: kessel/relations/v1beta1/relation_tuples.proto
 
-package v0
+package v1beta1
 
 import (
 	context "context"
@@ -19,8 +19,8 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationKesselTupleServiceCreateTuples = "/kessel.relations.v0.KesselTupleService/CreateTuples"
-const OperationKesselTupleServiceDeleteTuples = "/kessel.relations.v0.KesselTupleService/DeleteTuples"
+const OperationKesselTupleServiceCreateTuples = "/kessel.relations.v1beta1.KesselTupleService/CreateTuples"
+const OperationKesselTupleServiceDeleteTuples = "/kessel.relations.v1beta1.KesselTupleService/DeleteTuples"
 
 type KesselTupleServiceHTTPServer interface {
 	CreateTuples(context.Context, *CreateTuplesRequest) (*CreateTuplesResponse, error)
@@ -29,8 +29,8 @@ type KesselTupleServiceHTTPServer interface {
 
 func RegisterKesselTupleServiceHTTPServer(s *http.Server, srv KesselTupleServiceHTTPServer) {
 	r := s.Route("/")
-	r.POST("/v0/tuples", _KesselTupleService_CreateTuples0_HTTP_Handler(srv))
-	r.DELETE("/v0/tuples", _KesselTupleService_DeleteTuples0_HTTP_Handler(srv))
+	r.POST("/v1beta1/tuples", _KesselTupleService_CreateTuples0_HTTP_Handler(srv))
+	r.DELETE("/v1beta1/tuples", _KesselTupleService_DeleteTuples0_HTTP_Handler(srv))
 }
 
 func _KesselTupleService_CreateTuples0_HTTP_Handler(srv KesselTupleServiceHTTPServer) func(ctx http.Context) error {
@@ -89,7 +89,7 @@ func NewKesselTupleServiceHTTPClient(client *http.Client) KesselTupleServiceHTTP
 
 func (c *KesselTupleServiceHTTPClientImpl) CreateTuples(ctx context.Context, in *CreateTuplesRequest, opts ...http.CallOption) (*CreateTuplesResponse, error) {
 	var out CreateTuplesResponse
-	pattern := "/v0/tuples"
+	pattern := "/v1beta1/tuples"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationKesselTupleServiceCreateTuples))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -102,7 +102,7 @@ func (c *KesselTupleServiceHTTPClientImpl) CreateTuples(ctx context.Context, in 
 
 func (c *KesselTupleServiceHTTPClientImpl) DeleteTuples(ctx context.Context, in *DeleteTuplesRequest, opts ...http.CallOption) (*DeleteTuplesResponse, error) {
 	var out DeleteTuplesResponse
-	pattern := "/v0/tuples"
+	pattern := "/v1beta1/tuples"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationKesselTupleServiceDeleteTuples))
 	opts = append(opts, http.PathTemplate(pattern))

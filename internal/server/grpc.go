@@ -1,8 +1,8 @@
 package server
 
 import (
-	h "github.com/project-kessel/relations-api/api/health/v1"
-	v0 "github.com/project-kessel/relations-api/api/kessel/relations/v0"
+	h "github.com/project-kessel/relations-api/api/kessel/health/v1"
+	v0 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/conf"
 	"github.com/project-kessel/relations-api/internal/server/middleware"
 	"github.com/project-kessel/relations-api/internal/service"
@@ -36,7 +36,7 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 	srv := grpc.NewServer(opts...)
 	v0.RegisterKesselTupleServiceServer(srv, relations)
 	v0.RegisterKesselCheckServiceServer(srv, check)
-	h.RegisterKesselHealthServer(srv, health)
+	h.RegisterKesselHealthServiceServer(srv, health)
 	v0.RegisterKesselLookupServiceServer(srv, subjects)
 	return srv
 }

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	apiV0 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
+	apiV1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/conf"
 
@@ -86,7 +86,7 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 	return &SpiceDbRepository{client, healthClient}, cleanup, nil
 }
 
-func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *apiV0.ObjectType, subject_relation, relation string, object *apiV0.ObjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.SubjectResult, chan error, error) {
+func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *apiV1beta1.ObjectType, subject_relation, relation string, object *apiV1beta1.ObjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.SubjectResult, chan error, error) {
 	var cursor *v1.Cursor = nil
 	if continuation != "" {
 		cursor = &v1.Cursor{
@@ -135,8 +135,8 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 
 			subj := msg.GetSubject()
 			subjects <- &biz.SubjectResult{
-				Subject: &apiV0.SubjectReference{
-					Subject: &apiV0.ObjectReference{
+				Subject: &apiV1beta1.SubjectReference{
+					Subject: &apiV1beta1.ObjectReference{
 						Type: subject_type,
 						Id:   subj.SubjectObjectId,
 					},
@@ -149,7 +149,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 	return subjects, errs, nil
 }
 
-func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *apiV0.ObjectType, relation string, subject *apiV0.SubjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.ResourceResult, chan error, error) {
+func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *apiV1beta1.ObjectType, relation string, subject *apiV1beta1.SubjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.ResourceResult, chan error, error) {
 	var cursor *v1.Cursor = nil
 	if continuation != "" {
 		cursor = &v1.Cursor{
@@ -194,7 +194,7 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 
 			resId := msg.GetResourceObjectId()
 			resources <- &biz.ResourceResult{
-				Resource: &apiV0.ObjectReference{
+				Resource: &apiV1beta1.ObjectReference{
 					Type: resouce_type,
 					Id:   resId,
 				},
@@ -205,7 +205,7 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 	return resources, errs, nil
 }
 
-func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV0.Relationship, touch biz.TouchSemantics) error {
+func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics) error {
 	var relationshipUpdates []*v1.RelationshipUpdate
 
 	var operation v1.RelationshipUpdate_Operation
@@ -232,7 +232,7 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 	return nil
 }
 
-func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV0.RelationTupleFilter, limit uint32, continuation biz.ContinuationToken) (chan *biz.RelationshipResult, chan error, error) {
+func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter, limit uint32, continuation biz.ContinuationToken) (chan *biz.RelationshipResult, chan error, error) {
 	var cursor *v1.Cursor = nil
 	if continuation != "" {
 		cursor = &v1.Cursor{
@@ -274,15 +274,15 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV0
 
 			spiceDbRel := msg.GetRelationship()
 			relationshipTuples <- &biz.RelationshipResult{
-				Relationship: &apiV0.Relationship{
-					Resource: &apiV0.ObjectReference{
+				Relationship: &apiV1beta1.Relationship{
+					Resource: &apiV1beta1.ObjectReference{
 						Type: spicedbTypeToKesselType(spiceDbRel.Resource.ObjectType),
 						Id:   spiceDbRel.Resource.ObjectId,
 					},
 					Relation: msg.Relationship.Relation,
-					Subject: &apiV0.SubjectReference{
+					Subject: &apiV1beta1.SubjectReference{
 						Relation: optionalStringToStringPointer(spiceDbRel.Subject.OptionalRelation),
-						Subject: &apiV0.ObjectReference{
+						Subject: &apiV1beta1.ObjectReference{
 							Type: spicedbTypeToKesselType(spiceDbRel.Subject.Object.ObjectType),
 							Id:   spiceDbRel.Subject.Object.ObjectId,
 						},
@@ -296,7 +296,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV0
 	return relationshipTuples, errs, nil
 }
 
-func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV0.RelationTupleFilter) error {
+func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter) error {
 	req := &v1.DeleteRelationshipsRequest{RelationshipFilter: createSpiceDbRelationshipFilter(filter)}
 
 	_, err := s.client.DeleteRelationships(ctx, req)
@@ -309,7 +309,7 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 	return nil
 }
 
-func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV0.CheckRequest) (*apiV0.CheckResponse, error) {
+func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV1beta1.CheckRequest) (*apiV1beta1.CheckResponse, error) {
 	subject := &v1.SubjectReference{
 		Object: &v1.ObjectReference{
 			ObjectType: kesselTypeToSpiceDBType(check.GetSubject().GetSubject().Type),
@@ -329,14 +329,14 @@ func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV0.CheckRequest
 	}
 	checkResponse, err := s.client.CheckPermission(ctx, req)
 	if err != nil {
-		return &apiV0.CheckResponse{Allowed: apiV0.CheckResponse_ALLOWED_UNSPECIFIED}, fmt.Errorf("error invoking CheckPermission in SpiceDB: %w", err)
+		return &apiV1beta1.CheckResponse{Allowed: apiV1beta1.CheckResponse_ALLOWED_UNSPECIFIED}, fmt.Errorf("error invoking CheckPermission in SpiceDB: %w", err)
 	}
 
 	if checkResponse.Permissionship == v1.CheckPermissionResponse_PERMISSIONSHIP_HAS_PERMISSION {
-		return &apiV0.CheckResponse{Allowed: apiV0.CheckResponse_ALLOWED_TRUE}, nil
+		return &apiV1beta1.CheckResponse{Allowed: apiV1beta1.CheckResponse_ALLOWED_TRUE}, nil
 	}
 
-	return &apiV0.CheckResponse{Allowed: apiV0.CheckResponse_ALLOWED_FALSE}, nil
+	return &apiV1beta1.CheckResponse{Allowed: apiV1beta1.CheckResponse_ALLOWED_FALSE}, nil
 }
 
 func (s *SpiceDbRepository) IsBackendAvailable() error {
@@ -362,7 +362,7 @@ func (s *SpiceDbRepository) IsBackendAvailable() error {
 	return fmt.Errorf("error connecting to backend")
 }
 
-func createSpiceDbRelationshipFilter(filter *apiV0.RelationTupleFilter) *v1.RelationshipFilter {
+func createSpiceDbRelationshipFilter(filter *apiV1beta1.RelationTupleFilter) *v1.RelationshipFilter {
 	spiceDbRelationshipFilter := &v1.RelationshipFilter{
 		ResourceType:       filter.GetResourceType(),
 		OptionalResourceId: filter.GetResourceId(),
@@ -387,8 +387,8 @@ func createSpiceDbRelationshipFilter(filter *apiV0.RelationTupleFilter) *v1.Rela
 	return spiceDbRelationshipFilter
 }
 
-func spicedbTypeToKesselType(spicedbType string) *apiV0.ObjectType {
-	kesselType := &apiV0.ObjectType{}
+func spicedbTypeToKesselType(spicedbType string) *apiV1beta1.ObjectType {
+	kesselType := &apiV1beta1.ObjectType{}
 
 	parts := strings.Split(spicedbType, "/")
 	switch len(parts) {
@@ -404,7 +404,7 @@ func spicedbTypeToKesselType(spicedbType string) *apiV0.ObjectType {
 	return kesselType
 }
 
-func kesselTypeToSpiceDBType(kesselType *apiV0.ObjectType) string {
+func kesselTypeToSpiceDBType(kesselType *apiV1beta1.ObjectType) string {
 	if kesselType.Namespace != "" {
 		return fmt.Sprintf("%s/%s", kesselType.Namespace, kesselType.Name)
 	}
@@ -420,7 +420,7 @@ func optionalStringToStringPointer(optional string) *string {
 	return &optional
 }
 
-func createSpiceDbRelationship(relationship *apiV0.Relationship) *v1.Relationship {
+func createSpiceDbRelationship(relationship *apiV1beta1.Relationship) *v1.Relationship {
 	subject := &v1.SubjectReference{
 		Object: &v1.ObjectReference{
 			ObjectType: kesselTypeToSpiceDBType(relationship.GetSubject().GetSubject().GetType()),

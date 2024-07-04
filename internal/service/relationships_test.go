@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	v0 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
+	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/data"
 
@@ -49,19 +49,19 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 	ctx := context.Background()
 	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
 
-	req := &v0.CreateTuplesRequest{
-		Tuples: []*v0.Relationship{
+	req := &v1beta1.CreateTuplesRequest{
+		Tuples: []*v1beta1.Relationship{
 			expected,
 		},
 	}
 	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.NoError(t, err)
 
-	readReq := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
+	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
-		SubjectFilter: &v0.SubjectFilter{
+		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
@@ -93,19 +93,19 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 
 	ctx := context.Background()
 	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
-	req := &v0.CreateTuplesRequest{
-		Tuples: []*v0.Relationship{
+	req := &v1beta1.CreateTuplesRequest{
+		Tuples: []*v1beta1.Relationship{
 			expected,
 		},
 	}
 	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.NoError(t, err)
 
-	readReq := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
+	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
-		SubjectFilter: &v0.SubjectFilter{
+		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
@@ -140,7 +140,7 @@ func TestRelationshipsService_CreateRelationshipsWithNilRelationshipsSlice(t *te
 	assert.NoError(t, err)
 	ctx := context.Background()
 
-	req := &v0.CreateTuplesRequest{
+	req := &v1beta1.CreateTuplesRequest{
 		Tuples: nil,
 	}
 	_, err = relationshipsService.CreateTuples(ctx, req)
@@ -154,8 +154,8 @@ func TestRelationshipsService_CreateRelationshipsWithBadSubjectType(t *testing.T
 	ctx := context.Background()
 	badSubjectType := "not_a_user"
 	expected := createRelationship("bob", simple_type(badSubjectType), "", "member", simple_type("group"), "bob_club")
-	req := &v0.CreateTuplesRequest{
-		Tuples: []*v0.Relationship{
+	req := &v1beta1.CreateTuplesRequest{
+		Tuples: []*v1beta1.Relationship{
 			expected,
 		},
 	}
@@ -172,8 +172,8 @@ func TestRelationshipsService_CreateRelationshipsWithBadObjectType(t *testing.T)
 	ctx := context.Background()
 	badObjectType := "not_an_object"
 	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type(badObjectType), "bob_club")
-	req := &v0.CreateTuplesRequest{
-		Tuples: []*v0.Relationship{
+	req := &v1beta1.CreateTuplesRequest{
+		Tuples: []*v1beta1.Relationship{
 			expected,
 		},
 	}
@@ -191,19 +191,19 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
 
 	ctx := context.Background()
-	req := &v0.CreateTuplesRequest{
-		Tuples: []*v0.Relationship{
+	req := &v1beta1.CreateTuplesRequest{
+		Tuples: []*v1beta1.Relationship{
 			expected,
 		},
 	}
 	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.NoError(t, err)
 
-	delreq := &v0.DeleteTuplesRequest{Filter: &v0.RelationTupleFilter{
+	delreq := &v1beta1.DeleteTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
-		SubjectFilter: &v0.SubjectFilter{
+		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
@@ -211,11 +211,11 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	_, err = relationshipsService.DeleteTuples(ctx, delreq)
 	assert.NoError(t, err)
 
-	readReq := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
+	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
-		SubjectFilter: &v0.SubjectFilter{
+		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
@@ -272,19 +272,19 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 
 	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
 
-	reqCr := &v0.CreateTuplesRequest{
-		Tuples: []*v0.Relationship{
+	reqCr := &v1beta1.CreateTuplesRequest{
+		Tuples: []*v1beta1.Relationship{
 			expected,
 		},
 	}
 	_, err = relationshipsService.CreateTuples(ctx, reqCr)
 	assert.NoError(t, err)
 
-	req := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
+	req := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
-		SubjectFilter: &v0.SubjectFilter{
+		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
@@ -323,8 +323,8 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 	expected1 := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
 	expected2 := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "other_bob_club")
 
-	reqCr := &v0.CreateTuplesRequest{
-		Tuples: []*v0.Relationship{
+	reqCr := &v1beta1.CreateTuplesRequest{
+		Tuples: []*v1beta1.Relationship{
 			expected1,
 			expected2,
 		},
@@ -333,15 +333,15 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 	assert.NoError(t, err)
 	container.WaitForQuantizationInterval()
 
-	req := &v0.ReadTuplesRequest{Filter: &v0.RelationTupleFilter{
+	req := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
-		SubjectFilter: &v0.SubjectFilter{
+		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
 	},
-		Pagination: &v0.RequestPagination{
+		Pagination: &v1beta1.RequestPagination{
 			Limit: 1,
 		},
 	}
@@ -368,17 +368,17 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func simple_type(typename string) *v0.ObjectType {
-	return &v0.ObjectType{Name: typename}
+func simple_type(typename string) *v1beta1.ObjectType {
+	return &v1beta1.ObjectType{Name: typename}
 }
 
 func pointerize(value string) *string { //Used to turn string literals into pointers
 	return &value
 }
 
-func createRelationship(subjectId string, subjectType *v0.ObjectType, subjectRelationship string, relationship string, objectType *v0.ObjectType, objectId string) *v0.Relationship {
-	subject := &v0.SubjectReference{
-		Subject: &v0.ObjectReference{
+func createRelationship(subjectId string, subjectType *v1beta1.ObjectType, subjectRelationship string, relationship string, objectType *v1beta1.ObjectType, objectId string) *v1beta1.Relationship {
+	subject := &v1beta1.SubjectReference{
+		Subject: &v1beta1.ObjectReference{
 			Type: subjectType,
 			Id:   subjectId,
 		},
@@ -388,12 +388,12 @@ func createRelationship(subjectId string, subjectType *v0.ObjectType, subjectRel
 		subject.Relation = &subjectRelationship
 	}
 
-	resource := &v0.ObjectReference{
+	resource := &v1beta1.ObjectReference{
 		Type: objectType,
 		Id:   objectId,
 	}
 
-	return &v0.Relationship{
+	return &v1beta1.Relationship{
 		Resource: resource,
 		Relation: relationship,
 		Subject:  subject,
@@ -405,25 +405,25 @@ func createRelationship(subjectId string, subjectType *v0.ObjectType, subjectRel
 func NewRelationships_ReadRelationshipsServerStub(ctx context.Context) *Relationships_ReadRelationshipsServerStub {
 	return &Relationships_ReadRelationshipsServerStub{
 		ServerStream: nil,
-		responses:    []*v0.ReadTuplesResponse{},
+		responses:    []*v1beta1.ReadTuplesResponse{},
 		ctx:          ctx,
 	}
 }
 
 type Relationships_ReadRelationshipsServerStub struct {
 	grpc.ServerStream
-	responses []*v0.ReadTuplesResponse
+	responses []*v1beta1.ReadTuplesResponse
 	ctx       context.Context
 }
 
-func (x *Relationships_ReadRelationshipsServerStub) GetDistinctTuples() []*v0.Relationship {
-	set := make(map[*v0.Relationship]bool)
+func (x *Relationships_ReadRelationshipsServerStub) GetDistinctTuples() []*v1beta1.Relationship {
+	set := make(map[*v1beta1.Relationship]bool)
 
 	for _, response := range x.responses {
 		set[response.Tuple] = true
 	}
 
-	results := make([]*v0.Relationship, 0, len(set))
+	results := make([]*v1beta1.Relationship, 0, len(set))
 	for tuple, found := range set {
 		if !found {
 			continue
@@ -444,7 +444,7 @@ func (x *Relationships_ReadRelationshipsServerStub) GetLatestContinuation() *str
 	return &response.Pagination.ContinuationToken
 }
 
-func (x *Relationships_ReadRelationshipsServerStub) Send(m *v0.ReadTuplesResponse) error {
+func (x *Relationships_ReadRelationshipsServerStub) Send(m *v1beta1.ReadTuplesResponse) error {
 	x.responses = append(x.responses, m)
 	return nil
 }

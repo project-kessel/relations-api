@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	apiV0 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
+	apiV1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/conf"
 
@@ -51,7 +51,7 @@ func TestCreateRelationship(t *testing.T) {
 	preExisting := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
 	assert.False(t, preExisting)
 
-	rels := []*apiV0.Relationship{
+	rels := []*apiV1beta1.Relationship{
 		createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club"),
 	}
 
@@ -74,7 +74,7 @@ func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 	preExisting := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
 	assert.False(t, preExisting)
 
-	rels := []*apiV0.Relationship{
+	rels := []*apiV1beta1.Relationship{
 		createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club"),
 	}
 
@@ -101,7 +101,7 @@ func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 	preExisting := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
 	assert.False(t, preExisting)
 
-	rels := []*apiV0.Relationship{
+	rels := []*apiV1beta1.Relationship{
 		createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club"),
 	}
 
@@ -153,7 +153,7 @@ func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {
 
 	badSubjectType := "not_a_user"
 
-	rels := []*apiV0.Relationship{
+	rels := []*apiV1beta1.Relationship{
 		createRelationship("bob", simple_type(badSubjectType), "", "member", simple_type("group"), "bob_club"),
 	}
 
@@ -174,7 +174,7 @@ func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
 
 	badObjectType := "not_an_object"
 
-	rels := []*apiV0.Relationship{
+	rels := []*apiV1beta1.Relationship{
 		createRelationship("bob", simple_type("user"), "", "member", simple_type(badObjectType), "bob_club"),
 	}
 
@@ -196,7 +196,7 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 	}
 
 	assert.NoError(t, err)
-	rels := []*apiV0.Relationship{
+	rels := []*apiV1beta1.Relationship{
 		createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club"),
 	}
 
@@ -205,11 +205,11 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 		return
 	}
 
-	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV0.RelationTupleFilter{
+	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
-		SubjectFilter: &apiV0.SubjectFilter{
+		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
@@ -233,7 +233,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 	}
 
 	assert.NoError(t, err)
-	rels := []*apiV0.Relationship{
+	rels := []*apiV1beta1.Relationship{
 		createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club"),
 	}
 
@@ -242,11 +242,11 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 		return
 	}
 
-	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV0.RelationTupleFilter{
+	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
-		SubjectFilter: &apiV0.SubjectFilter{
+		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
@@ -259,11 +259,11 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 	readrels := spiceRelChanToSlice(readRelChan)
 	assert.Equal(t, 1, len(readrels))
 
-	err = spiceDbRepo.DeleteRelationships(ctx, &apiV0.RelationTupleFilter{
+	err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
-		SubjectFilter: &apiV0.SubjectFilter{
+		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
@@ -273,11 +273,11 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 		return
 	}
 
-	readRelChan, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV0.RelationTupleFilter{
+	readRelChan, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
 		ResourceType: pointerize("group"),
 		Relation:     pointerize("member"),
-		SubjectFilter: &apiV0.SubjectFilter{
+		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
@@ -306,7 +306,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 	//role_binding:rb_test#granted@role:rl1
 	//role_binding:rb_test#subject@user:bob
 	//role:rl1#view_the_thing@user:*
-	rels := []*apiV0.Relationship{
+	rels := []*apiV1beta1.Relationship{
 		createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club"),
 		createRelationship("rb_test", simple_type("role_binding"), "", "user_grant", simple_type("workspace"), "test"),
 		createRelationship("rl1", simple_type("role"), "", "granted", simple_type("role_binding"), "rb_test"),
@@ -319,19 +319,19 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		return
 	}
 
-	subject := &apiV0.SubjectReference{
-		Subject: &apiV0.ObjectReference{
+	subject := &apiV1beta1.SubjectReference{
+		Subject: &apiV1beta1.ObjectReference{
 			Type: simple_type("user"),
 			Id:   "bob",
 		},
 	}
 
-	resource := &apiV0.ObjectReference{
+	resource := &apiV1beta1.ObjectReference{
 		Type: simple_type("workspace"),
 		Id:   "test",
 	}
 	// zed permission check workspace:test view_the_thing user:bob --explain
-	check := apiV0.CheckRequest{
+	check := apiV1beta1.CheckRequest{
 		Subject:  subject,
 		Relation: "view_the_thing",
 		Resource: resource,
@@ -341,17 +341,17 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		return
 	}
 	//apiV1.CheckResponse_ALLOWED_TRUE
-	checkResponse := apiV0.CheckResponse{
-		Allowed: apiV0.CheckResponse_ALLOWED_TRUE,
+	checkResponse := apiV1beta1.CheckResponse{
+		Allowed: apiV1beta1.CheckResponse_ALLOWED_TRUE,
 	}
 	assert.Equal(t, &checkResponse, resp)
 
 	//Remove // role_binding:rb_test#subject@user:bob
-	err = spiceDbRepo.DeleteRelationships(ctx, &apiV0.RelationTupleFilter{
+	err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("rb_test"),
 		ResourceType: pointerize("role_binding"),
 		Relation:     pointerize("subject"),
-		SubjectFilter: &apiV0.SubjectFilter{
+		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("user"),
 		},
@@ -361,7 +361,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 	}
 
 	// zed permission check workspace:test view_the_thing user:bob --explain
-	check2 := apiV0.CheckRequest{
+	check2 := apiV1beta1.CheckRequest{
 		Subject:  subject,
 		Relation: "view_the_thing",
 		Resource: resource,
@@ -371,23 +371,23 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
-	checkResponsev2 := apiV0.CheckResponse{
-		Allowed: apiV0.CheckResponse_ALLOWED_FALSE,
+	checkResponsev2 := apiV1beta1.CheckResponse{
+		Allowed: apiV1beta1.CheckResponse_ALLOWED_FALSE,
 	}
 	assert.Equal(t, &checkResponsev2, resp2)
 }
 
-func simple_type(typename string) *apiV0.ObjectType {
-	return &apiV0.ObjectType{Name: typename}
+func simple_type(typename string) *apiV1beta1.ObjectType {
+	return &apiV1beta1.ObjectType{Name: typename}
 }
 
 func pointerize(value string) *string { //Used to turn string literals into pointers
 	return &value
 }
 
-func createRelationship(subjectId string, subjectType *apiV0.ObjectType, subjectRelationship string, relationship string, objectType *apiV0.ObjectType, objectId string) *apiV0.Relationship {
-	subject := &apiV0.SubjectReference{
-		Subject: &apiV0.ObjectReference{
+func createRelationship(subjectId string, subjectType *apiV1beta1.ObjectType, subjectRelationship string, relationship string, objectType *apiV1beta1.ObjectType, objectId string) *apiV1beta1.Relationship {
+	subject := &apiV1beta1.SubjectReference{
+		Subject: &apiV1beta1.ObjectReference{
 			Type: subjectType,
 			Id:   subjectId,
 		},
@@ -397,12 +397,12 @@ func createRelationship(subjectId string, subjectType *apiV0.ObjectType, subject
 		subject.Relation = &subjectRelationship
 	}
 
-	resource := &apiV0.ObjectReference{
+	resource := &apiV1beta1.ObjectReference{
 		Type: objectType,
 		Id:   objectId,
 	}
 
-	return &apiV0.Relationship{
+	return &apiV1beta1.Relationship{
 		Resource: resource,
 		Relation: relationship,
 		Subject:  subject,

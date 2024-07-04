@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	v0 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
+	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/data"
 
@@ -22,7 +22,7 @@ func TestLookupService_LookupSubjects_EmptyRequest(t *testing.T) {
 	assert.NoError(t, err)
 	service := createLookupService(spicedb)
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
-	err = service.LookupSubjects(&v0.LookupSubjectsRequest{}, responseCollector)
+	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{}, responseCollector)
 
 	assert.Error(t, err)
 }
@@ -34,7 +34,7 @@ func TestLookupService_LookupResources_EmptyRequest(t *testing.T) {
 	assert.NoError(t, err)
 	service := createLookupService(spicedb)
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
-	err = service.LookupResources(&v0.LookupResourcesRequest{}, responseCollector)
+	err = service.LookupResources(&v1beta1.LookupResourcesRequest{}, responseCollector)
 
 	assert.Error(t, err)
 }
@@ -52,10 +52,10 @@ func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 	service := createLookupService(spicedb)
 
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
-	err = service.LookupSubjects(&v0.LookupSubjectsRequest{
+	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
 		SubjectType: simple_type("user"),
 		Relation:    "view",
-		Resource:    &v0.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
+		Resource:    &v1beta1.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
 	results := responseCollector.GetResponses()
@@ -76,10 +76,10 @@ func TestLookupService_LookupResources_NoResults(t *testing.T) {
 	service := createLookupService(spicedb)
 
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
-	err = service.LookupResources(&v0.LookupResourcesRequest{
-		Subject:  &v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
+	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
+		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
 		Relation: "view",
-		ResourceType: &v0.ObjectType{
+		ResourceType: &v1beta1.ObjectType{
 			Name: "thing",
 		},
 	}, responseCollector)
@@ -104,10 +104,10 @@ func TestLookupService_LookupSubjects_OneResult(t *testing.T) {
 	service := createLookupService(spicedb)
 
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
-	err = service.LookupSubjects(&v0.LookupSubjectsRequest{
+	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
 		SubjectType: simple_type("user"),
 		Relation:    "view",
-		Resource:    &v0.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
+		Resource:    &v1beta1.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
 	ids := responseCollector.GetIDs()
@@ -128,10 +128,10 @@ func TestLookupService_LookupResources_OneResult(t *testing.T) {
 	service := createLookupService(spicedb)
 
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
-	err = service.LookupResources(&v0.LookupResourcesRequest{
-		Subject:  &v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
+	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
+		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
 		Relation: "workspace",
-		ResourceType: &v0.ObjectType{
+		ResourceType: &v1beta1.ObjectType{
 			Name: "thing",
 		},
 	}, responseCollector)
@@ -154,13 +154,13 @@ func TestLookupService_LookupResources_TwoResults(t *testing.T) {
 	container.WaitForQuantizationInterval()
 
 	service := createLookupService(spicedb)
-	//&v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"}}
+	//&v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"}}
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
-	err = service.LookupResources(&v0.LookupResourcesRequest{
-		Subject: &v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("user"), Id: "u1"}},
-		//Subject:  &v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
+	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
+		Subject: &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("user"), Id: "u1"}},
+		//Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
 		Relation: "subject",
-		ResourceType: &v0.ObjectType{
+		ResourceType: &v1beta1.ObjectType{
 			Name: "role_binding",
 		},
 	}, responseCollector)
@@ -187,10 +187,10 @@ func TestLookupService_LookupSubjects_TwoResults(t *testing.T) {
 	service := createLookupService(spicedb)
 
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
-	err = service.LookupSubjects(&v0.LookupSubjectsRequest{
+	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
 		SubjectType: simple_type("user"),
 		Relation:    "view",
-		Resource:    &v0.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
+		Resource:    &v1beta1.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
 	ids := responseCollector.GetIDs()
@@ -208,41 +208,41 @@ func createLookupService(spicedb *data.SpiceDbRepository) *LookupService {
 	return NewLookupService(logger, biz.NewGetSubjectsUseCase(spicedb), biz.NewGetResourcesUseCase(spicedb))
 }
 func seedThingInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepository, thing string) error {
-	return spicedb.CreateRelationships(ctx, []*v0.Relationship{
+	return spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
 		{
-			Resource: &v0.ObjectReference{Type: simple_type("thing"), Id: thing},
+			Resource: &v1beta1.ObjectReference{Type: simple_type("thing"), Id: thing},
 			Relation: "workspace",
-			Subject:  &v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
 		},
 	}, biz.TouchSemantics(true))
 }
 
 func seedUserWithViewThingInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepository, user string) error {
-	return spicedb.CreateRelationships(ctx, []*v0.Relationship{
+	return spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
 		{
-			Resource: &v0.ObjectReference{Type: simple_type("role"), Id: "viewers"},
+			Resource: &v1beta1.ObjectReference{Type: simple_type("role"), Id: "viewers"},
 			Relation: "view_the_thing",
-			Subject:  &v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("user"), Id: "*"}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("user"), Id: "*"}},
 		},
 		{
-			Resource: &v0.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"},
+			Resource: &v1beta1.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"},
 			Relation: "subject",
-			Subject:  &v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("user"), Id: user}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("user"), Id: user}},
 		},
 		{
-			Resource: &v0.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers_two"},
+			Resource: &v1beta1.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers_two"},
 			Relation: "subject",
-			Subject:  &v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("user"), Id: user}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("user"), Id: user}},
 		},
 		{
-			Resource: &v0.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"},
+			Resource: &v1beta1.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"},
 			Relation: "granted",
-			Subject:  &v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("role"), Id: "viewers"}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("role"), Id: "viewers"}},
 		},
 		{
-			Resource: &v0.ObjectReference{Type: simple_type("workspace"), Id: "default"},
+			Resource: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"},
 			Relation: "user_grant",
-			Subject:  &v0.SubjectReference{Subject: &v0.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"}},
 		},
 	}, biz.TouchSemantics(true))
 }
@@ -250,7 +250,7 @@ func seedUserWithViewThingInDefaultWorkspace(ctx context.Context, spicedb *data.
 func NewLookup_SubjectsServerStub(ctx context.Context) *Lookup_SubjectsServerStub {
 	return &Lookup_SubjectsServerStub{
 		ServerStream: nil,
-		responses:    []*v0.LookupSubjectsResponse{},
+		responses:    []*v1beta1.LookupSubjectsResponse{},
 		ctx:          ctx,
 	}
 }
@@ -258,12 +258,12 @@ func NewLookup_SubjectsServerStub(ctx context.Context) *Lookup_SubjectsServerStu
 func NewLookup_ResourcesServerStub(ctx context.Context) *Lookup_ResourcesServerStub {
 	return &Lookup_ResourcesServerStub{
 		ServerStream: nil,
-		responses:    []*v0.LookupResourcesResponse{},
+		responses:    []*v1beta1.LookupResourcesResponse{},
 		ctx:          ctx,
 	}
 }
 
-func (s *Lookup_SubjectsServerStub) GetResponses() []*v0.LookupSubjectsResponse {
+func (s *Lookup_SubjectsServerStub) GetResponses() []*v1beta1.LookupSubjectsResponse {
 	return s.responses
 }
 
@@ -289,13 +289,13 @@ func (s *Lookup_ResourcesServerStub) GetIDs() []string {
 
 type Lookup_SubjectsServerStub struct {
 	grpc.ServerStream
-	responses []*v0.LookupSubjectsResponse
+	responses []*v1beta1.LookupSubjectsResponse
 	ctx       context.Context
 }
 
 type Lookup_ResourcesServerStub struct {
 	grpc.ServerStream
-	responses []*v0.LookupResourcesResponse
+	responses []*v1beta1.LookupResourcesResponse
 	ctx       context.Context
 }
 
@@ -303,12 +303,12 @@ func (s *Lookup_SubjectsServerStub) Context() context.Context {
 	return s.ctx
 }
 
-func (s *Lookup_SubjectsServerStub) Send(r *v0.LookupSubjectsResponse) error {
+func (s *Lookup_SubjectsServerStub) Send(r *v1beta1.LookupSubjectsResponse) error {
 	s.responses = append(s.responses, r)
 	return nil
 }
 
-func (s *Lookup_ResourcesServerStub) GetResponses() []*v0.LookupResourcesResponse {
+func (s *Lookup_ResourcesServerStub) GetResponses() []*v1beta1.LookupResourcesResponse {
 	return s.responses
 }
 
@@ -316,7 +316,7 @@ func (s *Lookup_ResourcesServerStub) Context() context.Context {
 	return s.ctx
 }
 
-func (s *Lookup_ResourcesServerStub) Send(r *v0.LookupResourcesResponse) error {
+func (s *Lookup_ResourcesServerStub) Send(r *v1beta1.LookupResourcesResponse) error {
 	s.responses = append(s.responses, r)
 	return nil
 }

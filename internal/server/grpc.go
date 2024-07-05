@@ -1,7 +1,7 @@
 package server
 
 import (
-	h "github.com/project-kessel/relations-api/api/kessel/health/v1"
+	h "github.com/project-kessel/relations-api/api/kessel/relations/v1"
 	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/conf"
 	"github.com/project-kessel/relations-api/internal/server/middleware"

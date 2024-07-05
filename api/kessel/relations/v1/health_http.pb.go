@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.7.3
 // - protoc             v4.25.1
-// source: kessel/health/v1/health.proto
+// source: kessel/relations/v1/health.proto
 
 package v1
 
@@ -19,8 +19,8 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationKesselHealthServiceGetLivez = "/kessel.health.v1.KesselHealthService/GetLivez"
-const OperationKesselHealthServiceGetReadyz = "/kessel.health.v1.KesselHealthService/GetReadyz"
+const OperationKesselHealthServiceGetLivez = "/kessel.relations.v1.KesselHealthService/GetLivez"
+const OperationKesselHealthServiceGetReadyz = "/kessel.relations.v1.KesselHealthService/GetReadyz"
 
 type KesselHealthServiceHTTPServer interface {
 	GetLivez(context.Context, *GetLivezRequest) (*GetLivezResponse, error)

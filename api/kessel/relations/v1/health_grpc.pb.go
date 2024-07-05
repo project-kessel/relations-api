@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v4.25.1
-// source: kessel/health/v1/health.proto
+// source: kessel/relations/v1/health.proto
 
 package v1
 
@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	KesselHealthService_GetLivez_FullMethodName  = "/kessel.health.v1.KesselHealthService/GetLivez"
-	KesselHealthService_GetReadyz_FullMethodName = "/kessel.health.v1.KesselHealthService/GetReadyz"
+	KesselHealthService_GetLivez_FullMethodName  = "/kessel.relations.v1.KesselHealthService/GetLivez"
+	KesselHealthService_GetReadyz_FullMethodName = "/kessel.relations.v1.KesselHealthService/GetReadyz"
 )
 
 // KesselHealthServiceClient is the client API for KesselHealthService service.
@@ -131,7 +131,7 @@ func _KesselHealthService_GetReadyz_Handler(srv interface{}, ctx context.Context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var KesselHealthService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "kessel.health.v1.KesselHealthService",
+	ServiceName: "kessel.relations.v1.KesselHealthService",
 	HandlerType: (*KesselHealthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -144,5 +144,5 @@ var KesselHealthService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "kessel/health/v1/health.proto",
+	Metadata: "kessel/relations/v1/health.proto",
 }

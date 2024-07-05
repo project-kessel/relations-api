@@ -17,7 +17,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/kessel.health.v1.GetLivezResponse'
+                                $ref: '#/components/schemas/kessel.relations.v1.GetLivezResponse'
     /readyz:
         get:
             tags:
@@ -29,7 +29,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/kessel.health.v1.GetReadyzResponse'
+                                $ref: '#/components/schemas/kessel.relations.v1.GetReadyzResponse'
     /v1beta1/check:
         post:
             tags:
@@ -269,7 +269,7 @@ paths:
                                 $ref: '#/components/schemas/kessel.relations.v1beta1.DeleteTuplesResponse'
 components:
     schemas:
-        kessel.health.v1.GetLivezResponse:
+        kessel.relations.v1.GetLivezResponse:
             type: object
             properties:
                 status:
@@ -277,7 +277,7 @@ components:
                 code:
                     type: integer
                     format: uint32
-        kessel.health.v1.GetReadyzResponse:
+        kessel.relations.v1.GetReadyzResponse:
             type: object
             properties:
                 status:

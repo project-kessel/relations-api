@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	pb "github.com/project-kessel/relations-api/api/kessel/health/v1"
+	pb "github.com/project-kessel/relations-api/api/kessel/relations/v1"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/data"
 

@@ -21,6 +21,9 @@ RUN go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
 RUN go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest 
 RUN go install github.com/envoyproxy/protoc-gen-validate@latest
 
+# Install Buf
+RUN go install github.com/bufbuild/buf/cmd/buf@latest
+
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10
 
 COPY --from=builder /usr/local/bin/protoc /usr/local/bin/protoc
@@ -29,3 +32,5 @@ COPY --from=builder /root/go/bin/protoc-gen-go-grpc /usr/local/bin/protoc-gen-go
 COPY --from=builder /root/go/bin/protoc-gen-go-http /usr/local/bin/protoc-gen-go-http
 COPY --from=builder /root/go/bin/protoc-gen-openapi /usr/local/bin/protoc-gen-openapi
 COPY --from=builder /root/go/bin/protoc-gen-validate /usr/local/bin/protoc-gen-validate
+
+COPY --from=builder /root/go/bin/buf /usr/local/bin/buf

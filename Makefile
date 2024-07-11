@@ -48,12 +48,11 @@ api:
 		--go-grpc_out=paths=source_relative:./api \
 		--validate_out=paths=source_relative,lang=go:./api \
 		--openapi_out=fq_schema_naming=true,default_response=false:. \
-		$(API_PROTO_FILES) && \
-		cd api/ && \
-		buf lint && \
-		buf breaking --against 'buf.build/project-kessel/relations-api' " \
+		--buf-lint_out=. \
+		--buf-breaking_out=. \
+		'--buf-breaking_opt={\"against_input\":\"buf.build/project-kessel/relations-api\",\"limit_to_input_files\":true, \"exclude_imports\": true}' \
+		$(API_PROTO_FILES)"
 		
-
 
 .PHONY: build
 # build

@@ -4,17 +4,17 @@ package kessel.relations.v1;
 
 import "google/api/annotations.proto";
 
-option go_package = "github.com/project-kessel/relations-api/api/health/v1";
+option go_package = "github.com/project-kessel/relations-api/api/kessel/relations/v1";
 option java_multiple_files = true;
 option java_package = "org.project_kessel.api.relations.v1";
 
-service KesselHealth {
-	rpc GetLivez (GetLivezRequest) returns (GetLivezReply){
+service KesselHealthService {
+	rpc GetLivez (GetLivezRequest) returns (GetLivezResponse){
 		option (google.api.http) = {
 			get: "/livez"
 		};
 	};
-	rpc GetReadyz (GetReadyzRequest) returns (GetReadyzReply){
+	rpc GetReadyz (GetReadyzRequest) returns (GetReadyzResponse){
 		option (google.api.http) = {
 			get: "/readyz"
 		};
@@ -22,13 +22,13 @@ service KesselHealth {
 }
 
 message GetLivezRequest {}
-message GetLivezReply {
+message GetLivezResponse {
 	string status = 1;
 	uint32 code = 2;
 }
 
 message GetReadyzRequest {}
-message GetReadyzReply {
+message GetReadyzResponse {
 	string status = 1;
 	uint32 code = 2;
 }

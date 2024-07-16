@@ -9,28 +9,28 @@ paths:
     /livez:
         get:
             tags:
-                - KesselHealth
-            operationId: KesselHealth_GetLivez
+                - KesselHealthService
+            operationId: KesselHealthService_GetLivez
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/kessel.relations.v1.GetLivezReply'
+                                $ref: '#/components/schemas/kessel.relations.v1.GetLivezResponse'
     /readyz:
         get:
             tags:
-                - KesselHealth
-            operationId: KesselHealth_GetReadyz
+                - KesselHealthService
+            operationId: KesselHealthService_GetReadyz
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/kessel.relations.v1.GetReadyzReply'
-    /v0/check:
+                                $ref: '#/components/schemas/kessel.relations.v1.GetReadyzResponse'
+    /v1beta1/check:
         post:
             tags:
                 - KesselCheckService
@@ -40,7 +40,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/kessel.relations.v0.CheckRequest'
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.CheckRequest'
                 required: true
             responses:
                 "200":
@@ -48,8 +48,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/kessel.relations.v0.CheckResponse'
-    /v0/resources:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.CheckResponse'
+    /v1beta1/resources:
         get:
             tags:
                 - KesselLookupService
@@ -101,8 +101,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/kessel.relations.v0.LookupResourcesResponse'
-    /v0/subjects:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.LookupResourcesResponse'
+    /v1beta1/subjects:
         get:
             tags:
                 - KesselLookupService
@@ -151,8 +151,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/kessel.relations.v0.LookupSubjectsResponse'
-    /v0/tuples:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.LookupSubjectsResponse'
+    /v1beta1/tuples:
         get:
             tags:
                 - KesselTupleService
@@ -205,7 +205,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/kessel.relations.v0.ReadTuplesResponse'
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.ReadTuplesResponse'
         post:
             tags:
                 - KesselTupleService
@@ -214,7 +214,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/kessel.relations.v0.CreateTuplesRequest'
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.CreateTuplesRequest'
                 required: true
             responses:
                 "200":
@@ -222,7 +222,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/kessel.relations.v0.CreateTuplesResponse'
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.CreateTuplesResponse'
         delete:
             tags:
                 - KesselTupleService
@@ -266,25 +266,41 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/kessel.relations.v0.DeleteTuplesResponse'
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.DeleteTuplesResponse'
 components:
     schemas:
-        kessel.relations.v0.CheckRequest:
+        kessel.relations.v1.GetLivezResponse:
+            type: object
+            properties:
+                status:
+                    type: string
+                code:
+                    type: integer
+                    format: uint32
+        kessel.relations.v1.GetReadyzResponse:
+            type: object
+            properties:
+                status:
+                    type: string
+                code:
+                    type: integer
+                    format: uint32
+        kessel.relations.v1beta1.CheckRequest:
             type: object
             properties:
                 resource:
-                    $ref: '#/components/schemas/kessel.relations.v0.ObjectReference'
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
                 relation:
                     type: string
                 subject:
-                    $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
-        kessel.relations.v0.CheckResponse:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
+        kessel.relations.v1beta1.CheckResponse:
             type: object
             properties:
                 allowed:
                     type: integer
                     format: enum
-        kessel.relations.v0.CreateTuplesRequest:
+        kessel.relations.v1beta1.CreateTuplesRequest:
             type: object
             properties:
                 upsert:
@@ -293,64 +309,64 @@ components:
                 tuples:
                     type: array
                     items:
-                        $ref: '#/components/schemas/kessel.relations.v0.Relationship'
-        kessel.relations.v0.CreateTuplesResponse:
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.Relationship'
+        kessel.relations.v1beta1.CreateTuplesResponse:
             type: object
             properties: {}
-        kessel.relations.v0.DeleteTuplesResponse:
+        kessel.relations.v1beta1.DeleteTuplesResponse:
             type: object
             properties: {}
-        kessel.relations.v0.LookupResourcesResponse:
+        kessel.relations.v1beta1.LookupResourcesResponse:
             type: object
             properties:
                 resource:
-                    $ref: '#/components/schemas/kessel.relations.v0.ObjectReference'
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
                 pagination:
-                    $ref: '#/components/schemas/kessel.relations.v0.ResponsePagination'
-        kessel.relations.v0.LookupSubjectsResponse:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
+        kessel.relations.v1beta1.LookupSubjectsResponse:
             type: object
             properties:
                 subject:
-                    $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
                 pagination:
-                    $ref: '#/components/schemas/kessel.relations.v0.ResponsePagination'
-        kessel.relations.v0.ObjectReference:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
+        kessel.relations.v1beta1.ObjectReference:
             type: object
             properties:
                 type:
-                    $ref: '#/components/schemas/kessel.relations.v0.ObjectType'
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectType'
                 id:
                     type: string
-        kessel.relations.v0.ObjectType:
+        kessel.relations.v1beta1.ObjectType:
             type: object
             properties:
                 namespace:
                     type: string
                 name:
                     type: string
-        kessel.relations.v0.ReadTuplesResponse:
+        kessel.relations.v1beta1.ReadTuplesResponse:
             type: object
             properties:
                 tuple:
-                    $ref: '#/components/schemas/kessel.relations.v0.Relationship'
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Relationship'
                 pagination:
-                    $ref: '#/components/schemas/kessel.relations.v0.ResponsePagination'
-        kessel.relations.v0.Relationship:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
+        kessel.relations.v1beta1.Relationship:
             type: object
             properties:
                 resource:
-                    $ref: '#/components/schemas/kessel.relations.v0.ObjectReference'
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
                 relation:
                     type: string
                 subject:
-                    $ref: '#/components/schemas/kessel.relations.v0.SubjectReference'
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
             description: "A _Relationship_ is the realization of a _Relation_ (a string) \n between a _Resource_ and a _Subject_ or a _Subject Set_ (known as a Userset in Zanzibar).\n\n All Relationships are object-object relations.\n \"Resource\" and \"Subject\" are relative terms which define the direction of a Relation.\n That is, Relations are unidirectional.\n If you reverse the Subject and Resource, it is a different Relation and a different Relationship.\n Conventionally, we generally refer to the Resource first, then Subject,\n following the direction of typical graph traversal (Resource to Subject)."
-        kessel.relations.v0.ResponsePagination:
+        kessel.relations.v1beta1.ResponsePagination:
             type: object
             properties:
                 continuationToken:
                     type: string
-        kessel.relations.v0.SubjectReference:
+        kessel.relations.v1beta1.SubjectReference:
             type: object
             properties:
                 relation:
@@ -359,27 +375,11 @@ components:
                         An optional relation which points to a set of Subjects instead of the single Subject.
                          e.g. "members" or "owners" of a group identified in `subject`.
                 subject:
-                    $ref: '#/components/schemas/kessel.relations.v0.ObjectReference'
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
             description: A reference to a Subject or, if a `relation` is provided, a Subject Set.
-        kessel.relations.v1.GetLivezReply:
-            type: object
-            properties:
-                status:
-                    type: string
-                code:
-                    type: integer
-                    format: uint32
-        kessel.relations.v1.GetReadyzReply:
-            type: object
-            properties:
-                status:
-                    type: string
-                code:
-                    type: integer
-                    format: uint32
 tags:
     - name: KesselCheckService
-    - name: KesselHealth
+    - name: KesselHealthService
     - name: KesselLookupService
     - name: KesselTupleService
       description: "KesselTupleServices manages the persisted _Tuples_ stored in the system..\n \n A Tuple is an explicitly stated, persistent relation \n between a Resource and a Subject or Subject Set. \n It has the same _shape_ as a Relationship but is not the same thing as a Relationship.\n \n A single Tuple may result in zero-to-many Relationships."

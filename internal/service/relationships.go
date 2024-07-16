@@ -9,7 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 
-	pb "github.com/project-kessel/relations-api/api/relations/v0"
+	pb "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 )
 
 type RelationshipsService struct {

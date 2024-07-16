@@ -1,14 +1,14 @@
 syntax = "proto3";
 
-package kessel.relations.v0;
+package kessel.relations.v1beta1;
 
 import "google/api/annotations.proto";
-import "relations/v0/common.proto";
+import "kessel/relations/v1beta1/common.proto";
 import "validate/validate.proto";
 
-option go_package = "github.com/project-kessel/relations-api/api/relations/v0";
+option go_package = "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1";
 option java_multiple_files = true;
-option java_package = "org.project_kessel.api.relations.v0";
+option java_package = "org.project_kessel.api.relations.v1beta1";
 
 // KesselTupleServices manages the persisted _Tuples_ stored in the system..
 // 
@@ -20,18 +20,18 @@ option java_package = "org.project_kessel.api.relations.v0";
 service KesselTupleService {
 	rpc CreateTuples (CreateTuplesRequest) returns (CreateTuplesResponse) {
 		option (google.api.http) = {
-			post: "/v0/tuples"
+			post: "/v1beta1/tuples"
 			body: "*"
 		};
 	};
 	rpc ReadTuples (ReadTuplesRequest) returns (stream ReadTuplesResponse) {
 		option (google.api.http) = {
-			get: "/v0/tuples"
+			get: "/v1beta1/tuples"
 		};
 	};
 	rpc DeleteTuples (DeleteTuplesRequest) returns (DeleteTuplesResponse) {
 		option (google.api.http) = {
-			delete: "/v0/tuples"
+			delete: "/v1beta1/tuples"
 		};
 	};
 }

@@ -138,4 +138,4 @@ fi
 echo "Relations - Write(POST) - Sample CURL request"
 echo ""
 JSON_DATA='{ "tuples": [{"resource": {"type": {"type": "group"},"id": "bob_club2"},"relation": "member","subject": {"subject": {"type": {"type": "user"},"id": "bob2"}}}]}'
-echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v0/tuples -H 'Content-Type: application/json' -d '$JSON_DATA'"
+echo "curl -v -u ${USER}:${PASSWORD} ${BASE_URL}/api/authz/v1beta1/tuples -H 'Content-Type: application/json' -d '$JSON_DATA'"

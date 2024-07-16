@@ -1,0 +1,11 @@
+version: v2
+name: buf.build/project-kessel/relations-api
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE
+deps:
+  - buf.build/googleapis/googleapis
+  - buf.build/envoyproxy/protoc-gen-validate

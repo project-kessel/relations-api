@@ -1,8 +1,8 @@
 package server
 
 import (
-	h "github.com/project-kessel/relations-api/api/health/v1"
-	v0 "github.com/project-kessel/relations-api/api/relations/v0"
+	h "github.com/project-kessel/relations-api/api/kessel/relations/v1"
+	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/conf"
 	"github.com/project-kessel/relations-api/internal/service"
 
@@ -36,8 +36,8 @@ func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, 
 	}
 
 	srv := http.NewServer(opts...)
-	v0.RegisterKesselTupleServiceHTTPServer(srv, relationships)
-	v0.RegisterKesselCheckServiceHTTPServer(srv, check)
-	h.RegisterKesselHealthHTTPServer(srv, health)
+	v1beta1.RegisterKesselTupleServiceHTTPServer(srv, relationships)
+	v1beta1.RegisterKesselCheckServiceHTTPServer(srv, check)
+	h.RegisterKesselHealthServiceHTTPServer(srv, health)
 	return srv
 }

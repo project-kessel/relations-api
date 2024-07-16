@@ -9,11 +9,6 @@ ifeq ($(GOHOSTOS), windows)
 	#changed to use git-bash.exe to run find cli or other cli friendly, caused of every developer has a Git.
 	#Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
 	Git_Bash=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell where git))))
-	INTERNAL_PROTO_FILES=$(shell $(Git_Bash) -c "find internal -name *.proto")
-	API_PROTO_FILES=$(shell $(Git_Bash) -c "find api -name *.proto")
-else
-	INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
-	API_PROTO_FILES=$(shell find api -name *.proto)
 endif
 
 .PHONY: init
@@ -28,11 +23,7 @@ config:
 	@echo "Generating internal protos"
 	@$(DOCKER) build -t custom-protoc ./api
 	@$(DOCKER) run -t --rm -v $(PWD)/internal:/internal -v $(PWD)/third_party:/third_party \
-	custom-protoc sh -c "protoc \
-		--proto_path=./internal \
-		--proto_path=./third_party \
-		--go_out=paths=source_relative:./internal \
-		$(INTERNAL_PROTO_FILES)"
+	-w=/internal/conf/ custom-protoc sh -c "buf generate"		
 
 .PHONY: api
 # generate api proto
@@ -40,16 +31,10 @@ api:
 	@echo "Generating api protos"
 	@$(DOCKER) build -t custom-protoc ./api
 	@$(DOCKER) run -t --rm -v $(PWD)/api:/api -v $(PWD)/openapi.yaml:/openapi.yaml -v $(PWD)/third_party:/third_party \
-    custom-protoc sh -c "protoc \
-		--proto_path=./api \
-		--proto_path=./third_party \
-		--go_out=paths=source_relative:./api \
-		--go-http_out=paths=source_relative:./api \
-		--go-grpc_out=paths=source_relative:./api \
-		--validate_out=paths=source_relative,lang=go:./api \
-		--openapi_out=fq_schema_naming=true,default_response=false:. \
-		$(API_PROTO_FILES)"
-
+	-w=/api/ custom-protoc sh -c "buf generate && \
+		buf lint && \
+		buf breaking --against 'buf.build/project-kessel/relations-api' "
+		
 
 .PHONY: build
 # build

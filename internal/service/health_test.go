@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	pb "github.com/project-kessel/relations-api/api/health/v1"
+	pb "github.com/project-kessel/relations-api/api/kessel/relations/v1"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/data"
 
@@ -23,7 +23,7 @@ func TestHealthService_GetLivez(t *testing.T) {
 	resp, err := service.GetLivez(ctx, &pb.GetLivezRequest{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, resp, &pb.GetLivezReply{Status: "OK", Code: 200})
+	assert.Equal(t, resp, &pb.GetLivezResponse{Status: "OK", Code: 200})
 }
 
 func TestHealthService_GetReadyz_SpiceDBAvailable(t *testing.T) {
@@ -37,7 +37,7 @@ func TestHealthService_GetReadyz_SpiceDBAvailable(t *testing.T) {
 	resp, err := service.GetReadyz(ctx, &pb.GetReadyzRequest{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, resp, &pb.GetReadyzReply{Status: "OK", Code: 200})
+	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "OK", Code: 200})
 }
 
 func TestHealthService_GetReadyz_SpiceDBUnavailable(t *testing.T) {
@@ -50,7 +50,7 @@ func TestHealthService_GetReadyz_SpiceDBUnavailable(t *testing.T) {
 	resp, err := service.GetReadyz(ctx, &pb.GetReadyzRequest{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, resp, &pb.GetReadyzReply{Status: "Unavailable", Code: 503})
+	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "Unavailable", Code: 503})
 }
 
 type DummyZanzibar struct {

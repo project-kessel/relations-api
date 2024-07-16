@@ -3,7 +3,7 @@ package biz
 import (
 	"context"
 
-	v0 "github.com/project-kessel/relations-api/api/relations/v0"
+	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 )
 
 const (
@@ -28,7 +28,7 @@ func NewGetSubjectsUseCase(repo ZanzibarRepository) *GetSubjectsUsecase {
 	return &GetSubjectsUsecase{repo: repo}
 }
 
-func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequest) (chan *SubjectResult, chan error, error) {
+func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v1beta1.LookupSubjectsRequest) (chan *SubjectResult, chan error, error) {
 	limit := uint32(MaxStreamingCount)
 	continuation := ContinuationToken("")
 	subjectRelation := ""
@@ -47,7 +47,7 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequ
 		subjectRelation = *req.SubjectRelation
 	}
 
-	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, subjectRelation, req.Relation, &v0.ObjectReference{
+	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, subjectRelation, req.Relation, &v1beta1.ObjectReference{
 		Type: req.Resource.Type,
 		Id:   req.Resource.Id,
 	}, limit, continuation)
@@ -59,7 +59,7 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v0.LookupSubjectsRequ
 	return subs, errs, nil
 }
 
-func (r *GetResourcesUsecase) Get(ctx context.Context, req *v0.LookupResourcesRequest) (chan *ResourceResult, chan error, error) {
+func (r *GetResourcesUsecase) Get(ctx context.Context, req *v1beta1.LookupResourcesRequest) (chan *ResourceResult, chan error, error) {
 	limit := uint32(MaxStreamingCount)
 	continuation := ContinuationToken("")
 

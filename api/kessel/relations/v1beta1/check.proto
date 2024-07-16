@@ -1,22 +1,22 @@
 syntax = "proto3";
 
-package kessel.relations.v0;
+package kessel.relations.v1beta1;
 
 import "google/api/annotations.proto";
-import "relations/v0/common.proto";
+import "kessel/relations/v1beta1/common.proto";
 import "validate/validate.proto";
 
 
-option go_package = "github.com/project-kessel/relations-api/api/relations/v0";
+option go_package = "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1";
 option java_multiple_files = true;
-option java_package = "org.project_kessel.api.relations.v0";
+option java_package = "org.project_kessel.api.relations.v1beta1";
 
 service KesselCheckService {
 	// Checks for the existence of a single Relationship 
 	// (a Relation between a Resource and a Subject or Subject Set).
 	rpc Check (CheckRequest) returns (CheckResponse) {
 		option (google.api.http) = {
-			post: "/v0/check"
+			post: "/v1beta1/check"
 			body: "*"
 		};
 	};

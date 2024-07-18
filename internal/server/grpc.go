@@ -24,6 +24,7 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 		),
 		grpc.StreamInterceptor(middleware.StreamLogInterceptor(logger)),
 		grpc.StreamInterceptor(middleware.StreamValidationInterceptor()),
+		grpc.StreamInterceptor(middleware.StreamRecoveryInterceptor(logger)),
 	}
 	if c.Grpc.Network != "" {
 		opts = append(opts, grpc.Network(c.Grpc.Network))

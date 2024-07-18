@@ -1,19 +1,35 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
 
 	"google.golang.org/grpc"
 )
 
-func StreamRecoveryInterceptor(logger log.Logger) grpc.StreamServerInterceptor {
-	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		wrapper := &requestInterceptingWrapper{ServerStream: ss}
+type Option func(*options)
+
+type options struct { // Duplicated from https://github.com/go-kratos/kratos/blob/main/middleware/recovery/recovery.go b/c no export
+	handler recovery.HandlerFunc
+}
+
+func StreamRecoveryInterceptor(logger log.Logger, opts ...Option) grpc.StreamServerInterceptor {
+	op := options{
+		handler: func(ctx context.Context, req, err interface{}) error {
+			return recovery.ErrUnknownRequest
+		},
+	}
+	for _, o := range opts {
+		o(&op)
+	}
+	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) (err error) {
 		startTime := time.Now()
+		wrapper := &requestInterceptingWrapper{ServerStream: ss}
 		ctx := ss.Context()
 
 		defer func() {
@@ -27,7 +43,7 @@ func StreamRecoveryInterceptor(logger log.Logger) grpc.StreamServerInterceptor {
 					"latency", time.Since(startTime).Seconds(),
 					"reason", fmt.Sprintf("%v: %+v\n%s\n", rerr, wrapper.req, buf),
 				)
-				// fail silently?
+				err = op.handler(ctx, wrapper.req, rerr)
 			}
 		}()
 		return handler(srv, wrapper)

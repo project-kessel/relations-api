@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/metrics"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 
 	"google.golang.org/grpc"
@@ -15,7 +16,9 @@ import (
 type Option func(*options)
 
 type options struct { // Duplicated from https://github.com/go-kratos/kratos/blob/main/middleware/recovery/recovery.go b/c no export
-	handler recovery.HandlerFunc
+	handler  recovery.HandlerFunc
+	requests metrics.Counter
+	seconds  metrics.Observer
 }
 
 func StreamRecoveryInterceptor(logger log.Logger, opts ...Option) grpc.StreamServerInterceptor {

@@ -46,6 +46,7 @@ services:
 
   database:
     image: "postgres"
+    command: -c track_commit_timestamp=on
     ports:
       - "5432:5432"
     environment:

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/metrics"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"go.opentelemetry.io/otel/metric"
 
 	"google.golang.org/grpc"
 )
@@ -17,8 +17,8 @@ type Option func(*options)
 
 type options struct { // Duplicated from https://github.com/go-kratos/kratos/blob/main/middleware/recovery/recovery.go b/c no export
 	handler  recovery.HandlerFunc
-	requests metrics.Counter
-	seconds  metrics.Observer
+	requests metric.Int64Counter
+	seconds  metric.Float64Histogram
 }
 
 func StreamRecoveryInterceptor(logger log.Logger, opts ...Option) grpc.StreamServerInterceptor {

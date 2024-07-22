@@ -5,7 +5,6 @@ package middleware
 import (
 	"context"
 	"net"
-	"net/url"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/metadata"
@@ -21,6 +20,7 @@ import (
 
 const serviceHeader = "x-md-service-name" //Taken from Kratos: middleware/tracing/metadata.go
 
+/* Removed because client code isn't used yet, and this is a linter issue
 func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 	var (
 		attrs     []attribute.KeyValue
@@ -59,6 +59,7 @@ func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 
 	span.SetAttributes(attrs...)
 }
+*/
 
 func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
 	var (
@@ -140,6 +141,7 @@ func peerAttr(addr string) []attribute.KeyValue {
 	}
 }
 
+/* Removed because client code isn't used yet, and this is a linter issue
 func parseTarget(endpoint string) (address string, err error) {
 	var u *url.URL
 	u, err = url.Parse(endpoint)
@@ -154,3 +156,4 @@ func parseTarget(endpoint string) (address string, err error) {
 	}
 	return endpoint, nil
 }
+*/

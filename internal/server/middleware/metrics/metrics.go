@@ -1,4 +1,4 @@
-package middleware
+package metrics
 
 // Taken from Kratos: middleware/metrics/metrics.go
 
@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
 	"google.golang.org/grpc"
 
@@ -20,6 +19,13 @@ const (
 	metricLabelCode      = "code"
 	metricLabelReason    = "reason"
 )
+
+type Option func(*options)
+
+type options struct { // Duplicated from https://github.com/go-kratos/kratos/blob/main/middleware/metrics/metrics.go b/c no export
+	requests metric.Int64Counter
+	seconds  metric.Float64Histogram
+}
 
 // WithRequests with requests counter.
 func WithRequests(c metric.Int64Counter) Option {
@@ -35,15 +41,14 @@ func WithSeconds(histogram metric.Float64Histogram) Option {
 	}
 }
 
-func StreamMetricsInterceptor(logger log.Logger, opts ...Option) grpc.StreamServerInterceptor {
+func StreamMetricsInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 	op := options{}
 	for _, o := range opts {
 		o(&op)
 	}
 	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		wrapper := &requestInterceptingWrapper{ServerStream: ss}
 		if op.seconds == nil && op.requests == nil {
-			return handler(srv, wrapper)
+			return handler(srv, ss)
 		}
 
 		var (
@@ -60,7 +65,7 @@ func StreamMetricsInterceptor(logger log.Logger, opts ...Option) grpc.StreamServ
 			operation = info.Operation()
 		}
 
-		err := handler(srv, wrapper)
+		err := handler(srv, ss)
 		if se := errors.FromError(err); se != nil {
 			code = int(se.Code)
 			reason = se.Reason

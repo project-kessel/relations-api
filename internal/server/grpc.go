@@ -14,6 +14,8 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
+	kesselMetrics "github.com/project-kessel/relations-api/internal/server/middleware/metrics"
+	kesselRecovery "github.com/project-kessel/relations-api/internal/server/middleware/recovery"
 	googlegrpc "google.golang.org/grpc"
 )
 
@@ -41,10 +43,10 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 		grpc.Options(googlegrpc.ChainStreamInterceptor(
 			middleware.StreamLogInterceptor(logger),
 			middleware.StreamValidationInterceptor(),
-			middleware.StreamRecoveryInterceptor(logger),
-			middleware.StreamMetricsInterceptor(logger,
-				middleware.WithSeconds(seconds),
-				middleware.WithRequests(requests),
+			kesselRecovery.StreamRecoveryInterceptor(logger),
+			kesselMetrics.StreamMetricsInterceptor(
+				kesselMetrics.WithSeconds(seconds),
+				kesselMetrics.WithRequests(requests),
 			),
 		)),
 	}

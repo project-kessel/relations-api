@@ -1,4 +1,4 @@
-package middleware
+package tracing
 
 import (
 	"github.com/go-kratos/kratos/v2/middleware/tracing"

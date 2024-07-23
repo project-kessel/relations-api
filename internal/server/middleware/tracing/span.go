@@ -1,4 +1,4 @@
-package middleware
+package tracing
 
 // Taken from: middleware/tracing/span.go
 

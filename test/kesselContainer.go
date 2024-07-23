@@ -75,9 +75,12 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 	}
 	targetArch := "amd64" // or "arm64", depending on your needs
 
+	enable_auth := fmt.Sprintf("SPICEDB_ENABLEAUTH=%t", true)
+	sso := fmt.Sprintf("SPICEDB_JWKSURL=%s", "http://host.docker.internal:8180/jwks")
 	name := strings.Trim(container.Name(), "/")
 	endpoint := fmt.Sprintf("SPICEDB_ENDPOINT=%s:%s", name, "50051")
 	presharedSecret := fmt.Sprintf("SPICEDB_PRESHARED=%s", "spicedbpreshared")
+
 	resource, err := pool.BuildAndRunWithBuildOptions(&dockertest.BuildOptions{
 		Dockerfile: "Dockerfile", // Path to your Dockerfile
 		ContextDir: "../",        // Context directory for the Dockerfile
@@ -87,7 +90,7 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 		},
 	}, &dockertest.RunOptions{
 		Name:      "rel",
-		Env:       []string{endpoint, presharedSecret},
+		Env:       []string{endpoint, presharedSecret, sso, enable_auth},
 		NetworkID: network.ID,
 	})
 	if err != nil {

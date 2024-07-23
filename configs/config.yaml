@@ -7,6 +7,9 @@ server:
     addr: "${GRPCADDR:0.0.0.0:9000}"
     timeout: 1s
   minLogLevel: Info
+  auth:
+    enableAuth: "${ENABLEAUTH:false}"
+    jwksUrl: "${JWKSURL:http://0.0.0.0:8180/jwks}"
 data:
   spiceDb:
     useTLS: false

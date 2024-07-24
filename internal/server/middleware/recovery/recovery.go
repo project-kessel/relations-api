@@ -1,4 +1,4 @@
-package middleware
+package recovery
 
 import (
 	"context"
@@ -16,6 +16,11 @@ type Option func(*options)
 
 type options struct { // Duplicated from https://github.com/go-kratos/kratos/blob/main/middleware/recovery/recovery.go b/c no export
 	handler recovery.HandlerFunc
+}
+
+type requestInterceptingWrapper struct {
+	req any
+	grpc.ServerStream
 }
 
 func StreamRecoveryInterceptor(logger log.Logger, opts ...Option) grpc.StreamServerInterceptor {

@@ -62,9 +62,6 @@ func StreamAuthInterceptor(keyFunc jwtv5.Keyfunc, opts ...AuthOption) grpc.Strea
 		if keyFunc == nil {
 			return jwt.ErrMissingKeyFunc
 		}
-		if err != nil {
-			return err
-		}
 		md, ok := metadata.FromIncomingContext(newCtx)
 		if !ok {
 			return jwt.ErrMissingJwtToken

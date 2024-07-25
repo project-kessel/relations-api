@@ -6,12 +6,10 @@ require (
 	github.com/MicahParks/keyfunc/v3 v3.3.3
 	github.com/authzed/authzed-go v0.13.0
 	github.com/authzed/grpcutil v0.0.0-20230908193239-4286bb1d6403
-	github.com/bradhe/stopwatch v0.0.0-20190618212248-a58cccc508ea
 	github.com/envoyproxy/protoc-gen-validate v1.0.4
 	github.com/go-kratos/kratos/v2 v2.8.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/wire v0.6.0
-	github.com/mendsley/gojwk v0.0.0-20141217222730-4d5ec6e58103
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/prometheus/client_golang v1.19.1
 	github.com/stretchr/testify v1.9.0

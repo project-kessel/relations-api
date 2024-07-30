@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"fmt"
+	"github.com/authzed/grpcutil"
 	"os"
 	"sync"
 	"testing"
@@ -65,9 +66,16 @@ func TestMain(m *testing.M) {
 
 func TestKesselAPIGRPC_CreateTuples(t *testing.T) {
 	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
+
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
 	)
 	if err != nil {
 		fmt.Print(err)
@@ -83,9 +91,15 @@ func TestKesselAPIGRPC_CreateTuples(t *testing.T) {
 
 func TestKesselAPIGRPC_ReadTuples(t *testing.T) {
 	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
 	)
 	if err != nil {
 		fmt.Print(err)
@@ -108,9 +122,15 @@ func TestKesselAPIGRPC_ReadTuples(t *testing.T) {
 
 func TestKesselAPIGRPC_DeleteTuples(t *testing.T) {
 	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
 	)
 	if err != nil {
 		fmt.Print(err)
@@ -134,9 +154,15 @@ func TestKesselAPIGRPC_DeleteTuples(t *testing.T) {
 
 func TestKesselAPIGRPC_Check(t *testing.T) {
 	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
 	)
 	if err != nil {
 		fmt.Print(err)
@@ -166,9 +192,15 @@ func TestKesselAPIGRPC_Check(t *testing.T) {
 
 func TestKesselAPIGRPC_LookupSubjects(t *testing.T) {
 	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
 	)
 	if err != nil {
 		fmt.Print(err)
@@ -187,9 +219,15 @@ func TestKesselAPIGRPC_LookupSubjects(t *testing.T) {
 
 func TestKesselAPIGRPC_LookupResources(t *testing.T) {
 	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
 	)
 	if err != nil {
 		fmt.Print(err)

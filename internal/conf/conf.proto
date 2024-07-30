@@ -25,6 +25,12 @@ message Server {
   HTTP http = 1;
   GRPC grpc = 2;
   optional string minLogLevel = 3;
+
+  message Auth {
+    bool enableAuth = 1;
+    string jwksUrl = 2;
+  }
+  Auth auth = 4;
 }
 
 message Data {

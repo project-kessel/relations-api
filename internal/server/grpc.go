@@ -1,19 +1,24 @@
 package server
 
 import (
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
+	"github.com/go-kratos/kratos/v2/middleware/logging"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/middleware/selector"
+	"github.com/go-kratos/kratos/v2/middleware/validate"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	jwtv5 "github.com/golang-jwt/jwt/v5"
 	h "github.com/project-kessel/relations-api/api/kessel/relations/v1"
 	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/conf"
 	"github.com/project-kessel/relations-api/internal/server/middleware"
+	"github.com/project-kessel/relations-api/internal/server/middleware/auth"
 	"github.com/project-kessel/relations-api/internal/service"
+
 	"go.opentelemetry.io/otel/metric"
 
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/metrics"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/middleware/validate"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
 	kesselMetrics "github.com/project-kessel/relations-api/internal/server/middleware/metrics"
 	kesselRecovery "github.com/project-kessel/relations-api/internal/server/middleware/recovery"
 	googlegrpc "google.golang.org/grpc"
@@ -48,6 +53,22 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 				kesselMetrics.WithRequests(requests),
 			),
 		)),
+	}
+	if c.Auth.EnableAuth {
+		jwks, err := FetchJwks(c.Auth.JwksUrl)
+		if err != nil {
+			return nil, err
+		}
+		opts = append(opts, grpc.Middleware(
+			selector.Server(jwt.Server(jwks.Keyfunc,
+				jwt.WithSigningMethod(jwtv5.SigningMethodRS256))).
+				Match(NewWhiteListMatcher).
+				Build(),
+		),
+			grpc.Options(googlegrpc.ChainStreamInterceptor(auth.StreamAuthInterceptor(
+				jwks.Keyfunc,
+				auth.WithSigningMethod(jwtv5.SigningMethodRS256)))),
+		)
 	}
 	if c.Grpc.Network != "" {
 		opts = append(opts, grpc.Network(c.Grpc.Network))

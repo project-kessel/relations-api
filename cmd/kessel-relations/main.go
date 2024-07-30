@@ -54,6 +54,7 @@ func main() {
 	flag.Parse()
 
 	c := config.New(
+		config.WithResolveActualTypes(true),
 		config.WithSource(
 			env.NewSource("SPICEDB_"),
 			file.NewSource(flagconf),

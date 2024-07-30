@@ -74,6 +74,11 @@ func (s *LookupService) LookupResources(req *pb.LookupResourcesRequest, conn pb.
 		return errors.BadRequest("Invalid request", err.Error())
 	}
 
+	if err := req.Subject.Subject.ValidateAll(); err != nil {
+		s.log.Infof("Subject failed to pass validation: %v", req)
+		return errors.BadRequest("Invalid request", err.Error())
+	}
+
 	ctx := conn.Context()
 
 	res, errs, err := s.resourcesUsecase.Get(ctx, req)

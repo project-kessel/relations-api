@@ -63,6 +63,26 @@ func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 	assert.Empty(t, results)
 }
 
+func TestLookupService_LookupResources_Empty(t *testing.T) {
+	t.Parallel()
+	ctx := context.TODO()
+	spicedb, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	service := createLookupService(spicedb)
+
+	responseCollector := NewLookup_ResourcesServerStub(ctx)
+	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
+		Subject:      &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{}},
+		Relation:     "view",
+		ResourceType: &v1beta1.ObjectType{},
+	}, responseCollector)
+	assert.ErrorContains(t, err, "Invalid request message")
+	results := responseCollector.GetResponses()
+
+	assert.Empty(t, results)
+}
+
 func TestLookupService_LookupResources_NoResults(t *testing.T) {
 	t.Parallel()
 	ctx := context.TODO()

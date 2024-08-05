@@ -2,12 +2,13 @@ package service
 
 import (
 	"context"
+
 	pb "github.com/project-kessel/relations-api/api/kessel/relations/v1"
 	"github.com/project-kessel/relations-api/internal/biz"
 )
 
 type HealthService struct {
-	pb.UnimplementedKesselHealthServiceServer
+	pb.UnimplementedKesselRelationsHealthServiceServer
 	backendUseCase *biz.IsBackendAvaliableUsecase
 }
 

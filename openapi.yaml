@@ -9,8 +9,8 @@ paths:
     /livez:
         get:
             tags:
-                - KesselHealthService
-            operationId: KesselHealthService_GetLivez
+                - KesselRelationsHealthService
+            operationId: KesselRelationsHealthService_GetLivez
             responses:
                 "200":
                     description: OK
@@ -21,8 +21,8 @@ paths:
     /readyz:
         get:
             tags:
-                - KesselHealthService
-            operationId: KesselHealthService_GetReadyz
+                - KesselRelationsHealthService
+            operationId: KesselRelationsHealthService_GetReadyz
             responses:
                 "200":
                     description: OK
@@ -379,7 +379,7 @@ components:
             description: A reference to a Subject or, if a `relation` is provided, a Subject Set.
 tags:
     - name: KesselCheckService
-    - name: KesselHealthService
     - name: KesselLookupService
+    - name: KesselRelationsHealthService
     - name: KesselTupleService
       description: "KesselTupleServices manages the persisted _Tuples_ stored in the system..\n \n A Tuple is an explicitly stated, persistent relation \n between a Resource and a Subject or Subject Set. \n It has the same _shape_ as a Relationship but is not the same thing as a Relationship.\n \n A single Tuple may result in zero-to-many Relationships."

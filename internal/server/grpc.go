@@ -82,7 +82,7 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 	srv := grpc.NewServer(opts...)
 	v1beta1.RegisterKesselTupleServiceServer(srv, relations)
 	v1beta1.RegisterKesselCheckServiceServer(srv, check)
-	h.RegisterKesselHealthServiceServer(srv, health)
+	h.RegisterKesselRelationsHealthServiceServer(srv, health)
 	v1beta1.RegisterKesselLookupServiceServer(srv, subjects)
 	return srv, nil
 }

@@ -19,27 +19,27 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationKesselHealthServiceGetLivez = "/kessel.relations.v1.KesselHealthService/GetLivez"
-const OperationKesselHealthServiceGetReadyz = "/kessel.relations.v1.KesselHealthService/GetReadyz"
+const OperationKesselRelationsHealthServiceGetLivez = "/kessel.relations.v1.KesselRelationsHealthService/GetLivez"
+const OperationKesselRelationsHealthServiceGetReadyz = "/kessel.relations.v1.KesselRelationsHealthService/GetReadyz"
 
-type KesselHealthServiceHTTPServer interface {
+type KesselRelationsHealthServiceHTTPServer interface {
 	GetLivez(context.Context, *GetLivezRequest) (*GetLivezResponse, error)
 	GetReadyz(context.Context, *GetReadyzRequest) (*GetReadyzResponse, error)
 }
 
-func RegisterKesselHealthServiceHTTPServer(s *http.Server, srv KesselHealthServiceHTTPServer) {
+func RegisterKesselRelationsHealthServiceHTTPServer(s *http.Server, srv KesselRelationsHealthServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/livez", _KesselHealthService_GetLivez0_HTTP_Handler(srv))
-	r.GET("/readyz", _KesselHealthService_GetReadyz0_HTTP_Handler(srv))
+	r.GET("/livez", _KesselRelationsHealthService_GetLivez0_HTTP_Handler(srv))
+	r.GET("/readyz", _KesselRelationsHealthService_GetReadyz0_HTTP_Handler(srv))
 }
 
-func _KesselHealthService_GetLivez0_HTTP_Handler(srv KesselHealthServiceHTTPServer) func(ctx http.Context) error {
+func _KesselRelationsHealthService_GetLivez0_HTTP_Handler(srv KesselRelationsHealthServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetLivezRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationKesselHealthServiceGetLivez)
+		http.SetOperation(ctx, OperationKesselRelationsHealthServiceGetLivez)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetLivez(ctx, req.(*GetLivezRequest))
 		})
@@ -52,13 +52,13 @@ func _KesselHealthService_GetLivez0_HTTP_Handler(srv KesselHealthServiceHTTPServ
 	}
 }
 
-func _KesselHealthService_GetReadyz0_HTTP_Handler(srv KesselHealthServiceHTTPServer) func(ctx http.Context) error {
+func _KesselRelationsHealthService_GetReadyz0_HTTP_Handler(srv KesselRelationsHealthServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetReadyzRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationKesselHealthServiceGetReadyz)
+		http.SetOperation(ctx, OperationKesselRelationsHealthServiceGetReadyz)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetReadyz(ctx, req.(*GetReadyzRequest))
 		})
@@ -71,24 +71,24 @@ func _KesselHealthService_GetReadyz0_HTTP_Handler(srv KesselHealthServiceHTTPSer
 	}
 }
 
-type KesselHealthServiceHTTPClient interface {
+type KesselRelationsHealthServiceHTTPClient interface {
 	GetLivez(ctx context.Context, req *GetLivezRequest, opts ...http.CallOption) (rsp *GetLivezResponse, err error)
 	GetReadyz(ctx context.Context, req *GetReadyzRequest, opts ...http.CallOption) (rsp *GetReadyzResponse, err error)
 }
 
-type KesselHealthServiceHTTPClientImpl struct {
+type KesselRelationsHealthServiceHTTPClientImpl struct {
 	cc *http.Client
 }
 
-func NewKesselHealthServiceHTTPClient(client *http.Client) KesselHealthServiceHTTPClient {
-	return &KesselHealthServiceHTTPClientImpl{client}
+func NewKesselRelationsHealthServiceHTTPClient(client *http.Client) KesselRelationsHealthServiceHTTPClient {
+	return &KesselRelationsHealthServiceHTTPClientImpl{client}
 }
 
-func (c *KesselHealthServiceHTTPClientImpl) GetLivez(ctx context.Context, in *GetLivezRequest, opts ...http.CallOption) (*GetLivezResponse, error) {
+func (c *KesselRelationsHealthServiceHTTPClientImpl) GetLivez(ctx context.Context, in *GetLivezRequest, opts ...http.CallOption) (*GetLivezResponse, error) {
 	var out GetLivezResponse
 	pattern := "/livez"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationKesselHealthServiceGetLivez))
+	opts = append(opts, http.Operation(OperationKesselRelationsHealthServiceGetLivez))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -97,11 +97,11 @@ func (c *KesselHealthServiceHTTPClientImpl) GetLivez(ctx context.Context, in *Ge
 	return &out, nil
 }
 
-func (c *KesselHealthServiceHTTPClientImpl) GetReadyz(ctx context.Context, in *GetReadyzRequest, opts ...http.CallOption) (*GetReadyzResponse, error) {
+func (c *KesselRelationsHealthServiceHTTPClientImpl) GetReadyz(ctx context.Context, in *GetReadyzRequest, opts ...http.CallOption) (*GetReadyzResponse, error) {
 	var out GetReadyzResponse
 	pattern := "/readyz"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationKesselHealthServiceGetReadyz))
+	opts = append(opts, http.Operation(OperationKesselRelationsHealthServiceGetReadyz))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

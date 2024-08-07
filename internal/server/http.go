@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
@@ -80,7 +81,7 @@ func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, 
 
 	v1beta1.RegisterKesselTupleServiceHTTPServer(srv, relationships)
 	v1beta1.RegisterKesselCheckServiceHTTPServer(srv, check)
-	h.RegisterKesselHealthServiceHTTPServer(srv, health)
+	h.RegisterKesselRelationsHealthServiceHTTPServer(srv, health)
 	return srv, nil
 }
 

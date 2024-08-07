@@ -8,7 +8,7 @@ option go_package = "github.com/project-kessel/relations-api/api/kessel/relation
 option java_multiple_files = true;
 option java_package = "org.project_kessel.api.relations.v1";
 
-service KesselHealthService {
+service KesselRelationsHealthService {
 	rpc GetLivez (GetLivezRequest) returns (GetLivezResponse){
 		option (google.api.http) = {
 			get: "/livez"

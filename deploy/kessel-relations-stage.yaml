@@ -6,7 +6,7 @@ objects:
   - apiVersion: authzed.com/v1alpha1
     kind: SpiceDBCluster
     metadata:
-      name: relations-spicedb
+      name: ${CLOWDAPP_NAME}-spicedb
     spec:
       config:
         logLevel: debug
@@ -32,7 +32,8 @@ objects:
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:
-      name: relations
+      name: ${CLOWDAPP_NAME}
+      namesapce: ${NAMESPACE}
     spec:
       envName: ${ENV_NAME}
       testing:
@@ -57,7 +58,7 @@ objects:
                     key: preshared_key
                     name: stage-spicedb-config
               - name: SPICEDB_ENDPOINT
-                value: relations-spicedb:50051
+                value: ${CLOWDAPP_NAME}-spicedb:50051
           webServices:
             public:
               enabled: true
@@ -69,6 +70,9 @@ parameters:
   - description : ClowdEnvironment name
     name: ENV_NAME
     value: stage
+  - description: Namespace to deploy into
+    name: NAMESPACE
+    value: ${NAMESPACE}
   - description: App Image
     name: RELATIONS_IMAGE
     value: quay.io/cloudservices/kessel-relations

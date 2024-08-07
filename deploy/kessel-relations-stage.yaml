@@ -1,0 +1,77 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: relations
+objects:
+  - apiVersion: authzed.com/v1alpha1
+    kind: SpiceDBCluster
+    metadata:
+      name: relations-spicedb
+    spec:
+      config:
+        logLevel: debug
+        replicas: 1
+        datastoreEngine: postgres
+        datastoreBootstrapFiles: /etc/bootstrap/schema.yaml
+      secretName: dev-spicedb-config
+      patches:
+      - kind: Deployment
+        patch:
+          spec:
+            template:
+              spec:
+                volumes:
+                - name:  bootstrap
+                  configMap:
+                    name: spicedb-schema
+                containers:
+                - name: spicedb
+                  volumeMounts:
+                  - name: bootstrap
+                    mountPath: /etc/bootstrap
+  - apiVersion: cloud.redhat.com/v1alpha1
+    kind: ClowdApp
+    metadata:
+      name: relations
+    spec:
+      envName: ${ENV_NAME}
+      testing:
+        iqePlugin: relations_api
+      replicas: 1
+      deployments:
+        - name: relations
+          podSpec:
+            image: ${RELATIONS_IMAGE}:${RELATIONS_IMAGE_TAG}
+            livenessProbe:
+              httpGet:
+                path: /api/authz/livez
+                port: 8000
+            readinessProbe:
+              httpGet:
+                path: /api/authz/readyz
+                port: 8000
+            env:
+              - name: SPICEDB_PRESHARED
+                valueFrom:
+                  secretKeyRef:
+                    key: preshared_key
+                    name: dev-spicedb-config
+              - name: SPICEDB_ENDPOINT
+                value: relations-spicedb:50051
+          webServices:
+            public:
+              enabled: true
+              apiPath: authz
+parameters:
+  - description: Name of the ClowdApp
+    name: CLOWDAPP_NAME
+    value: relations
+  - description : ClowdEnvironment name
+    name: ENV_NAME
+    value: insights-ephemeral
+  - description: App Image
+    name: RELATIONS_IMAGE
+    value: quay.io/cloudservices/kessel-relations
+  - description: Image Tag
+    name: RELATIONS_IMAGE_TAG
+    value: latest

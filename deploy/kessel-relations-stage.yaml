@@ -13,7 +13,7 @@ objects:
         replicas: 1
         datastoreEngine: postgres
         datastoreBootstrapFiles: /etc/bootstrap/schema.yaml
-      secretName: dev-spicedb-config
+      secretName: stage-spicedb-config
       patches:
       - kind: Deployment
         patch:
@@ -55,7 +55,7 @@ objects:
                 valueFrom:
                   secretKeyRef:
                     key: preshared_key
-                    name: dev-spicedb-config
+                    name: stage-spicedb-config
               - name: SPICEDB_ENDPOINT
                 value: relations-spicedb:50051
           webServices:
@@ -68,7 +68,7 @@ parameters:
     value: relations
   - description : ClowdEnvironment name
     name: ENV_NAME
-    value: insights-ephemeral
+    value: stage
   - description: App Image
     name: RELATIONS_IMAGE
     value: quay.io/cloudservices/kessel-relations

@@ -1,0 +1,215 @@
+// version 4
+definition user {}
+
+definition group {
+	relation owner: organization
+	relation user_grant: role_binding
+	relation member: user | group#member
+	permission add_user = user_grant->iam_group_add_user + owner->iam_group_add_user
+}
+
+definition role {
+	// inventory namespace
+	relation inventory_host_manage_subscription: user:*
+	relation inventory_host_register: user:*
+	relation inventory_host_view: user:*
+	relation inventory_host_view_cve: user:*
+
+	// iam namespace
+	relation iam_organization_list_users: user:*
+	relation iam_organization_view_details: user:*
+
+	// billing namespace
+	relation billing_account_view_subscriptions: user:*
+	relation billing_account_assign_subscriptions: user:*
+
+	// workspace namespace
+	relation workspace_assign_services: user:*
+
+	// notifications namespace
+	relation notifications_integration_create: user:*
+	relation notifications_behavior_group_create: user:*
+	relation notifications_integration_view: user:*
+	relation notifications_integration_edit: user:*
+	relation notifications_integration_test: user:*
+	relation notifications_integration_view_history: user:*
+	relation notifications_integration_delete: user:*
+	relation notifications_integration_disable: user:*
+	relation notifications_event_log_view: user:*
+	relation notifications_behavior_group_view: user:*
+	relation notifications_behavior_group_edit: user:*
+	relation notifications_behavior_group_delete: user:*
+}
+
+definition role_binding {
+	relation subject: user | group#member
+	relation granted: role
+
+	// {namespace}_{resourceType}_{action} = subject & granted->{namespace}_{resourceType}_{action}
+	permission inventory_host_manage_subscription = subject & granted->inventory_host_manage_subscription
+	permission inventory_host_view = subject & granted->inventory_host_view
+	permission inventory_host_view_cve = subject & granted->inventory_host_view_cve
+	permission iam_organization_list_users = subject & granted->iam_organization_list_users
+	permission iam_organization_view_details = subject & granted->iam_organization_view_details
+	permission billing_account_view_subscriptions = subject & granted->billing_account_view_subscriptions
+	permission billing_account_assign_subscriptions = subject & granted->billing_account_assign_subscriptions
+	permission workspace_assign_services = subject & granted->workspace_assign_services
+	permission notifications_integration_create = subject & granted->notifications_integration_create
+	permission notifications_behavior_group_create = subject & granted->notifications_behavior_group_create
+	permission notifications_integration_view = subject & granted->notifications_integration_view
+	permission notifications_integration_edit = subject & granted->notifications_integration_edit
+	permission notifications_integration_test = subject & granted->notifications_integration_test
+	permission notifications_integration_view_history = subject & granted->notifications_integration_view_history
+	permission notifications_integration_delete = subject & granted->notifications_integration_delete
+	permission notifications_integration_disable = subject & granted->notifications_integration_disable
+	permission notifications_behavior_group_view = subject & granted->notifications_behavior_group_view
+	permission notifications_behavior_group_edit = subject & granted->notifications_behavior_group_edit
+	permission notifications_behavior_group_delete = subject & granted->notifications_behavior_group_delete
+	permission notifications_event_log_view = subject & granted->notifications_event_log_view
+}
+
+definition realm {
+	relation user_grant: role_binding
+}
+
+definition organization {
+	// every org should get an realm relation to a common root
+	relation realm: realm
+	relation user_grant: role_binding
+	relation member: user
+	permission list_users = user_grant->iam_organization_list_users
+	permission view_details = user_grant->iam_organization_view_details
+	permission list_billing_accounts = user_grant->list_billing_accounts
+	permission bind_role = user_grant->bind_role
+}
+
+definition workspace {
+	// if you want folders instead of recursive workspaces, change that here
+	// authority=org
+	relation parent: workspace | organization
+	relation user_grant: role_binding
+	relation service_grant: service_binding
+	relation direct_subscribed_to_host_cve: user | user with cve_score_at_least
+	permission inventory_host_register = user_grant->inventory_host_register + parent->inventory_host_register
+	permission inventory_host_manage_subscription = user_grant->inventory_host_manage_subscription + parent->inventory_host_manage_subscription
+	permission inventory_host_view_cve = user_grant->inventory_host_view_cve + parent->inventory_host_view_cve
+	permission subscribed_to_host_cve = direct_subscribed_to_host_cve + parent->subscribed_to_host_cve
+	permission assign_services = user_grant->workspace_assign_services + parent->assign_services
+	permission content_provider = service_grant->content_provider + parent->content_provider
+	permission provide_service = service_grant->service_provider + parent->service_provider
+
+	// If any of these notifications need to be restricted by bundle,
+	// we would probably do that via separate permissions.
+	permission notifications_integration_create = user_grant->notifications_integration_create + parent->notifications_integration_create
+	permission notifications_behavior_group_create = user_grant->notifications_behavior_group_create + parent->notifications_behavior_group_create
+	permission notifications_integration_view = user_grant->notifications_integration_view + parent->notifications_integration_view
+	permission notifications_integration_edit = user_grant->notifications_integration_edit + parent->notifications_integration_edit
+	permission notifications_integration_test = user_grant->notifications_integration_test + parent->notifications_integration_test
+	permission notifications_integration_view_history = user_grant->notifications_integration_view_history + parent->notifications_integration_view_history
+	permission notifications_integration_delete = user_grant->notifications_integration_delete + parent->notifications_integration_delete
+	permission notifications_integration_disable = user_grant->notifications_integration_disable + parent->notifications_integration_disable
+	permission notifications_behavior_group_view = user_grant->notifications_behavior_group_view + parent->notifications_behavior_group_view
+	permission notifications_behavior_group_edit = user_grant->notifications_behavior_group_edit + parent->notifications_behavior_group_edit
+	permission notifications_behavior_group_delete = user_grant->notifications_behavior_group_delete + parent->notifications_behavior_group_delete
+	permission notifications_event_log_view = user_grant->notifications_event_log_view + parent->notifications_event_log_view
+}
+
+definition notifications/integration {
+	relation workspace: workspace
+	permission view = workspace->notifications_integration_view
+
+	// Edit display name, connectivity settings, and event type mappings
+	permission edit = workspace->notifications_integration_edit
+	permission test = workspace->notifications_integration_test
+	permission view_history = workspace->notifications_integration_view_history
+	permission delete = workspace->notifications_integration_delete
+	permission disable = workspace->notifications_integration_disable
+}
+
+definition notifications/behavior_group {
+	relation workspace: workspace
+	permission view = workspace->notifications_behavior_group_view
+
+	// Edit associated event types and recipients
+	permission edit = workspace->notifications_behavior_group_edit
+
+	// permission edit_event_types = nil
+	// permission edit_recipients = nil
+	permission delete = workspace->notifications_behavior_group_delete
+}
+
+// Experimenting with a pattern that allows per-service high level access,
+// but also supports lookups (as its own vertex).
+// Could have one global, or one per organization.
+// TODO: instead of service->service, could do subscription->service
+// where service is something only referred to internally, but they are otherwise "equivalent"
+// subscription is just service * billing account,
+// but service is referrable for tenant-agnostic lookups
+// then we could do fine grained auth on the subscription objects
+// that otherwise appear like services
+definition service {
+	relation parent: service
+}
+
+definition billing_account {
+	// Used for access control about the account itself
+	relation owner: organization
+	relation user_grant: role_binding
+	relation consumer: organization
+
+	// authority=service provider
+	// the authority is important, because you can assign service_groups to workspaces all you want,
+	// but the service provider has to agree.
+	// the authority is about "meta permissions": what party is authorized to write these relations
+	relation service_grant: service_group | service_binding | service
+	permission content_provider = service_grant->content_provider
+	permission service_provider = service_grant->service_provider + service_grant + service_grant->parent
+	permission bind_role = user_grant->bind_role + owner->bind_role
+	permission view_subscriptions = user_grant->billing_account_view_subscriptions + owner->billing_account_view_subscriptions
+	permission assign_subscriptions = user_grant->billing_account_assign_subscriptions + owner->billing_account_assign_subscriptions
+}
+
+definition service_group {
+	// Allows hierarchical service_groups
+	relation provider: service_group
+
+	// content namespace
+	relation direct_content_provider: content/repository
+	permission content_provider = direct_content_provider + provider->content_provider
+
+	// generic services
+	relation direct_service_provider: service
+	permission service_provider = direct_service_provider + provider->service_provider + direct_service_provider->parent
+}
+
+definition service_binding {
+	// this makes lifecycle tied to an organization or workspace's service
+	relation arbiter: service_group | service_binding | billing_account
+	relation grant: service_group | service
+	permission content_provider = arbiter->content_provider & grant->content_provider
+	permission service_provider = arbiter->service_provider & grant + grant->service_provider + grant->parent
+}
+
+definition content/repository {}
+
+definition inventory/host {
+	relation workspace: workspace
+	relation user_grant: role_binding
+	permission manage_subscription = user_grant->inventory_host_manage_subscription + workspace->inventory_host_manage_subscription
+	permission view = user_grant->inventory_host_view + workspace->inventory_host_view
+	permission view_cve = user_grant->inventory_host_view_cve + workspace->inventory_host_view_cve
+	permission view_cve_notification = view_cve & workspace->subscribed_to_host_cve
+
+	// find path to entitled repository
+	permission provide_content = workspace->content_provider
+}
+
+definition integrations/connector {}
+
+caveat cve_score_at_least(cve_score int, threshold int) {
+	cve_score >= threshold
+}
+
+caveat cve_score_less_than(cve_score int, threshold int) {
+	cve_score < threshold
+}

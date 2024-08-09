@@ -6,7 +6,7 @@ require (
 	github.com/MicahParks/keyfunc/v3 v3.3.3
 	github.com/authzed/authzed-go v0.13.0
 	github.com/authzed/grpcutil v0.0.0-20230908193239-4286bb1d6403
-	github.com/envoyproxy/protoc-gen-validate v1.0.4
+	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/go-kratos/kratos/v2 v2.8.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/wire v0.6.0

@@ -1,30 +1,87 @@
 schema: |-
-  definition user {}
+  // TODO: should we prefix all relations?
+  // TODO: do we need to distinguish between service account and user principles as separate types?
+  definition rbac/user {}
 
-  definition group {
-    relation member: user | group#member
+  // TODO: Add permissions here
+  definition rbac/realm {
+    relation user_grant: rbac/role_binding
   }
 
-  definition role {
-    relation view_the_thing: user:*
+  // TODO: Add permissions here OR roll up to realm directly from top level workspaces instead of tenant.
+  definition rbac/tenant {
+    // Every tenant should be connected to a common "realm" for global bindings.
+    relation realm: rbac/realm
+    relation user_grant: rbac/role_binding
+    relation member: rbac/user
   }
 
-  definition role_binding {
-    relation subject : user | group#member
-    relation granted: role
-
-    permission view_the_thing = subject & granted->view_the_thing
+  definition rbac/group {
+    relation owner: rbac/tenant
+    relation member: rbac/user | rbac/group#member
   }
 
-  definition workspace {
-    relation parent: workspace
-    relation user_grant: role_binding
-
-    permission view_the_thing = user_grant->view_the_thing
+  definition rbac/role {
+    relation notifications_daily_digest_preference_edit: rbac/user:*
+    relation notifications_daily_digest_preference_view: rbac/user:*
+    relation notifications_integration_create: rbac/user:*
+    relation notifications_integration_subscribe_drawer: rbac/user:*
+    relation notifications_integration_subscribe_email: rbac/user:*
+    relation notifications_integration_view: rbac/user:*
+    relation notifications_integration_edit: rbac/user:*
+    relation notifications_integration_test: rbac/user:*
+    relation notifications_integration_view_history: rbac/user:*
+    relation notifications_integration_delete: rbac/user:*
+    relation notifications_integration_disable: rbac/user:*
+    relation notifications_integration_enable: rbac/user:*
+    relation notifications_event_log_view: rbac/user:*
   }
 
-  definition thing {
-    relation workspace: workspace
+  definition rbac/role_binding {
+    relation subject: rbac/user | rbac/group#member
+    relation granted: rbac/role
+    permission notifications_daily_digest_preference_edit = subject & granted->notifications_daily_digest_preference_edit
+    permission notifications_daily_digest_preference_view = subject & granted->notifications_daily_digest_preference_view
+    permission notifications_integration_create = subject & granted->notifications_integration_create
+    permission notifications_integration_subscribe_drawer = subject & granted->notifications_integration_subscribe_drawer
+    permission notifications_integration_subscribe_email = subject & granted->notifications_integration_subscribe_email
+    permission notifications_integration_view = subject & granted->notifications_integration_view
+    permission notifications_integration_edit = subject & granted->notifications_integration_edit
+    permission notifications_integration_test = subject & granted->notifications_integration_test
+    permission notifications_integration_view_history = subject & granted->notifications_integration_view_history
+    permission notifications_integration_delete = subject & granted->notifications_integration_delete
+    permission notifications_integration_disable = subject & granted->notifications_integration_disable
+    permission notifications_integration_enable = subject & granted->notifications_integration_enable
+    permission notifications_event_log_view = subject & granted->notifications_event_log_view
+  }
 
-    permission view = workspace->view_the_thing
+  definition rbac/workspace {
+    relation parent: rbac/workspace | rbac/tenant
+    relation user_grant: rbac/role_binding
+    permission notifications_daily_digest_preference_edit = user_grant->notifications_daily_digest_preference_edit + parent->notifications_daily_digest_preference_edit
+    permission notifications_daily_digest_preference_view = user_grant->notifications_daily_digest_preference_view + parent->notifications_daily_digest_preference_view
+    permission notifications_integration_create = user_grant->notifications_integration_create + parent->notifications_integration_create
+    permission notifications_integration_subscribe_drawer = user_grant->notifications_integration_subscribe_drawer + parent->notifications_integration_subscribe_drawer
+    permission notifications_integration_subscribe_email = user_grant->notifications_integration_subscribe_email + parent->notifications_integration_subscribe_email
+    permission notifications_integration_view = user_grant->notifications_integration_view + parent->notifications_integration_view
+    permission notifications_integration_edit = user_grant->notifications_integration_edit + parent->notifications_integration_edit
+    permission notifications_integration_test = user_grant->notifications_integration_test + parent->notifications_integration_test
+    permission notifications_integration_view_history = user_grant->notifications_integration_view_history + parent->notifications_integration_view_history
+    permission notifications_integration_delete = user_grant->notifications_integration_delete + parent->notifications_integration_delete
+    permission notifications_integration_disable = user_grant->notifications_integration_disable + parent->notifications_integration_disable
+    permission notifications_integration_enable = user_grant->notifications_integration_enable + parent->notifications_integration_enable
+    permission notifications_event_log_view = user_grant->notifications_event_log_view + parent->notifications_event_log_view
+  }
+
+  definition notifications/integration {
+    relation workspace: rbac/workspace
+    permission view = workspace->notifications_integration_view
+
+    // Edit display name, connectivity settings, and event type mappings
+    permission edit = workspace->notifications_integration_edit
+    permission test = workspace->notifications_integration_test
+    permission view_history = workspace->notifications_integration_view_history
+    permission delete = workspace->notifications_integration_delete
+    permission disable = workspace->notifications_integration_disable
+    permission enable = workspace->notifications_integration_enable
   }

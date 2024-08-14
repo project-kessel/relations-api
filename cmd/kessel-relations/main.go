@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"strings"
 
@@ -63,12 +64,12 @@ func main() {
 	defer c.Close()
 
 	if err := c.Load(); err != nil {
-		panic(err)
+		panic(fmt.Errorf("error loading configuration: %w", err))
 	}
 
 	var bc conf.Bootstrap
 	if err := c.Scan(&bc); err != nil {
-		panic(err)
+		panic(fmt.Errorf("error reading bootstrap config from configuration: %w", err))
 	}
 
 	//preshared, err := c.Value("PRESHARED").String()
@@ -81,13 +82,13 @@ func main() {
 
 	app, cleanup, err := wireApp(bc.Server, bc.Data, createLogger(bc.Server))
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("error initializing application (via wire): %w", err))
 	}
 	defer cleanup()
 
 	// start and wait for stop signal
 	if err := app.Run(); err != nil {
-		panic(err)
+		panic(fmt.Errorf("fatal error during application execution: %w", err))
 	}
 }
 

@@ -44,7 +44,7 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 		token, err = readToken(c.SpiceDb.TokenFile)
 		if err != nil {
 			log.NewHelper(logger).Error(err)
-			return nil, nil, err
+			return nil, nil, fmt.Errorf("error creating spicedb client: error loading token file: %w", err)
 		}
 	}
 	if token == "" {
@@ -442,19 +442,10 @@ func createSpiceDbRelationship(relationship *apiV1beta1.Relationship) *v1.Relati
 }
 
 func readToken(file string) (string, error) {
-	isFileExist := checkFileExists(file)
-	if !isFileExist {
-		return file, errors.New("file doesn't exist")
-	}
 	bytes, err := os.ReadFile(file)
 	if err != nil {
 		return "", err
 	}
 
 	return string(bytes), nil
-}
-
-func checkFileExists(filePath string) bool {
-	_, err := os.Stat(filePath)
-	return !errors.Is(err, os.ErrNotExist)
 }

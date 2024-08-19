@@ -13,7 +13,7 @@ objects:
         replicas: 1
         datastoreEngine: postgres
         datastoreBootstrapFiles: /etc/bootstrap/schema.yaml
-      secretName: ${ENV_NAME}-spicedb-config
+      secretName: spicedb-config
       patches:
       - kind: Deployment
         patch:
@@ -56,7 +56,7 @@ objects:
                 valueFrom:
                   secretKeyRef:
                     key: preshared_key
-                    name: ${ENV_NAME}-spicedb-config
+                    name: spicedb-config
               - name: SPICEDB_ENDPOINT
                 value: ${CLOWDAPP_NAME}-spicedb:50051
           webServices:

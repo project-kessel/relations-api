@@ -83,7 +83,7 @@ func TestKesselAPIGRPC_CreateTuples(t *testing.T) {
 	}
 
 	client := v1beta1.NewKesselTupleServiceClient(conn)
-	rels := createRelations("rbac/user", "bob", "member", "rbac/group", "bob_club")
+	rels := createRelations("user", "bob", "member", "group", "bob_club")
 	_, err = client.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{
 		Tuples: rels,
 	})

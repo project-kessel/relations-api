@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bufbuild/protovalidate-go"
 	"github.com/project-kessel/relations-api/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -26,18 +27,14 @@ func NewCheckService(logger log.Logger, checkUseCase *biz.CheckUsecase) *CheckSe
 }
 
 func (s *CheckService) Check(ctx context.Context, req *pb.CheckRequest) (*pb.CheckResponse, error) {
-	if err := req.ValidateAll(); err != nil {
+	v, err := protovalidate.New()
+	if err != nil {
+		s.log.Errorf("failed to initialize validator: ", err)
+		return nil, errors.BadRequest("Invalid request", err.Error())
+	}
+
+	if err = v.Validate(req); err != nil {
 		s.log.Infof("Request failed to pass validation: %v", req)
-		return nil, errors.BadRequest("Invalid request", err.Error())
-	}
-
-	if err := req.Subject.ValidateAll(); err != nil {
-		s.log.Infof("Subject failed to pass validation: %v", req)
-		return nil, errors.BadRequest("Invalid request", err.Error())
-	}
-
-	if err := req.Resource.ValidateAll(); err != nil {
-		s.log.Infof("Resource failed to pass validation: %v", req)
 		return nil, errors.BadRequest("Invalid request", err.Error())
 	}
 

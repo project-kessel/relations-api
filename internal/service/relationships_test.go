@@ -59,11 +59,11 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 
 	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("group"),
+		ResourceType: pointerize("rbac/group"),
 		Relation:     pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	},
 	}
@@ -103,11 +103,11 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 
 	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("group"),
+		ResourceType: pointerize("rbac/group"),
 		Relation:     pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	},
 	}
@@ -152,8 +152,8 @@ func TestRelationshipsService_CreateRelationshipsWithBadSubjectType(t *testing.T
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
-	badSubjectType := "not_a_user"
-	expected := createRelationship("bob", simple_type(badSubjectType), "", "member", simple_type("group"), "bob_club")
+	badSubjectType := simple_type("not_a_user")
+	expected := createRelationship("bob", badSubjectType, "", "member", simple_type("group"), "bob_club")
 	req := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
 			expected,
@@ -162,7 +162,8 @@ func TestRelationshipsService_CreateRelationshipsWithBadSubjectType(t *testing.T
 	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.Error(t, err)
 	assert.Equal(t, status.Convert(err).Code(), codes.FailedPrecondition)
-	assert.Contains(t, err.Error(), "object definition `"+badSubjectType+"` not found")
+	assert.Contains(t, err.Error(),
+		fmt.Sprintf("object definition `%s/%s` not found", badSubjectType.GetNamespace(), badSubjectType.GetName()))
 }
 
 func TestRelationshipsService_CreateRelationshipsWithBadObjectType(t *testing.T) {
@@ -170,8 +171,8 @@ func TestRelationshipsService_CreateRelationshipsWithBadObjectType(t *testing.T)
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
-	badObjectType := "not_an_object"
-	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type(badObjectType), "bob_club")
+	badObjectType := simple_type("not_an_object")
+	expected := createRelationship("bob", simple_type("user"), "", "member", badObjectType, "bob_club")
 	req := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
 			expected,
@@ -179,8 +180,9 @@ func TestRelationshipsService_CreateRelationshipsWithBadObjectType(t *testing.T)
 	}
 	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.Error(t, err)
-	assert.Equal(t, status.Convert(err).Code(), codes.FailedPrecondition)
-	assert.Contains(t, err.Error(), "object definition `"+badObjectType+"` not found")
+	assert.Equal(t, codes.FailedPrecondition, status.Convert(err).Code())
+	assert.Contains(t, err.Error(),
+		fmt.Sprintf("object definition `%s/%s` not found", badObjectType.GetNamespace(), badObjectType.GetName()))
 }
 
 func TestRelationshipsService_DeleteRelationships(t *testing.T) {
@@ -201,11 +203,11 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 
 	delreq := &v1beta1.DeleteTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("group"),
+		ResourceType: pointerize("rbac/group"),
 		Relation:     pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	}}
 	_, err = relationshipsService.DeleteTuples(ctx, delreq)
@@ -213,11 +215,11 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 
 	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("group"),
+		ResourceType: pointerize("rbac/group"),
 		Relation:     pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	},
 	}
@@ -282,11 +284,11 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 
 	req := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("group"),
+		ResourceType: pointerize("rbac/group"),
 		Relation:     pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	},
 	}
@@ -334,11 +336,11 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 	container.WaitForQuantizationInterval()
 
 	req := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
-		ResourceType: pointerize("group"),
+		ResourceType: pointerize("rbac/group"),
 		Relation:     pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	},
 		Pagination: &v1beta1.RequestPagination{
@@ -369,7 +371,7 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 }
 
 func simple_type(typename string) *v1beta1.ObjectType {
-	return &v1beta1.ObjectType{Name: typename}
+	return &v1beta1.ObjectType{Name: typename, Namespace: "rbac"}
 }
 
 func pointerize(value string) *string { //Used to turn string literals into pointers

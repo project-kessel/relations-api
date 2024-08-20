@@ -98,9 +98,10 @@ func TestLookupService_LookupResources_NoResults(t *testing.T) {
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
 	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
 		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
-		Relation: "view",
+		Relation: "view_the_thing",
 		ResourceType: &v1beta1.ObjectType{
-			Name: "thing",
+			Name:      "workspace",
+			Namespace: "rbac",
 		},
 	}, responseCollector)
 	assert.NoError(t, err)
@@ -152,7 +153,8 @@ func TestLookupService_LookupResources_OneResult(t *testing.T) {
 		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
 		Relation: "workspace",
 		ResourceType: &v1beta1.ObjectType{
-			Name: "thing",
+			Name:      "thing",
+			Namespace: "rbac",
 		},
 	}, responseCollector)
 	assert.NoError(t, err)
@@ -181,7 +183,8 @@ func TestLookupService_LookupResources_TwoResults(t *testing.T) {
 		//Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
 		Relation: "subject",
 		ResourceType: &v1beta1.ObjectType{
-			Name: "role_binding",
+			Name:      "role_binding",
+			Namespace: "rbac",
 		},
 	}, responseCollector)
 	assert.NoError(t, err)

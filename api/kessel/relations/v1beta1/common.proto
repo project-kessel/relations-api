@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package kessel.relations.v1beta1;
 
-import "validate/validate.proto";
+import "buf/validate/validate.proto";
 
 option go_package = "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1";
 option java_multiple_files = true;
@@ -18,9 +18,9 @@ option java_package = "org.project_kessel.api.relations.v1beta1";
 // Conventionally, we generally refer to the Resource first, then Subject,
 // following the direction of typical graph traversal (Resource to Subject).
 message Relationship {
-	ObjectReference resource = 1 [(validate.rules).any.required = true]; 
-	string relation = 2 [(validate.rules).string.min_len = 1];
-	SubjectReference subject = 3 [(validate.rules).any.required = true];
+	ObjectReference resource = 1 [(buf.validate.field).required = true]; 
+	string relation = 2 [(buf.validate.field).string.min_len = 1];
+	SubjectReference subject = 3 [(buf.validate.field).required = true];
 }
 
 // A reference to a Subject or, if a `relation` is provided, a Subject Set.
@@ -28,11 +28,11 @@ message SubjectReference {
 	// An optional relation which points to a set of Subjects instead of the single Subject.
 	// e.g. "members" or "owners" of a group identified in `subject`.
 	optional string relation = 1;
-	ObjectReference subject = 2 [(validate.rules).any.required = true];
+	ObjectReference subject = 2 [(buf.validate.field).required = true];
 }
 
 message RequestPagination {
-	uint32 limit = 1 [(validate.rules).uint32 = {gt: 0}];
+	uint32 limit = 1 [(buf.validate.field).uint32 = {gt: 0}];
 	optional string continuation_token = 2;
 }
 
@@ -41,11 +41,11 @@ message ResponsePagination {
 }
 
 message ObjectReference {
-	ObjectType type = 1 [(validate.rules).any.required = true];
-	string id = 2 [(validate.rules).string.min_len = 1];
+	ObjectType type = 1 [(buf.validate.field).required = true];
+	string id = 2 [(buf.validate.field).string.min_len = 1];
 }
 
 message ObjectType {
-	string namespace = 1 [(validate.rules).string.min_len = 1];
-	string name = 2 [(validate.rules).string.min_len = 1];
+	string namespace = 1 [(buf.validate.field).string.min_len = 1];
+	string name = 2 [(buf.validate.field).string.min_len = 1];
 }

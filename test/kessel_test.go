@@ -3,11 +3,12 @@ package test
 import (
 	"context"
 	"fmt"
-	"github.com/authzed/grpcutil"
 	"os"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/authzed/grpcutil"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
@@ -82,7 +83,7 @@ func TestKesselAPIGRPC_CreateTuples(t *testing.T) {
 	}
 
 	client := v1beta1.NewKesselTupleServiceClient(conn)
-	rels := createRelations("user", "bob", "member", "group", "bob_club")
+	rels := createRelations("rbac/user", "bob", "member", "rbac/group", "bob_club")
 	_, err = client.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{
 		Tuples: rels,
 	})
@@ -108,11 +109,11 @@ func TestKesselAPIGRPC_ReadTuples(t *testing.T) {
 	client := v1beta1.NewKesselTupleServiceClient(conn)
 	_, err = client.ReadTuples(context.Background(), &v1beta1.ReadTuplesRequest{
 		Filter: &v1beta1.RelationTupleFilter{
-			ResourceType: pointerize("group"),
+			ResourceType: pointerize("rbac/group"),
 			ResourceId:   pointerize("bob_club"),
 			Relation:     pointerize("member"),
 			SubjectFilter: &v1beta1.SubjectFilter{
-				SubjectType: pointerize("user"),
+				SubjectType: pointerize("rbac/user"),
 				SubjectId:   pointerize("bob"),
 			},
 		},
@@ -140,11 +141,11 @@ func TestKesselAPIGRPC_DeleteTuples(t *testing.T) {
 
 	_, err = client.DeleteTuples(context.Background(), &v1beta1.DeleteTuplesRequest{
 		Filter: &v1beta1.RelationTupleFilter{
-			ResourceType: pointerize("group"),
+			ResourceType: pointerize("rbac/group"),
 			ResourceId:   pointerize("bob_club"),
 			Relation:     pointerize("member"),
 			SubjectFilter: &v1beta1.SubjectFilter{
-				SubjectType: pointerize("user"),
+				SubjectType: pointerize("rbac/user"),
 				SubjectId:   pointerize("bob"),
 			},
 		},
@@ -174,7 +175,8 @@ func TestKesselAPIGRPC_Check(t *testing.T) {
 		Subject: &v1beta1.SubjectReference{
 			Subject: &v1beta1.ObjectReference{
 				Type: &v1beta1.ObjectType{
-					Name: "user",
+					Namespace: "rbac",
+					Name:      "user",
 				},
 				Id: "bob",
 			},
@@ -182,7 +184,8 @@ func TestKesselAPIGRPC_Check(t *testing.T) {
 		Relation: "member",
 		Resource: &v1beta1.ObjectReference{
 			Type: &v1beta1.ObjectType{
-				Name: "group",
+				Namespace: "rbac",
+				Name:      "group",
 			},
 			Id: "bob_club",
 		},
@@ -237,12 +240,13 @@ func TestKesselAPIGRPC_LookupResources(t *testing.T) {
 
 	_, err = client.LookupResources(
 		context.Background(), &v1beta1.LookupResourcesRequest{
-			ResourceType: &v1beta1.ObjectType{Name: "group"},
+			ResourceType: &v1beta1.ObjectType{Name: "group", Namespace: "rbac"},
 			Relation:     "member",
 			Subject: &v1beta1.SubjectReference{
 				Subject: &v1beta1.ObjectReference{
 					Type: &v1beta1.ObjectType{
-						Name: "user",
+						Name:      "user",
+						Namespace: "rbac",
 					},
 					Id: "bob",
 				},
@@ -256,7 +260,7 @@ func pointerize(value string) *string { //Used to turn string literals into poin
 }
 
 func simple_type(typename string) *v1beta1.ObjectType {
-	return &v1beta1.ObjectType{Name: typename}
+	return &v1beta1.ObjectType{Name: typename, Namespace: "rbac"}
 }
 
 func createRelations(subName string, subId string, relation string, resouceName string, ResouceId string) []*v1beta1.Relationship {
@@ -265,7 +269,8 @@ func createRelations(subName string, subId string, relation string, resouceName 
 			Subject: &v1beta1.SubjectReference{
 				Subject: &v1beta1.ObjectReference{
 					Type: &v1beta1.ObjectType{
-						Name: subName,
+						Name:      subName,
+						Namespace: "rbac",
 					},
 					Id: subId,
 				},
@@ -273,7 +278,8 @@ func createRelations(subName string, subId string, relation string, resouceName 
 			Relation: relation,
 			Resource: &v1beta1.ObjectReference{
 				Type: &v1beta1.ObjectType{
-					Name: resouceName,
+					Name:      resouceName,
+					Namespace: "rbac",
 				},
 				Id: ResouceId,
 			},

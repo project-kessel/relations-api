@@ -48,7 +48,7 @@ func TestCreateRelationship(t *testing.T) {
 	spiceDbRepo, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	preExisting := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
+	preExisting := CheckForRelationship(spiceDbRepo.client, "bob", "rbac/user", "", "member", "rbac/group", "bob_club")
 	assert.False(t, preExisting)
 
 	rels := []*apiV1beta1.Relationship{
@@ -60,7 +60,7 @@ func TestCreateRelationship(t *testing.T) {
 	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.NoError(t, err)
 
-	exists := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
+	exists := CheckForRelationship(spiceDbRepo.client, "bob", "rbac/user", "", "member", "rbac/group", "bob_club")
 	assert.True(t, exists)
 }
 
@@ -71,7 +71,7 @@ func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 	spiceDbRepo, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	preExisting := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
+	preExisting := CheckForRelationship(spiceDbRepo.client, "bob", "rbac/user", "", "member", "rbac/group", "bob_club")
 	assert.False(t, preExisting)
 
 	rels := []*apiV1beta1.Relationship{
@@ -87,7 +87,7 @@ func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, status.Convert(err).Code(), codes.AlreadyExists)
 
-	exists := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
+	exists := CheckForRelationship(spiceDbRepo.client, "bob", "rbac/user", "", "member", "rbac/group", "bob_club")
 	assert.True(t, exists)
 }
 
@@ -98,7 +98,7 @@ func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 	spiceDbRepo, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	preExisting := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
+	preExisting := CheckForRelationship(spiceDbRepo.client, "bob", "rbac/user", "", "member", "rbac/group", "bob_club")
 	assert.False(t, preExisting)
 
 	rels := []*apiV1beta1.Relationship{
@@ -115,7 +115,7 @@ func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.NoError(t, err)
 
-	exists := CheckForRelationship(spiceDbRepo.client, "bob", "user", "", "member", "group", "bob_club")
+	exists := CheckForRelationship(spiceDbRepo.client, "bob", "rbac/user", "", "member", "rbac/group", "bob_club")
 	assert.True(t, exists)
 }
 
@@ -151,10 +151,10 @@ func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {
 	spiceDbRepo, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	badSubjectType := "not_a_user"
+	badSubjectType := simple_type("not_a_user")
 
 	rels := []*apiV1beta1.Relationship{
-		createRelationship("bob", simple_type(badSubjectType), "", "member", simple_type("group"), "bob_club"),
+		createRelationship("bob", badSubjectType, "", "member", simple_type("group"), "bob_club"),
 	}
 
 	touch := biz.TouchSemantics(false)
@@ -162,7 +162,8 @@ func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {
 	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.Error(t, err)
 	assert.Equal(t, status.Convert(err).Code(), codes.FailedPrecondition)
-	assert.Contains(t, err.Error(), "object definition `"+badSubjectType+"` not found")
+	assert.Contains(t, err.Error(),
+		fmt.Sprintf("object definition `%s/%s` not found", badSubjectType.GetNamespace(), badSubjectType.GetName()))
 }
 
 func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
@@ -172,10 +173,10 @@ func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
 	spiceDbRepo, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	badObjectType := "not_an_object"
+	badObjectType := simple_type("not_an_object")
 
 	rels := []*apiV1beta1.Relationship{
-		createRelationship("bob", simple_type("user"), "", "member", simple_type(badObjectType), "bob_club"),
+		createRelationship("bob", simple_type("user"), "", "member", badObjectType, "bob_club"),
 	}
 
 	touch := biz.TouchSemantics(false)
@@ -183,7 +184,9 @@ func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
 	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.Error(t, err)
 	assert.Equal(t, status.Convert(err).Code(), codes.FailedPrecondition)
-	assert.Contains(t, err.Error(), "object definition `"+badObjectType+"` not found")
+	assert.Contains(t, err.Error(),
+		fmt.Sprintf("object definition `%s/%s` not found", badObjectType.GetNamespace(), badObjectType.GetName()))
+
 }
 
 func TestWriteAndReadBackRelationships(t *testing.T) {
@@ -207,11 +210,11 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 
 	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("group"),
+		ResourceType: pointerize("rbac/group"),
 		Relation:     pointerize("member"),
 		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	}, 0, "")
 
@@ -244,11 +247,11 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 
 	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("group"),
+		ResourceType: pointerize("rbac/group"),
 		Relation:     pointerize("member"),
 		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	}, 0, "")
 
@@ -261,11 +264,11 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 
 	err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("group"),
+		ResourceType: pointerize("rbac/group"),
 		Relation:     pointerize("member"),
 		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	})
 
@@ -275,11 +278,11 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 
 	readRelChan, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("group"),
+		ResourceType: pointerize("rbac/group"),
 		Relation:     pointerize("member"),
 		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	}, 0, "")
 
@@ -349,11 +352,11 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 	//Remove // role_binding:rb_test#subject@user:bob
 	err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:   pointerize("rb_test"),
-		ResourceType: pointerize("role_binding"),
+		ResourceType: pointerize("rbac/role_binding"),
 		Relation:     pointerize("subject"),
 		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("user"),
+			SubjectType: pointerize("rbac/user"),
 		},
 	})
 	if !assert.NoError(t, err) {
@@ -378,7 +381,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 }
 
 func simple_type(typename string) *apiV1beta1.ObjectType {
-	return &apiV1beta1.ObjectType{Name: typename}
+	return &apiV1beta1.ObjectType{Name: typename, Namespace: "rbac"}
 }
 
 func pointerize(value string) *string { //Used to turn string literals into pointers

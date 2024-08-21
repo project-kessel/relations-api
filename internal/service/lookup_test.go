@@ -15,30 +15,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-func TestLookupService_LookupSubjects_EmptyRequest(t *testing.T) {
-	t.Parallel()
-	ctx := context.TODO()
-	spicedb, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-	service := createLookupService(spicedb)
-	responseCollector := NewLookup_SubjectsServerStub(ctx)
-	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{}, responseCollector)
-
-	assert.Error(t, err)
-}
-
-func TestLookupService_LookupResources_EmptyRequest(t *testing.T) {
-	t.Parallel()
-	ctx := context.TODO()
-	spicedb, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-	service := createLookupService(spicedb)
-	responseCollector := NewLookup_ResourcesServerStub(ctx)
-	err = service.LookupResources(&v1beta1.LookupResourcesRequest{}, responseCollector)
-
-	assert.Error(t, err)
-}
-
 func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 	t.Parallel()
 	ctx := context.TODO()
@@ -58,26 +34,6 @@ func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 		Resource:    &v1beta1.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
-	results := responseCollector.GetResponses()
-
-	assert.Empty(t, results)
-}
-
-func TestLookupService_LookupResources_Empty(t *testing.T) {
-	t.Parallel()
-	ctx := context.TODO()
-	spicedb, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-
-	service := createLookupService(spicedb)
-
-	responseCollector := NewLookup_ResourcesServerStub(ctx)
-	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
-		Subject:      &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{}},
-		Relation:     "view",
-		ResourceType: &v1beta1.ObjectType{},
-	}, responseCollector)
-	assert.ErrorContains(t, err, "Invalid request message")
 	results := responseCollector.GetResponses()
 
 	assert.Empty(t, results)

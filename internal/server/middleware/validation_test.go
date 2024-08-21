@@ -87,8 +87,7 @@ func TestStreamValidationInterceptor_ValidRequest(t *testing.T) {
 	handler := func(srv interface{}, stream grpc.ServerStream) error {
 		msg := &v1beta1.LookupSubjectsRequest{}
 		err := stream.RecvMsg(msg)
-		assert.NoError(t, err)
-		return nil
+		return err
 	}
 
 	err = interceptor(nil, dummyStream, nil, handler)
@@ -115,7 +114,6 @@ func TestStreamValidationInterceptor_InvalidRequest(t *testing.T) {
 	handler := func(srv interface{}, stream grpc.ServerStream) error {
 		msg := &v1beta1.LookupSubjectsRequest{}
 		err := stream.RecvMsg(msg)
-		assert.Error(t, err)
 		return err
 	}
 

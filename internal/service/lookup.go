@@ -3,8 +3,6 @@ package service
 import (
 	"fmt"
 
-	"github.com/bufbuild/protovalidate-go"
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	pb "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
@@ -27,17 +25,6 @@ func NewLookupService(logger log.Logger, subjectsUseCase *biz.GetSubjectsUsecase
 }
 
 func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.KesselLookupService_LookupSubjectsServer) error {
-	v, err := protovalidate.New()
-	if err != nil {
-		s.log.Errorf("failed to initialize validator: ", err)
-		return errors.BadRequest("Invalid request", err.Error())
-	}
-
-	if err = v.Validate(req); err != nil {
-		s.log.Infof("Request failed to pass validation: %v", req)
-		return errors.BadRequest("Invalid request", err.Error())
-	}
-
 	ctx := conn.Context()
 
 	subs, errs, err := s.subjectsUsecase.Get(ctx, req)
@@ -65,17 +52,6 @@ func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.Ke
 }
 
 func (s *LookupService) LookupResources(req *pb.LookupResourcesRequest, conn pb.KesselLookupService_LookupResourcesServer) error {
-	v, err := protovalidate.New()
-	if err != nil {
-		s.log.Errorf("failed to initialize validator: ", err)
-		return errors.BadRequest("Invalid request", err.Error())
-	}
-
-	if err = v.Validate(req); err != nil {
-		s.log.Infof("Request failed to pass validation: %v", req)
-		return errors.BadRequest("Invalid request", err.Error())
-	}
-
 	ctx := conn.Context()
 
 	res, errs, err := s.resourcesUsecase.Get(ctx, req)

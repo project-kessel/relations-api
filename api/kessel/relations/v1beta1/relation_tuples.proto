@@ -4,7 +4,7 @@ package kessel.relations.v1beta1;
 
 import "google/api/annotations.proto";
 import "kessel/relations/v1beta1/common.proto";
-import "validate/validate.proto";
+import "buf/validate/validate.proto";
 
 option go_package = "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1";
 option java_multiple_files = true;
@@ -47,7 +47,7 @@ message CreateTuplesRequest {
 message CreateTuplesResponse {}
 
 message ReadTuplesRequest {
-	RelationTupleFilter filter = 1 [(validate.rules).any.required = true];
+	RelationTupleFilter filter = 1 [(buf.validate.field).required = true];
 	optional RequestPagination pagination = 2;
 }
 message ReadTuplesResponse {
@@ -56,7 +56,7 @@ message ReadTuplesResponse {
 }
 
 message DeleteTuplesRequest {
-	RelationTupleFilter filter = 1 [(validate.rules).any.required = true];
+	RelationTupleFilter filter = 1 [(buf.validate.field).required = true];
 }
 message DeleteTuplesResponse {}
 

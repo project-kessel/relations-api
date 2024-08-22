@@ -15,30 +15,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-func TestLookupService_LookupSubjects_EmptyRequest(t *testing.T) {
-	t.Parallel()
-	ctx := context.TODO()
-	spicedb, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-	service := createLookupService(spicedb)
-	responseCollector := NewLookup_SubjectsServerStub(ctx)
-	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{}, responseCollector)
-
-	assert.Error(t, err)
-}
-
-func TestLookupService_LookupResources_EmptyRequest(t *testing.T) {
-	t.Parallel()
-	ctx := context.TODO()
-	spicedb, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-	service := createLookupService(spicedb)
-	responseCollector := NewLookup_ResourcesServerStub(ctx)
-	err = service.LookupResources(&v1beta1.LookupResourcesRequest{}, responseCollector)
-
-	assert.Error(t, err)
-}
-
 func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 	t.Parallel()
 	ctx := context.TODO()
@@ -63,26 +39,6 @@ func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 	assert.Empty(t, results)
 }
 
-func TestLookupService_LookupResources_Empty(t *testing.T) {
-	t.Parallel()
-	ctx := context.TODO()
-	spicedb, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-
-	service := createLookupService(spicedb)
-
-	responseCollector := NewLookup_ResourcesServerStub(ctx)
-	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
-		Subject:      &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{}},
-		Relation:     "view",
-		ResourceType: &v1beta1.ObjectType{},
-	}, responseCollector)
-	assert.ErrorContains(t, err, "Invalid request message")
-	results := responseCollector.GetResponses()
-
-	assert.Empty(t, results)
-}
-
 func TestLookupService_LookupResources_NoResults(t *testing.T) {
 	t.Parallel()
 	ctx := context.TODO()
@@ -98,9 +54,10 @@ func TestLookupService_LookupResources_NoResults(t *testing.T) {
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
 	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
 		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
-		Relation: "view",
+		Relation: "view_the_thing",
 		ResourceType: &v1beta1.ObjectType{
-			Name: "thing",
+			Name:      "workspace",
+			Namespace: "rbac",
 		},
 	}, responseCollector)
 	assert.NoError(t, err)
@@ -152,7 +109,8 @@ func TestLookupService_LookupResources_OneResult(t *testing.T) {
 		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
 		Relation: "workspace",
 		ResourceType: &v1beta1.ObjectType{
-			Name: "thing",
+			Name:      "thing",
+			Namespace: "rbac",
 		},
 	}, responseCollector)
 	assert.NoError(t, err)
@@ -181,7 +139,8 @@ func TestLookupService_LookupResources_TwoResults(t *testing.T) {
 		//Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
 		Relation: "subject",
 		ResourceType: &v1beta1.ObjectType{
-			Name: "role_binding",
+			Name:      "role_binding",
+			Namespace: "rbac",
 		},
 	}, responseCollector)
 	assert.NoError(t, err)

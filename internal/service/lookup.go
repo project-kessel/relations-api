@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	pb "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
@@ -26,18 +25,7 @@ func NewLookupService(logger log.Logger, subjectsUseCase *biz.GetSubjectsUsecase
 }
 
 func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.KesselLookupService_LookupSubjectsServer) error {
-	if err := req.ValidateAll(); err != nil {
-		s.log.Infof("Request failed to pass validation: %v", req)
-		return errors.BadRequest("Invalid request", err.Error())
-	}
-
-	if err := req.Resource.ValidateAll(); err != nil {
-		s.log.Infof("Resource failed to pass validation: %v", req)
-		return errors.BadRequest("Invalid request", err.Error())
-	}
-
 	ctx := conn.Context()
-	s.log.Debugf("Lookup subjects request: %v", req) //TODO: remove when logging middleware supports streaming
 
 	subs, errs, err := s.subjectsUsecase.Get(ctx, req)
 
@@ -64,21 +52,6 @@ func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.Ke
 }
 
 func (s *LookupService) LookupResources(req *pb.LookupResourcesRequest, conn pb.KesselLookupService_LookupResourcesServer) error {
-	if err := req.ValidateAll(); err != nil {
-		s.log.Infof("Request failed to pass validation: %v", req)
-		return errors.BadRequest("Invalid request", err.Error())
-	}
-
-	if err := req.Subject.ValidateAll(); err != nil {
-		s.log.Infof("Subject failed to pass validation: %v", req)
-		return errors.BadRequest("Invalid request", err.Error())
-	}
-
-	if err := req.Subject.Subject.ValidateAll(); err != nil {
-		s.log.Infof("Subject failed to pass validation: %v", req)
-		return errors.BadRequest("Invalid request", err.Error())
-	}
-
 	ctx := conn.Context()
 
 	res, errs, err := s.resourcesUsecase.Get(ctx, req)

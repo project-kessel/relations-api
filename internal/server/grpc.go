@@ -1,12 +1,12 @@
 package server
 
 import (
+	"github.com/bufbuild/protovalidate-go"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
-	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	h "github.com/project-kessel/relations-api/api/kessel/relations/v1"
@@ -34,10 +34,14 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 	if err != nil {
 		return nil, err
 	}
+	validator, err := protovalidate.New()
+	if err != nil {
+		return nil, err
+	}
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
-			validate.Validator(),
+			middleware.ValidationMiddleware(validator),
 			logging.Server(logger),
 			metrics.Server(
 				metrics.WithSeconds(seconds),
@@ -46,7 +50,7 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 		),
 		grpc.Options(googlegrpc.ChainStreamInterceptor(
 			middleware.StreamLogInterceptor(logger),
-			middleware.StreamValidationInterceptor(),
+			middleware.StreamValidationInterceptor(validator),
 			kesselRecovery.StreamRecoveryInterceptor(logger),
 			kesselMetrics.StreamMetricsInterceptor(
 				kesselMetrics.WithSeconds(seconds),

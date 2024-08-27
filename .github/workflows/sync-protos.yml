@@ -1,0 +1,44 @@
+name: sync-protos
+
+on:
+  push:
+    paths:
+      - "api/kessel/relations/v1/**"
+      - "api/kessel/relations/v1beta1/**"
+
+
+jobs:
+  build:
+    name: Sync protos to clients
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone target repository
+        run: git clone https://github.com/project-kessel/relations-client-java.git
+
+      - name: Copy proto files
+        run: |
+          cp -r api/kessel/relations/v1/*.proto relations-client-java/src/main/proto/kessel/relations/v1/
+          cp -r api/kessel/relations/v1beta1/*.proto relations-client-java/src/main/proto/kessel/relations/v1beta1/
+
+      - name: Commit proto files
+        run: |
+          git config --global user.name "jonathan marcantonio"
+          git config --global user.email "jmarcant@redhat.com"
+          cd relations-client-java
+          git checkout -b sync-proto-files
+          git commit -am "Sync updated proto files"
+          git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/project-kessel/relations-client-java.git
+          git push origin sync-proto-files
+
+      - name: Create Pull Request
+        run: |
+          cd relations-client-java
+          gh pr create --title "Sync updated proto files" \
+                       --body "This PR syncs the updated proto files" \
+                       --head sync-proto-files \
+                       --base main \
+                       --repo project-kessel/relations-client-java
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+

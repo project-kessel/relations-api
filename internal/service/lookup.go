@@ -57,7 +57,7 @@ func (s *LookupService) LookupResources(req *pb.LookupResourcesRequest, conn pb.
 	res, errs, err := s.resourcesUsecase.Get(ctx, req)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to retrieve resources: %w", err)
 	}
 	for re := range res {
 		err = conn.Send(&pb.LookupResourcesResponse{
@@ -65,12 +65,12 @@ func (s *LookupService) LookupResources(req *pb.LookupResourcesRequest, conn pb.
 			Pagination: &pb.ResponsePagination{ContinuationToken: string(re.Continuation)},
 		})
 		if err != nil {
-			return err
+			return fmt.Errorf("error sending retrieved resource to the client: %w", err)
 		}
 	}
 	err, ok := <-errs
 	if ok {
-		return err
+		return fmt.Errorf("error received while streaming subjects from Zanzibar backend: %w", err)
 	}
 
 	return nil

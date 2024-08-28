@@ -1,15 +1,11 @@
-name: Buf CI
-on:
-  push:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
-  delete:
+name: buf-pull-request
+on: pull_request
 permissions:
   contents: read
   pull-requests: write
 jobs:
   build:
-    name: Check protos 
+    name: Check protos
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,6 +14,4 @@ jobs:
           format: false
           lint: true
           breaking: true
-          push: true
           input: "api"
-          token: ${{ secrets.BUF_TOKEN }}

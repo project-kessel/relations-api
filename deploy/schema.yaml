@@ -1,30 +1,30 @@
 schema: |-
-  definition user {}
+  definition rbac/user {}
 
-  definition group {
-    relation member: user | group#member
+  definition rbac/group {
+    relation member: rbac/user | rbac/group#member
   }
 
-  definition role {
-    relation view_the_thing: user:*
+  definition rbac/role {
+    relation view_the_thing: rbac/user:*
   }
 
-  definition role_binding {
-    relation subject : user | group#member
-    relation granted: role
+  definition rbac/role_binding {
+    relation subject : rbac/user | rbac/group#member
+    relation granted: rbac/role
 
     permission view_the_thing = subject & granted->view_the_thing
   }
 
-  definition workspace {
-    relation parent: workspace
-    relation user_grant: role_binding
+  definition rbac/workspace {
+    relation parent: rbac/workspace
+    relation user_grant: rbac/role_binding
 
     permission view_the_thing = user_grant->view_the_thing
   }
 
-  definition thing {
-    relation workspace: workspace
+  definition rbac/thing {
+    relation workspace: rbac/workspace
 
     permission view = workspace->view_the_thing
   }

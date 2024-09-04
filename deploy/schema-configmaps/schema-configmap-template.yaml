@@ -1,0 +1,17 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: spicedb-schema-template
+  annotations:
+    description: "SpiceDB Schema Template"
+parameters:
+- description: "spicedb schema yaml for relations API"
+  name: SCHEMA
+objects:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: spicedb-schema
+  data:
+    schema.yaml: |-
+      ${{SCHEMA}}

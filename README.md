@@ -128,10 +128,23 @@ You should have logged into a valid openshift cluster using the oc login command
 
 #### Option 1: Using the config from app-interface (RedHat Internal only)
 
-* Create a config map inside a local directory. You can refer to [here](https://github.com/project-kessel/relations-api/blob/main/deploy/schema-configmaps/ex-schema-configmap.yaml)
-  * NOTE: Please replace the "data" section, as per your needs (the schema portion)
+* Create a config map inside a local temp directory. You can leverage the template [here](./deploy/schema-configmaps/schema-configmap-template.yaml). The template can be used to inject any schema definition file you like by providing the contents of a schema definition file as the parameter.
+  
+  ```shell
+  # Example, create a configmap using the current default schema
+  TEMP_DIR=$(mktemp -d)
+
+  # SCHEMA_FILE can be a path to any desired schema definition file in yaml format
+  SCHEMA_FILE=./deploy/schema.yaml 
+
+  oc process --local \
+    -f deploy/schema-configmaps/schema-configmap-template.yaml \
+    -p SCHEMA="$(cat ${SCHEMA_FILE})" \
+    -o yaml > $TEMP_DIR/schema-configmap.yaml
+  ```
+
 * Run the following command:
-  * `bonfire deploy relations --import-configmaps  --configmaps-dir <path-to-configmaps-dir>` 
+  * `bonfire deploy relations --import-configmaps  --configmaps-dir $TEMP_DIR` 
 
 #### Option 2: Using the deploy.sh script in this repository
 

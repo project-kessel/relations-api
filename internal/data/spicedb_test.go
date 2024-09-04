@@ -480,6 +480,8 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		return
 	}
 
+	container.WaitForQuantizationInterval()
+
 	subject := &apiV1beta1.SubjectReference{
 		Subject: &apiV1beta1.ObjectReference{
 			Type: &apiV1beta1.ObjectType{

@@ -16,3 +16,4 @@ data:
     endpoint: "${ENDPOINT:0.0.0.0:50051}"
     token: "${PRESHARED}" # token takes precedence over tokenFile
     tokenFile: "${PRESHARED_FILE:.secrets/local-spicedb-secret}"
+    schemaFile: "${SCHEMA_FILE:deploy/schema.zed}"

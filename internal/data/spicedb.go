@@ -25,8 +25,10 @@ import (
 
 // SpiceDbRepository .
 type SpiceDbRepository struct {
-	client       *authzed.Client
-	healthClient grpc_health_v1.HealthClient
+	client         *authzed.Client
+	healthClient   grpc_health_v1.HealthClient
+	schemaFilePath string
+	isInitialized  bool
 }
 
 // NewSpiceDbRepository .
@@ -42,7 +44,7 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 	if c.SpiceDb.Token != "" {
 		token = c.SpiceDb.Token
 	} else if c.SpiceDb.TokenFile != "" {
-		token, err = readToken(c.SpiceDb.TokenFile)
+		token, err = readFile(c.SpiceDb.TokenFile)
 		if err != nil {
 			log.NewHelper(logger).Error(err)
 			return nil, nil, fmt.Errorf("error creating spicedb client: error loading token file: %w", err)
@@ -84,10 +86,36 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 		log.NewHelper(logger).Info("spicedb connection cleanup requested (nothing to clean up)")
 	}
 
-	return &SpiceDbRepository{client, healthClient}, cleanup, nil
+	return &SpiceDbRepository{client, healthClient, c.SpiceDb.SchemaFile, false}, cleanup, nil
+}
+
+func (s *SpiceDbRepository) initialize() error {
+	if s.isInitialized {
+		return nil
+	}
+
+	schema, err := readFile(s.schemaFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to load schema file: %w", err)
+	}
+
+	_, err = s.client.WriteSchema(context.TODO(), &v1.WriteSchemaRequest{
+		Schema: schema,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	s.isInitialized = true
+	return nil
 }
 
 func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *apiV1beta1.ObjectType, subject_relation, relation string, object *apiV1beta1.ObjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.SubjectResult, chan error, error) {
+	if err := s.initialize(); err != nil {
+		return nil, nil, err
+	}
+
 	var cursor *v1.Cursor = nil
 	if continuation != "" {
 		cursor = &v1.Cursor{
@@ -151,6 +179,10 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 }
 
 func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *apiV1beta1.ObjectType, relation string, subject *apiV1beta1.SubjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.ResourceResult, chan error, error) {
+	if err := s.initialize(); err != nil {
+		return nil, nil, err
+	}
+
 	var cursor *v1.Cursor = nil
 	if continuation != "" {
 		cursor = &v1.Cursor{
@@ -207,6 +239,10 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 }
 
 func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics) error {
+	if err := s.initialize(); err != nil {
+		return err
+	}
+
 	var relationshipUpdates []*v1.RelationshipUpdate
 
 	var operation v1.RelationshipUpdate_Operation
@@ -234,6 +270,10 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 }
 
 func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter, limit uint32, continuation biz.ContinuationToken) (chan *biz.RelationshipResult, chan error, error) {
+	if err := s.initialize(); err != nil {
+		return nil, nil, err
+	}
+
 	var cursor *v1.Cursor = nil
 	if continuation != "" {
 		cursor = &v1.Cursor{
@@ -304,6 +344,10 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 }
 
 func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter) error {
+	if err := s.initialize(); err != nil {
+		return err
+	}
+
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
 
 	if err != nil {
@@ -323,6 +367,10 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 }
 
 func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV1beta1.CheckRequest) (*apiV1beta1.CheckResponse, error) {
+	if err := s.initialize(); err != nil {
+		return nil, err
+	}
+
 	subject := &v1.SubjectReference{
 		Object: &v1.ObjectReference{
 			ObjectType: kesselTypeToSpiceDBType(check.GetSubject().GetSubject().Type),
@@ -474,7 +522,7 @@ func createSpiceDbRelationship(relationship *apiV1beta1.Relationship) *v1.Relati
 	}
 }
 
-func readToken(file string) (string, error) {
+func readFile(file string) (string, error) {
 	bytes, err := os.ReadFile(file)
 	if err != nil {
 		return "", err

@@ -39,6 +39,7 @@ message Data {
     string endpoint = 2;
     string token = 3;
     string tokenFile = 4;
+    string schemaFile = 5;
   }
   SpiceDb spiceDb = 1;
 }

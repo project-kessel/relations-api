@@ -48,7 +48,7 @@ func TestCreateRelationship(t *testing.T) {
 	spiceDbRepo, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	preExisting := CheckForRelationship(spiceDbRepo.client, "rbac/group", "bob_club", "member", "rbac/user", "bob", "")
+	preExisting := CheckForRelationship(spiceDbRepo, "bob", "rbac", "user", "", "member", "rbac", "group", "bob_club")
 	assert.False(t, preExisting)
 
 	rels := []*apiV1beta1.Relationship{
@@ -60,7 +60,9 @@ func TestCreateRelationship(t *testing.T) {
 	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.NoError(t, err)
 
-	exists := CheckForRelationship(spiceDbRepo.client, "rbac/group", "bob_club", "member", "rbac/user", "bob", "")
+	container.WaitForQuantizationInterval()
+
+	exists := CheckForRelationship(spiceDbRepo, "bob", "rbac", "user", "", "member", "rbac", "group", "bob_club")
 	assert.True(t, exists)
 }
 
@@ -71,7 +73,7 @@ func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 	spiceDbRepo, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	preExisting := CheckForRelationship(spiceDbRepo.client, "rbac/group", "bob_club", "member", "rbac/user", "bob", "")
+	preExisting := CheckForRelationship(spiceDbRepo, "bob", "rbac", "user", "", "member", "rbac", "group", "bob_club")
 	assert.False(t, preExisting)
 
 	rels := []*apiV1beta1.Relationship{
@@ -87,7 +89,9 @@ func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, status.Convert(err).Code(), codes.AlreadyExists)
 
-	exists := CheckForRelationship(spiceDbRepo.client, "rbac/group", "bob_club", "member", "rbac/user", "bob", "")
+	container.WaitForQuantizationInterval()
+
+	exists := CheckForRelationship(spiceDbRepo, "bob", "rbac", "user", "", "member", "rbac", "group", "bob_club")
 	assert.True(t, exists)
 }
 
@@ -98,7 +102,7 @@ func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 	spiceDbRepo, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	preExisting := CheckForRelationship(spiceDbRepo.client, "rbac/group", "bob_club", "member", "rbac/user", "bob", "")
+	preExisting := CheckForRelationship(spiceDbRepo, "bob", "rbac", "user", "", "member", "rbac", "group", "bob_club")
 	assert.False(t, preExisting)
 
 	rels := []*apiV1beta1.Relationship{
@@ -115,7 +119,9 @@ func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.NoError(t, err)
 
-	exists := CheckForRelationship(spiceDbRepo.client, "rbac/group", "bob_club", "member", "rbac/user", "bob", "")
+	container.WaitForQuantizationInterval()
+
+	exists := CheckForRelationship(spiceDbRepo, "bob", "rbac", "user", "", "member", "rbac", "group", "bob_club")
 	assert.True(t, exists)
 }
 
@@ -358,6 +364,8 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 		return
 	}
 
+	container.WaitForQuantizationInterval()
+
 	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:        pointerize("bob_club"),
 		ResourceNamespace: pointerize("rbac"),
@@ -397,6 +405,8 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 		return
 	}
 
+	container.WaitForQuantizationInterval()
+
 	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:        pointerize("bob_club"),
 		ResourceNamespace: pointerize("rbac"),
@@ -431,6 +441,8 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+
+	container.WaitForQuantizationInterval()
 
 	readRelChan, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:        pointerize("bob_club"),

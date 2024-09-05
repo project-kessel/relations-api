@@ -4,12 +4,8 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"errors"
 	"fmt"
 
-	"github.com/authzed/authzed-go/v1"
-
-	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -19,9 +15,10 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
+	"github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
+	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/conf"
 
-	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -189,35 +186,42 @@ func (l *LocalSpiceDbContainer) Close() {
 }
 
 // CheckForRelationship returns true if the given subject has the given relationship to the given resource, otherwise false
-func CheckForRelationship(client *authzed.Client, resourceType string, resourceID string, relationship string, subjectType string, subjectID string, subjectRelationship string) bool {
+func CheckForRelationship(client biz.ZanzibarRepository, subjectID string, subjectNamespace string, subjectType string, subjectRelationship string, relationship string, resourceNamespace string, resourceType string, resourceID string) bool {
 	ctx := context.TODO()
-	resp, err := client.ReadRelationships(ctx, &v1.ReadRelationshipsRequest{
-		Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
-		RelationshipFilter: &v1.RelationshipFilter{
-			ResourceType:       resourceType,
-			OptionalResourceId: resourceID,
-			OptionalRelation:   relationship,
-			OptionalSubjectFilter: &v1.SubjectFilter{
-				SubjectType:       subjectType,
-				OptionalSubjectId: subjectID,
-				OptionalRelation:  &v1.SubjectFilter_RelationFilter{Relation: subjectRelationship},
-			},
+
+	var subjectRelationRef *string = nil //Relation is optional
+	if subjectRelationship != "" {
+		subjectRelationRef = &subjectRelationship
+	}
+
+	results, errors, err := client.ReadRelationships(ctx, &v1beta1.RelationTupleFilter{
+		ResourceNamespace: &resourceNamespace,
+		ResourceType:      &resourceType,
+		ResourceId:        &resourceID,
+		Relation:          &relationship,
+		SubjectFilter: &v1beta1.SubjectFilter{
+			SubjectNamespace: &subjectNamespace,
+			SubjectType:      &subjectType,
+			SubjectId:        &subjectID,
+			Relation:         subjectRelationRef,
 		},
-		OptionalLimit: 1,
-	})
+	}, 1, biz.ContinuationToken(""))
 
 	if err != nil {
 		panic(err)
 	}
 
-	_, e := resp.Recv()
+	found := false
+	select {
+	case err, ok := <-errors:
+		if ok {
+			panic(err)
+		}
+	case _, ok := <-results:
+		if ok {
+			found = true
+		}
+	}
 
-	if errors.Is(e, io.EOF) {
-		return false
-	}
-	// error
-	if e != nil {
-		panic(e)
-	}
-	return true
+	return found
 }

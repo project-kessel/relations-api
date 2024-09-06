@@ -109,12 +109,14 @@ func TestKesselAPIGRPC_ReadTuples(t *testing.T) {
 	client := v1beta1.NewKesselTupleServiceClient(conn)
 	_, err = client.ReadTuples(context.Background(), &v1beta1.ReadTuplesRequest{
 		Filter: &v1beta1.RelationTupleFilter{
-			ResourceType: pointerize("rbac/group"),
-			ResourceId:   pointerize("bob_club"),
-			Relation:     pointerize("member"),
+			ResourceNamespace: pointerize("rbac"),
+			ResourceType:      pointerize("group"),
+			ResourceId:        pointerize("bob_club"),
+			Relation:          pointerize("member"),
 			SubjectFilter: &v1beta1.SubjectFilter{
-				SubjectType: pointerize("rbac/user"),
-				SubjectId:   pointerize("bob"),
+				SubjectNamespace: pointerize("rbac"),
+				SubjectType:      pointerize("user"),
+				SubjectId:        pointerize("bob"),
 			},
 		},
 	})

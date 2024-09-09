@@ -247,12 +247,14 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 	}
 
 	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
-		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("rbac/group"),
-		Relation:     pointerize("member"),
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
 		SubjectFilter: &apiV1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	}, 0, "")
 
@@ -284,12 +286,14 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 	}
 
 	readRelChan, _, err := spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
-		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("rbac/group"),
-		Relation:     pointerize("member"),
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
 		SubjectFilter: &apiV1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	}, 0, "")
 
@@ -301,12 +305,14 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 	assert.Equal(t, 1, len(readrels))
 
 	err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
-		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("rbac/group"),
-		Relation:     pointerize("member"),
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
 		SubjectFilter: &apiV1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	})
 
@@ -315,12 +321,14 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 	}
 
 	readRelChan, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
-		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("rbac/group"),
-		Relation:     pointerize("member"),
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
 		SubjectFilter: &apiV1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	}, 0, "")
 
@@ -393,12 +401,14 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 
 	//Remove // role_binding:rb_test#subject@user:bob
 	err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
-		ResourceId:   pointerize("rb_test"),
-		ResourceType: pointerize("rbac/role_binding"),
-		Relation:     pointerize("subject"),
+		ResourceId:        pointerize("rb_test"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("role_binding"),
+		Relation:          pointerize("subject"),
 		SubjectFilter: &apiV1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	})
 	if !assert.NoError(t, err) {

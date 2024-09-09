@@ -385,8 +385,9 @@ func createSpiceDbRelationshipFilter(filter *apiV1beta1.RelationTupleFilter) (*v
 		return nil, fmt.Errorf("due to a spicedb limitation, if resource type is specified then resource namespace must also be specified")
 	}
 
+	resourceType := &apiV1beta1.ObjectType{Namespace: filter.GetResourceNamespace(), Name: filter.GetResourceType()}
 	spiceDbRelationshipFilter := &v1.RelationshipFilter{
-		ResourceType:       filter.GetResourceNamespace() + "/" + filter.GetResourceType(),
+		ResourceType:       kesselTypeToSpiceDBType(resourceType),
 		OptionalResourceId: filter.GetResourceId(),
 		OptionalRelation:   filter.GetRelation(),
 	}
@@ -401,8 +402,9 @@ func createSpiceDbRelationshipFilter(filter *apiV1beta1.RelationTupleFilter) (*v
 			return nil, fmt.Errorf("due to a spicedb limitation, if subject type is specified in subjectFilter then subject namespace must also be specified")
 		}
 
+		subjectType := &apiV1beta1.ObjectType{Namespace: subjectFilter.GetSubjectNamespace(), Name: subjectFilter.GetSubjectType()}
 		spiceDbSubjectFilter := &v1.SubjectFilter{
-			SubjectType:       subjectFilter.GetSubjectNamespace() + "/" + subjectFilter.GetSubjectType(),
+			SubjectType:       kesselTypeToSpiceDBType(subjectType),
 			OptionalSubjectId: subjectFilter.GetSubjectId(),
 		}
 

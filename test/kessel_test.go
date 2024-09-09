@@ -141,12 +141,14 @@ func TestKesselAPIGRPC_DeleteTuples(t *testing.T) {
 
 	_, err = client.DeleteTuples(context.Background(), &v1beta1.DeleteTuplesRequest{
 		Filter: &v1beta1.RelationTupleFilter{
-			ResourceType: pointerize("rbac/group"),
-			ResourceId:   pointerize("bob_club"),
-			Relation:     pointerize("member"),
+			ResourceNamespace: pointerize("rbac"),
+			ResourceType:      pointerize("group"),
+			ResourceId:        pointerize("bob_club"),
+			Relation:          pointerize("member"),
 			SubjectFilter: &v1beta1.SubjectFilter{
-				SubjectType: pointerize("rbac/user"),
-				SubjectId:   pointerize("bob"),
+				SubjectNamespace: pointerize("rbac"),
+				SubjectType:      pointerize("user"),
+				SubjectId:        pointerize("bob"),
 			},
 		},
 	})

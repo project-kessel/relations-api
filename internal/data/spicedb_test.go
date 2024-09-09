@@ -227,6 +227,118 @@ func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
 
 }
 
+func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.NoError(t, err)
+
+	_, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId:   pointerize("bob_club"),
+		ResourceType: pointerize("group"),
+		Relation:     pointerize("member"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
+		},
+	}, 0, "")
+
+	assert.Error(t, err)
+
+	_, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		Relation:          pointerize("member"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
+		},
+	}, 0, "")
+
+	assert.Error(t, err)
+
+	_, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:   pointerize("bob"),
+			SubjectType: pointerize("user"),
+		},
+	}, 0, "")
+
+	assert.Error(t, err)
+
+	_, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+		},
+	}, 0, "")
+
+	assert.Error(t, err)
+
+	_, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
+		},
+	}, 0, "")
+
+	assert.NoError(t, err)
+
+	_, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId: pointerize("bob_club"),
+		Relation:   pointerize("member"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
+		},
+	}, 0, "")
+
+	assert.NoError(t, err)
+
+	_, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId: pointerize("bob"),
+		},
+	}, 0, "")
+
+	assert.NoError(t, err)
+
+	_, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId: pointerize("bob_club"),
+		Relation:   pointerize("member"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId: pointerize("bob"),
+		},
+	}, 0, "")
+
+	assert.NoError(t, err)
+}
+
 func TestWriteAndReadBackRelationships(t *testing.T) {
 	t.Parallel()
 

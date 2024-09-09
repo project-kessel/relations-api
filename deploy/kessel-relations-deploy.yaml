@@ -41,9 +41,9 @@ objects:
       envName: ${ENV_NAME}
       testing:
         iqePlugin: relations_api
-      replicas: ${{RELATIONS_REPLICAS}}
       deployments:
         - name: relations
+          minReplicas: ${{RELATIONS_REPLICAS}}
           podSpec:
             image: ${RELATIONS_IMAGE}:${RELATIONS_IMAGE_TAG}
             livenessProbe:

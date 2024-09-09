@@ -10,7 +10,7 @@ objects:
     spec:
       config:
         logLevel: debug
-        replicas: 1
+        replicas: ${{SPICEDB_REPLICAS}}
         datastoreEngine: postgres
         datastoreBootstrapFiles: /etc/bootstrap/schema.yaml
       secretName: spicedb-config
@@ -41,7 +41,7 @@ objects:
       envName: ${ENV_NAME}
       testing:
         iqePlugin: relations_api
-      replicas: 1
+      replicas: ${{RELATIONS_REPLICAS}}
       deployments:
         - name: relations
           podSpec:
@@ -82,3 +82,9 @@ parameters:
   - description: Image Tag
     name: RELATIONS_IMAGE_TAG
     value: latest
+  - description: Number of pods for spiceDB service
+    name: SPICEDB_REPLICAS
+    value: '1'
+  - description: Number of pods for relations service
+    name: RELATIONS_REPLICAS
+    value: '1'

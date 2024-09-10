@@ -29,9 +29,9 @@ func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
 	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
-		SubjectType: simple_type("user"),
+		SubjectType: rbac_ns_type("user"),
 		Relation:    "view",
-		Resource:    &v1beta1.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
+		Resource:    &v1beta1.ObjectReference{Type: rbac_ns_type("thing"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
 	results := responseCollector.GetResponses()
@@ -53,7 +53,7 @@ func TestLookupService_LookupResources_NoResults(t *testing.T) {
 
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
 	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
-		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
+		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"}},
 		Relation: "view_the_thing",
 		ResourceType: &v1beta1.ObjectType{
 			Name:      "workspace",
@@ -82,9 +82,9 @@ func TestLookupService_LookupSubjects_OneResult(t *testing.T) {
 
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
 	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
-		SubjectType: simple_type("user"),
+		SubjectType: rbac_ns_type("user"),
 		Relation:    "view",
-		Resource:    &v1beta1.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
+		Resource:    &v1beta1.ObjectReference{Type: rbac_ns_type("thing"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
 	ids := responseCollector.GetIDs()
@@ -106,7 +106,7 @@ func TestLookupService_LookupResources_OneResult(t *testing.T) {
 
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
 	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
-		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
+		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"}},
 		Relation: "workspace",
 		ResourceType: &v1beta1.ObjectType{
 			Name:      "thing",
@@ -132,11 +132,11 @@ func TestLookupService_LookupResources_TwoResults(t *testing.T) {
 	container.WaitForQuantizationInterval()
 
 	service := createLookupService(spicedb)
-	//&v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"}}
+	//&v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("role_binding"), Id: "default_viewers"}}
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
 	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
-		Subject: &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("user"), Id: "u1"}},
-		//Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
+		Subject: &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("user"), Id: "u1"}},
+		//Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"}},
 		Relation: "subject",
 		ResourceType: &v1beta1.ObjectType{
 			Name:      "role_binding",
@@ -167,9 +167,9 @@ func TestLookupService_LookupSubjects_TwoResults(t *testing.T) {
 
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
 	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
-		SubjectType: simple_type("user"),
+		SubjectType: rbac_ns_type("user"),
 		Relation:    "view",
-		Resource:    &v1beta1.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
+		Resource:    &v1beta1.ObjectReference{Type: rbac_ns_type("thing"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
 	ids := responseCollector.GetIDs()
@@ -189,9 +189,9 @@ func createLookupService(spicedb *data.SpiceDbRepository) *LookupService {
 func seedThingInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepository, thing string) error {
 	return spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
 		{
-			Resource: &v1beta1.ObjectReference{Type: simple_type("thing"), Id: thing},
+			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("thing"), Id: thing},
 			Relation: "workspace",
-			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"}},
 		},
 	}, biz.TouchSemantics(true))
 }
@@ -199,29 +199,29 @@ func seedThingInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepos
 func seedUserWithViewThingInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepository, user string) error {
 	return spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
 		{
-			Resource: &v1beta1.ObjectReference{Type: simple_type("role"), Id: "viewers"},
+			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("role"), Id: "viewers"},
 			Relation: "view_the_thing",
-			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("user"), Id: "*"}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("user"), Id: "*"}},
 		},
 		{
-			Resource: &v1beta1.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"},
+			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("role_binding"), Id: "default_viewers"},
 			Relation: "subject",
-			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("user"), Id: user}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("user"), Id: user}},
 		},
 		{
-			Resource: &v1beta1.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers_two"},
+			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("role_binding"), Id: "default_viewers_two"},
 			Relation: "subject",
-			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("user"), Id: user}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("user"), Id: user}},
 		},
 		{
-			Resource: &v1beta1.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"},
+			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("role_binding"), Id: "default_viewers"},
 			Relation: "granted",
-			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("role"), Id: "viewers"}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("role"), Id: "viewers"}},
 		},
 		{
-			Resource: &v1beta1.ObjectReference{Type: simple_type("workspace"), Id: "default"},
+			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"},
 			Relation: "user_grant",
-			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: simple_type("role_binding"), Id: "default_viewers"}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("role_binding"), Id: "default_viewers"}},
 		},
 	}, biz.TouchSemantics(true))
 }

@@ -16,6 +16,7 @@ import (
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/authzed/authzed-go/v1"
 	"github.com/authzed/grpcutil"
+	kerrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -240,8 +241,14 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 		}
 	}
 
+	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
+
+	if err != nil {
+		return nil, nil, kerrors.BadRequest("SpiceDb request validation", err.Error()).WithCause(err)
+	}
+
 	req := &v1.ReadRelationshipsRequest{
-		RelationshipFilter: createSpiceDbRelationshipFilter(filter),
+		RelationshipFilter: relationshipFilter,
 		OptionalLimit:      limit,
 		OptionalCursor:     cursor,
 	}
@@ -297,9 +304,15 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 }
 
 func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter) error {
-	req := &v1.DeleteRelationshipsRequest{RelationshipFilter: createSpiceDbRelationshipFilter(filter)}
+	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
 
-	_, err := s.client.DeleteRelationships(ctx, req)
+	if err != nil {
+		return kerrors.BadRequest("SpiceDb request validation", err.Error()).WithCause(err)
+	}
+
+	req := &v1.DeleteRelationshipsRequest{RelationshipFilter: relationshipFilter}
+
+	_, err = s.client.DeleteRelationships(ctx, req)
 
 	// TODO: we have not specified an option in our API to allow partial deletions, so currently it's all or nothing
 	if err != nil {
@@ -362,29 +375,49 @@ func (s *SpiceDbRepository) IsBackendAvailable() error {
 	return fmt.Errorf("error connecting to backend")
 }
 
-func createSpiceDbRelationshipFilter(filter *apiV1beta1.RelationTupleFilter) *v1.RelationshipFilter {
+func createSpiceDbRelationshipFilter(filter *apiV1beta1.RelationTupleFilter) (*v1.RelationshipFilter, error) {
+	// spicedb specific internal validation to reflect spicedb limitations whereby namespace and objectType must be both
+	// be set if either of them is set in a filter
+	if filter.GetResourceNamespace() != "" && filter.GetResourceType() == "" {
+		return nil, fmt.Errorf("due to a spicedb limitation, if resource namespace is specified then resource type must also be specified")
+	}
+	if filter.GetResourceNamespace() == "" && filter.GetResourceType() != "" {
+		return nil, fmt.Errorf("due to a spicedb limitation, if resource type is specified then resource namespace must also be specified")
+	}
+
+	resourceType := &apiV1beta1.ObjectType{Namespace: filter.GetResourceNamespace(), Name: filter.GetResourceType()}
 	spiceDbRelationshipFilter := &v1.RelationshipFilter{
-		ResourceType:       filter.GetResourceType(),
+		ResourceType:       kesselTypeToSpiceDBType(resourceType),
 		OptionalResourceId: filter.GetResourceId(),
 		OptionalRelation:   filter.GetRelation(),
 	}
 
 	if filter.GetSubjectFilter() != nil {
-		subjectFilter := &v1.SubjectFilter{
-			SubjectType:       filter.GetSubjectFilter().GetSubjectType(),
-			OptionalSubjectId: filter.GetSubjectFilter().GetSubjectId(),
+		subjectFilter := filter.GetSubjectFilter()
+
+		if subjectFilter.GetSubjectNamespace() != "" && subjectFilter.GetSubjectType() == "" {
+			return nil, fmt.Errorf("due to a spicedb limitation, if subject namespace is specified in subjectFilter then subject type must also be specified")
+		}
+		if subjectFilter.GetSubjectNamespace() == "" && subjectFilter.GetSubjectType() != "" {
+			return nil, fmt.Errorf("due to a spicedb limitation, if subject type is specified in subjectFilter then subject namespace must also be specified")
 		}
 
-		if filter.GetSubjectFilter().GetRelation() != "" {
-			subjectFilter.OptionalRelation = &v1.SubjectFilter_RelationFilter{
-				Relation: filter.GetSubjectFilter().GetRelation(),
+		subjectType := &apiV1beta1.ObjectType{Namespace: subjectFilter.GetSubjectNamespace(), Name: subjectFilter.GetSubjectType()}
+		spiceDbSubjectFilter := &v1.SubjectFilter{
+			SubjectType:       kesselTypeToSpiceDBType(subjectType),
+			OptionalSubjectId: subjectFilter.GetSubjectId(),
+		}
+
+		if subjectFilter.GetRelation() != "" {
+			spiceDbSubjectFilter.OptionalRelation = &v1.SubjectFilter_RelationFilter{
+				Relation: subjectFilter.GetRelation(),
 			}
 		}
 
-		spiceDbRelationshipFilter.OptionalSubjectFilter = subjectFilter
+		spiceDbRelationshipFilter.OptionalSubjectFilter = spiceDbSubjectFilter
 	}
 
-	return spiceDbRelationshipFilter
+	return spiceDbRelationshipFilter, nil
 }
 
 func spicedbTypeToKesselType(spicedbType string) *apiV1beta1.ObjectType {

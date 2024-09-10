@@ -47,7 +47,7 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
-	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
+	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
 
 	req := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
@@ -58,12 +58,14 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 	assert.NoError(t, err)
 
 	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
-		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("rbac/group"),
-		Relation:     pointerize("member"),
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	},
 	}
@@ -92,7 +94,7 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 	assert.NoError(t, err)
 
 	ctx := context.Background()
-	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
+	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
 	req := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
 			expected,
@@ -102,12 +104,14 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 	assert.NoError(t, err)
 
 	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
-		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("rbac/group"),
-		Relation:     pointerize("member"),
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	},
 	}
@@ -152,8 +156,8 @@ func TestRelationshipsService_CreateRelationshipsWithBadSubjectType(t *testing.T
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
-	badSubjectType := simple_type("not_a_user")
-	expected := createRelationship("bob", badSubjectType, "", "member", simple_type("group"), "bob_club")
+	badSubjectType := rbac_ns_type("not_a_user")
+	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", badSubjectType, "bob", "")
 	req := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
 			expected,
@@ -171,8 +175,8 @@ func TestRelationshipsService_CreateRelationshipsWithBadObjectType(t *testing.T)
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
-	badObjectType := simple_type("not_an_object")
-	expected := createRelationship("bob", simple_type("user"), "", "member", badObjectType, "bob_club")
+	badObjectType := rbac_ns_type("not_an_object")
+	expected := createRelationship(badObjectType, "bob_club", "member", rbac_ns_type("user"), "bob", "")
 	req := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
 			expected,
@@ -190,7 +194,7 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
 
-	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
+	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
 
 	ctx := context.Background()
 	req := &v1beta1.CreateTuplesRequest{
@@ -202,24 +206,28 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	assert.NoError(t, err)
 
 	delreq := &v1beta1.DeleteTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
-		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("rbac/group"),
-		Relation:     pointerize("member"),
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	}}
 	_, err = relationshipsService.DeleteTuples(ctx, delreq)
 	assert.NoError(t, err)
 
 	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
-		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("rbac/group"),
-		Relation:     pointerize("member"),
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	},
 	}
@@ -272,7 +280,7 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
 	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase)
 
-	expected := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
+	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
 
 	reqCr := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
@@ -283,12 +291,14 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 	assert.NoError(t, err)
 
 	req := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
-		ResourceId:   pointerize("bob_club"),
-		ResourceType: pointerize("rbac/group"),
-		Relation:     pointerize("member"),
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	},
 	}
@@ -322,8 +332,8 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
 	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase)
 
-	expected1 := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "bob_club")
-	expected2 := createRelationship("bob", simple_type("user"), "", "member", simple_type("group"), "other_bob_club")
+	expected1 := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
+	expected2 := createRelationship(rbac_ns_type("group"), "other_bob_club", "member", rbac_ns_type("user"), "bob", "")
 
 	reqCr := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
@@ -336,11 +346,13 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 	container.WaitForQuantizationInterval()
 
 	req := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
-		ResourceType: pointerize("rbac/group"),
-		Relation:     pointerize("member"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
 		SubjectFilter: &v1beta1.SubjectFilter{
-			SubjectId:   pointerize("bob"),
-			SubjectType: pointerize("rbac/user"),
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("user"),
 		},
 	},
 		Pagination: &v1beta1.RequestPagination{
@@ -370,7 +382,7 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func simple_type(typename string) *v1beta1.ObjectType {
+func rbac_ns_type(typename string) *v1beta1.ObjectType {
 	return &v1beta1.ObjectType{Name: typename, Namespace: "rbac"}
 }
 
@@ -378,7 +390,7 @@ func pointerize(value string) *string { //Used to turn string literals into poin
 	return &value
 }
 
-func createRelationship(subjectId string, subjectType *v1beta1.ObjectType, subjectRelationship string, relationship string, objectType *v1beta1.ObjectType, objectId string) *v1beta1.Relationship {
+func createRelationship(objectType *v1beta1.ObjectType, objectId string, relationship string, subjectType *v1beta1.ObjectType, subjectId string, subjectRelationship string) *v1beta1.Relationship {
 	subject := &v1beta1.SubjectReference{
 		Subject: &v1beta1.ObjectReference{
 			Type: subjectType,

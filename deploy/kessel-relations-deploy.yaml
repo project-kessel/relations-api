@@ -21,6 +21,13 @@ objects:
               spec:
                 containers:
                 - name: spicedb
+                  resources:
+                    requests:
+                      memory: "128Mi"
+                      cpu: "25m"
+                    limits:
+                      memory: "256Mi"
+                      cpu: "100m"
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:

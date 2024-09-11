@@ -26,12 +26,20 @@ objects:
                     name: spicedb-schema
                 containers:
                 - name: spicedb
+                  resources:
+                    requests:
+                      memory: "128Mi"
+                      cpu: "25m"
+                    limits:
+                      memory: "256Mi"
+                      cpu: "100m"  
                   env:
                    - name: "SPICEDB_DATASTORE_BOOTSTRAP_OVERWRITE"
                      value: "true"
                   volumeMounts:
                   - name: bootstrap
                     mountPath: /etc/bootstrap
+
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:

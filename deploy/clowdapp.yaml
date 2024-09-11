@@ -26,6 +26,13 @@ objects:
                     name: spicedb-schema
                 containers:
                 - name: spicedb
+                  resources:
+                    requests:
+                      memory: "128Mi"
+                      cpu: "25m"
+                    limits:
+                      memory: "256Mi"
+                      cpu: "100m"                
                   volumeMounts:
                   - name: bootstrap
                     mountPath: /etc/bootstrap      

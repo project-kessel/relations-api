@@ -2,7 +2,7 @@ version: v2
 name: buf.build/project-kessel/relations-api
 lint:
   use:
-    - DEFAULT
+    - STANDARD
 breaking:
   use:
     - FILE

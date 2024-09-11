@@ -19,7 +19,6 @@ objects:
           spec:
             template:
               spec:
-<<<<<<< HEAD
                 containers:
                 - name: spicedb
                   resources:
@@ -29,20 +28,6 @@ objects:
                     limits:
                       memory: "256Mi"
                       cpu: "100m"
-=======
-                volumes:
-                - name: bootstrap
-                  configMap:
-                    name: spicedb-schema
-                containers:
-                - name: spicedb
-                  env:
-                  - name: "SPICEDB_DATASTORE_BOOTSTRAP_OVERWRITE"
-                    value: "true"
-                  volumeMounts:
-                  - name: bootstrap
-                    mountPath: /etc/bootstrap
->>>>>>> b1bd6aa (Lint deploy file using yamllint)
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:

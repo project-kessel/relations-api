@@ -1,5 +1,7 @@
 name: buf-push
-on: push
+on: 
+  push:
+    branches: [ 'main' ]
 permissions:
   contents: read
   pull-requests: write

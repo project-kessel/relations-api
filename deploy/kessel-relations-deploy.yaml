@@ -12,7 +12,6 @@ objects:
         logLevel: debug
         replicas: ${{SPICEDB_REPLICAS}}
         datastoreEngine: postgres
-        datastoreBootstrapFiles: /etc/bootstrap/schema.yaml
       secretName: spicedb-config
       patches:
       - kind: Deployment
@@ -62,6 +61,15 @@ objects:
                     name: spicedb-config
               - name: SPICEDB_ENDPOINT
                 value: ${CLOWDAPP_NAME}-spicedb:50051
+              - name: SPICEDB_SCHEMA_FILE
+                value: /etc/schema/schema.zed
+            volumes:
+            - name: schema
+              configMap:
+                name: spicedb-schema
+            volumeMounts:
+              - name: schema
+                mountPath: /etc/schema
           webServices:
             public:
               enabled: true

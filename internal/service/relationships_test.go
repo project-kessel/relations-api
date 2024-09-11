@@ -57,6 +57,8 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.NoError(t, err)
 
+	container.WaitForQuantizationInterval()
+
 	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:        pointerize("bob_club"),
 		ResourceNamespace: pointerize("rbac"),
@@ -102,6 +104,8 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 	}
 	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.NoError(t, err)
+
+	container.WaitForQuantizationInterval()
 
 	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:        pointerize("bob_club"),
@@ -219,6 +223,8 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	_, err = relationshipsService.DeleteTuples(ctx, delreq)
 	assert.NoError(t, err)
 
+	container.WaitForQuantizationInterval()
+
 	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:        pointerize("bob_club"),
 		ResourceNamespace: pointerize("rbac"),
@@ -289,6 +295,8 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 	}
 	_, err = relationshipsService.CreateTuples(ctx, reqCr)
 	assert.NoError(t, err)
+
+	container.WaitForQuantizationInterval()
 
 	req := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
 		ResourceId:        pointerize("bob_club"),

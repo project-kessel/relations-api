@@ -4,24 +4,24 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"errors"
 	"fmt"
-	"github.com/authzed/authzed-go/v1"
 
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
-	"github.com/project-kessel/relations-api/internal/conf"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"time"
 
-	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
+	"github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
+	"github.com/project-kessel/relations-api/internal/biz"
+	"github.com/project-kessel/relations-api/internal/conf"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 const (
@@ -30,18 +30,19 @@ const (
 	// SpicedbVersion is the image version used for containerized spiceDB in tests
 	SpicedbVersion = "v1.22.2"
 	// SpicedbSchemaBootstrapFile specifies an optional bootstrap schema file to be used for testing
-	SpicedbSchemaBootstrapFile = "spicedb-test-data/basic_schema.yaml"
+	SpicedbSchemaBootstrapFile = "spicedb-test-data/basic_schema.zed"
 	// SpicedbRelationsBootstrapFile specifies an optional bootstrap file containing relations to be used for testing
 	SpicedbRelationsBootstrapFile = ""
 )
 
 // LocalSpiceDbContainer struct that holds pointers to the container, dockertest pool and exposes the port
 type LocalSpiceDbContainer struct {
-	logger    log.Logger
-	port      string
-	container *dockertest.Resource
-	pool      *dockertest.Pool
-	name      string
+	logger         log.Logger
+	port           string
+	container      *dockertest.Resource
+	pool           *dockertest.Pool
+	name           string
+	schemaLocation string
 }
 
 type ContainerOptions struct {
@@ -65,27 +66,10 @@ func CreateContainer(opts *ContainerOptions) (*LocalSpiceDbContainer, error) {
 
 	cmd := []string{"serve-testing", "--skip-release-check=true"}
 
-	var mounts []string
-	if SpicedbSchemaBootstrapFile != "" {
-		cmd = append(cmd, "--load-configs")
-		cmd = append(cmd, "/mnt/spicedb_bootstrap.yaml")
-		mounts = append(mounts, path.Join(basepath, SpicedbSchemaBootstrapFile)+":/mnt/spicedb_bootstrap.yaml")
-	}
-	if SpicedbRelationsBootstrapFile != "" {
-		if SpicedbSchemaBootstrapFile != "" {
-			cmd[len(cmd)-1] = "/mnt/spicedb_bootstrap.yaml,/mnt/spicedb_bootstrap_relations.yaml"
-		} else {
-			cmd = append(cmd, "--load-configs")
-			cmd = append(cmd, "/mnt/spicedb_bootstrap_relations.yaml")
-		}
-		mounts = append(mounts, path.Join(basepath, SpicedbRelationsBootstrapFile)+":/mnt/spicedb_bootstrap_relations.yaml")
-	}
-
 	runopt := &dockertest.RunOptions{
 		Repository:   SpicedbImage,
 		Tag:          SpicedbVersion, // Replace this with an actual version
 		Cmd:          cmd,
-		Mounts:       mounts,
 		ExposedPorts: []string{"50051/tcp", "50052/tcp"},
 	}
 	if opts.Network != nil {
@@ -111,11 +95,10 @@ func CreateContainer(opts *ContainerOptions) (*LocalSpiceDbContainer, error) {
 			return fmt.Errorf("error connecting to spiceDB: %v", err.Error())
 		}
 
-		client := v1.NewSchemaServiceClient(conn)
-
-		//read scheme we add via mount
-		_, err = client.ReadSchema(context.Background(), &v1.ReadSchemaRequest{})
-
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		client := grpc_health_v1.NewHealthClient(conn)
+		_, err = client.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
 		return err
 	})
 
@@ -124,11 +107,12 @@ func CreateContainer(opts *ContainerOptions) (*LocalSpiceDbContainer, error) {
 	}
 
 	return &LocalSpiceDbContainer{
-		name:      resource.Container.Name,
-		logger:    opts.Logger,
-		port:      port,
-		container: resource,
-		pool:      pool,
+		name:           resource.Container.Name,
+		logger:         opts.Logger,
+		port:           port,
+		container:      resource,
+		pool:           pool,
+		schemaLocation: path.Join(basepath, SpicedbSchemaBootstrapFile),
 	}, nil
 }
 
@@ -180,9 +164,10 @@ func (l *LocalSpiceDbContainer) CreateSpiceDbRepository() (*SpiceDbRepository, e
 	defer os.RemoveAll(tmpDir)
 
 	spiceDbConf := &conf.Data_SpiceDb{
-		UseTLS:   false,
-		Endpoint: "localhost:" + l.port,
-		Token:    tmpFile.Name(),
+		UseTLS:     false,
+		Endpoint:   "localhost:" + l.port,
+		Token:      tmpFile.Name(),
+		SchemaFile: l.schemaLocation,
 	}
 	repo, _, err := NewSpiceDbRepository(&conf.Data{SpiceDb: spiceDbConf}, l.logger)
 	if err != nil {
@@ -201,35 +186,42 @@ func (l *LocalSpiceDbContainer) Close() {
 }
 
 // CheckForRelationship returns true if the given subject has the given relationship to the given resource, otherwise false
-func CheckForRelationship(client *authzed.Client, resourceType string, resourceID string, relationship string, subjectType string, subjectID string, subjectRelationship string) bool {
+func CheckForRelationship(client biz.ZanzibarRepository, subjectID string, subjectNamespace string, subjectType string, subjectRelationship string, relationship string, resourceNamespace string, resourceType string, resourceID string) bool {
 	ctx := context.TODO()
-	resp, err := client.ReadRelationships(ctx, &v1.ReadRelationshipsRequest{
-		Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
-		RelationshipFilter: &v1.RelationshipFilter{
-			ResourceType:       resourceType,
-			OptionalResourceId: resourceID,
-			OptionalRelation:   relationship,
-			OptionalSubjectFilter: &v1.SubjectFilter{
-				SubjectType:       subjectType,
-				OptionalSubjectId: subjectID,
-				OptionalRelation:  &v1.SubjectFilter_RelationFilter{Relation: subjectRelationship},
-			},
+
+	var subjectRelationRef *string = nil //Relation is optional
+	if subjectRelationship != "" {
+		subjectRelationRef = &subjectRelationship
+	}
+
+	results, errors, err := client.ReadRelationships(ctx, &v1beta1.RelationTupleFilter{
+		ResourceNamespace: &resourceNamespace,
+		ResourceType:      &resourceType,
+		ResourceId:        &resourceID,
+		Relation:          &relationship,
+		SubjectFilter: &v1beta1.SubjectFilter{
+			SubjectNamespace: &subjectNamespace,
+			SubjectType:      &subjectType,
+			SubjectId:        &subjectID,
+			Relation:         subjectRelationRef,
 		},
-		OptionalLimit: 1,
-	})
+	}, 1, biz.ContinuationToken(""))
 
 	if err != nil {
 		panic(err)
 	}
 
-	_, e := resp.Recv()
+	found := false
+	select {
+	case err, ok := <-errors:
+		if ok {
+			panic(err)
+		}
+	case _, ok := <-results:
+		if ok {
+			found = true
+		}
+	}
 
-	if errors.Is(e, io.EOF) {
-		return false
-	}
-	// error
-	if e != nil {
-		panic(e)
-	}
-	return true
+	return found
 }

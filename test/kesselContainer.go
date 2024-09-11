@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -15,6 +18,10 @@ import (
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/project-kessel/relations-api/internal/data"
+)
+
+const (
+	SpicedbSchemaBootstrapFile = "../internal/data/spicedb-test-data/basic_schema.zed"
 )
 
 // LocalKesselContainer struct that holds pointers to the localKesselContainer, dockertest pool and exposes the port
@@ -118,12 +125,18 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 		log.Fatalf("Could not connect to keycloak container: %s", err)
 	}
 
+	var (
+		_, b, _, _ = runtime.Caller(0)
+		basepath   = filepath.Dir(b)
+	)
+
 	targetArch := "amd64" // or "arm64", depending on your needs
 	enable_auth := fmt.Sprintf("SPICEDB_ENABLEAUTH=%t", true)
 	sso := fmt.Sprintf("SPICEDB_JWKSURL=%s", kcurl)
 	name := strings.Trim(container.Name(), "/")
 	endpoint := fmt.Sprintf("SPICEDB_ENDPOINT=%s:%s", name, "50051")
 	presharedSecret := fmt.Sprintf("SPICEDB_PRESHARED=%s", "spicedbpreshared")
+	schemaFile := fmt.Sprintf("SPICEDB_SCHEMA_FILE=%s", "/mnt/spicedb_schema.zed")
 
 	resource, err := pool.BuildAndRunWithBuildOptions(&dockertest.BuildOptions{
 		Dockerfile: "Dockerfile", // Path to your Dockerfile
@@ -134,7 +147,8 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 		},
 	}, &dockertest.RunOptions{
 		Name:      "rel",
-		Env:       []string{endpoint, presharedSecret, sso, enable_auth},
+		Env:       []string{endpoint, presharedSecret, sso, enable_auth, schemaFile},
+		Mounts:    []string{fmt.Sprintf("%s:/mnt/spicedb_schema.zed:ro", path.Join(basepath, SpicedbSchemaBootstrapFile))},
 		NetworkID: network.ID,
 	})
 	if err != nil {

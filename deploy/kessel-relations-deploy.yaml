@@ -75,7 +75,7 @@ parameters:
   - description: Name of the ClowdApp
     name: CLOWDAPP_NAME
     value: relations
-  - description : ClowdEnvironment name
+  - description: ClowdEnvironment name
     name: ENV_NAME
     value: ${ENV_NAME}
   - description: Namespace to deploy into

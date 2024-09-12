@@ -1,0 +1,7 @@
+# See https://yamllint.readthedocs.io/en/stable/configuration.html
+extends: default
+
+rules:
+  document-start: disable  
+  indentation:
+    indent-sequences: whatever

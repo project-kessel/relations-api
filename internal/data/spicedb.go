@@ -253,6 +253,10 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 	}
 
 	for _, rel := range rels {
+		if !strings.HasPrefix(rel.Relation, "t_") {
+			rel.Relation = "t_" + rel.Relation
+		}
+
 		relationshipUpdates = append(relationshipUpdates, &v1.RelationshipUpdate{
 			Operation:    operation,
 			Relationship: createSpiceDbRelationship(rel),
@@ -279,6 +283,11 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 		cursor = &v1.Cursor{
 			Token: string(continuation),
 		}
+	}
+
+	if !strings.HasPrefix(*filter.Relation, "t_") {
+		prefix_rel := "t_" + filter.GetRelation()
+		filter.Relation = &prefix_rel
 	}
 
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
@@ -326,7 +335,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 						Type: spicedbTypeToKesselType(spiceDbRel.Resource.ObjectType),
 						Id:   spiceDbRel.Resource.ObjectId,
 					},
-					Relation: msg.Relationship.Relation,
+					Relation: msg.Relationship.Relation[2:],
 					Subject: &apiV1beta1.SubjectReference{
 						Relation: optionalStringToStringPointer(spiceDbRel.Subject.OptionalRelation),
 						Subject: &apiV1beta1.ObjectReference{
@@ -346,6 +355,11 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter) error {
 	if err := s.initialize(); err != nil {
 		return err
+	}
+
+	if !strings.HasPrefix(*filter.Relation, "t_") {
+		prefix_rel := "t_" + filter.GetRelation()
+		filter.Relation = &prefix_rel
 	}
 
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)

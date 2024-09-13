@@ -31,6 +31,10 @@ type SpiceDbRepository struct {
 	isInitialized  bool
 }
 
+const (
+	relationPrefix = "t_"
+)
+
 // NewSpiceDbRepository .
 func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, func(), error) {
 	log.NewHelper(logger).Info("creating spicedb connection")
@@ -253,9 +257,7 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 	}
 
 	for _, rel := range rels {
-		if !strings.HasPrefix(rel.Relation, "t_") {
-			rel.Relation = "t_" + rel.Relation
-		}
+		rel.Relation = addPrefix(rel.Relation, relationPrefix)
 
 		relationshipUpdates = append(relationshipUpdates, &v1.RelationshipUpdate{
 			Operation:    operation,
@@ -285,10 +287,8 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 		}
 	}
 
-	if !strings.HasPrefix(*filter.Relation, "t_") {
-		prefix_rel := "t_" + filter.GetRelation()
-		filter.Relation = &prefix_rel
-	}
+	tempRelation := addPrefix(*filter.Relation, relationPrefix)
+	filter.Relation = &tempRelation
 
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
 
@@ -335,7 +335,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 						Type: spicedbTypeToKesselType(spiceDbRel.Resource.ObjectType),
 						Id:   spiceDbRel.Resource.ObjectId,
 					},
-					Relation: msg.Relationship.Relation[2:],
+					Relation: strings.TrimPrefix(msg.Relationship.Relation, relationPrefix),
 					Subject: &apiV1beta1.SubjectReference{
 						Relation: optionalStringToStringPointer(spiceDbRel.Subject.OptionalRelation),
 						Subject: &apiV1beta1.ObjectReference{
@@ -357,10 +357,8 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 		return err
 	}
 
-	if !strings.HasPrefix(*filter.Relation, "t_") {
-		prefix_rel := "t_" + filter.GetRelation()
-		filter.Relation = &prefix_rel
-	}
+	tempRelation := addPrefix(*filter.Relation, relationPrefix)
+	filter.Relation = &tempRelation
 
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
 
@@ -513,6 +511,13 @@ func optionalStringToStringPointer(optional string) *string {
 	}
 
 	return &optional
+}
+
+func addPrefix(relation, prefix string) string {
+	if !strings.HasPrefix(relation, prefix) {
+		return prefix + relation
+	}
+	return relation
 }
 
 func createSpiceDbRelationship(relationship *apiV1beta1.Relationship) *v1.Relationship {

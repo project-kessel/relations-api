@@ -1,10 +1,3 @@
-definition rbac/user {}
-
-definition rbac/group {
-	permission member = t_member
-	relation t_member: rbac/user | rbac/group#member
-}
-
 definition rbac/role {
 	permission view_the_thing = t_view_the_thing
 	relation t_view_the_thing: rbac/user:*
@@ -30,4 +23,11 @@ definition rbac/thing {
 	permission workspace = t_workspace
 	relation t_workspace: rbac/workspace
 	permission view = t_workspace->view_the_thing
+}
+
+definition rbac/user {}
+
+definition rbac/group {
+	permission member = t_member
+	relation t_member: rbac/user | rbac/group#member
 }

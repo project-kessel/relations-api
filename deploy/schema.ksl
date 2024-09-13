@@ -1,5 +1,5 @@
 version 0.1
-module rbac
+namespace rbac
 
 public type user {}
 

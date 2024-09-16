@@ -257,7 +257,7 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 	}
 
 	for _, rel := range rels {
-		rel.Relation = addPrefix(rel.Relation, relationPrefix)
+		rel.Relation = addRelationPrefix(rel.Relation, relationPrefix)
 
 		relationshipUpdates = append(relationshipUpdates, &v1.RelationshipUpdate{
 			Operation:    operation,
@@ -287,7 +287,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 		}
 	}
 
-	tempRelation := addPrefix(*filter.Relation, relationPrefix)
+	tempRelation := addRelationPrefix(*filter.Relation, relationPrefix)
 	filter.Relation = &tempRelation
 
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
@@ -357,7 +357,7 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 		return err
 	}
 
-	tempRelation := addPrefix(*filter.Relation, relationPrefix)
+	tempRelation := addRelationPrefix(*filter.Relation, relationPrefix)
 	filter.Relation = &tempRelation
 
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
@@ -513,7 +513,7 @@ func optionalStringToStringPointer(optional string) *string {
 	return &optional
 }
 
-func addPrefix(relation, prefix string) string {
+func addRelationPrefix(relation, prefix string) string {
 	if !strings.HasPrefix(relation, prefix) {
 		return prefix + relation
 	}

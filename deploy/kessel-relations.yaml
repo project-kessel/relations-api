@@ -86,7 +86,7 @@ objects:
     spec:
       config:
         logLevel: debug
-        replicas: 1
+        replicas: ${{SPICEDB_REPLICAS}}
         datastoreEngine: postgres
       secretName: dev-spicedb-config
       patches:
@@ -112,9 +112,9 @@ objects:
       envName: ${ENV_NAME}
       testing:
         iqePlugin: relations_api
-      replicas: 1
       deployments:
         - name: relations
+          minReplicas: ${{RELATIONS_REPLICAS}}
           podSpec:
             image: ${RELATIONS_IMAGE}:${RELATIONS_IMAGE_TAG}
             livenessProbe:
@@ -159,3 +159,9 @@ parameters:
   - description: Image Tag
     name: RELATIONS_IMAGE_TAG
     value: latest
+  - description: Number of pods for spiceDB service
+    name: SPICEDB_REPLICAS
+    value: '1'
+  - description: Number of pods for relations service
+    name: RELATIONS_REPLICAS
+    value: '1'    

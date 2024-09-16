@@ -13,5 +13,5 @@ objects:
   metadata:
     name: spicedb-schema
   data:
-    schema.yaml: |-
+    schema.zed: |-
       ${{SCHEMA}}

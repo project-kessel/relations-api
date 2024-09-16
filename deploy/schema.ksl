@@ -1,0 +1,32 @@
+version 0.1
+namespace rbac
+
+public type user {}
+
+public type group {
+    relation member: [Any user or group.member]
+}
+
+public type role {
+    relation view_the_thing: [bool]
+}
+
+public type role_binding {
+    relation subject: [Any user or group.member]
+    relation granted: [AtLeastOne role]
+
+    relation view_the_thing: subject and granted.view_the_thing
+}
+
+public type workspace {
+    relation parent: [AtMostOne workspace]
+    relation user_grant: [Any role_binding]
+
+    relation view_the_thing: user_grant.view_the_thing
+}
+
+public type thing {
+    relation workspace: [ExactlyOne workspace]
+
+    relation view: workspace.view_the_thing
+}

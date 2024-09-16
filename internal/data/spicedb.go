@@ -31,6 +31,10 @@ type SpiceDbRepository struct {
 	isInitialized  bool
 }
 
+const (
+	relationPrefix = "t_"
+)
+
 // NewSpiceDbRepository .
 func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, func(), error) {
 	log.NewHelper(logger).Info("creating spicedb connection")
@@ -253,6 +257,8 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 	}
 
 	for _, rel := range rels {
+		rel.Relation = addRelationPrefix(rel.Relation, relationPrefix)
+
 		relationshipUpdates = append(relationshipUpdates, &v1.RelationshipUpdate{
 			Operation:    operation,
 			Relationship: createSpiceDbRelationship(rel),
@@ -280,6 +286,9 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 			Token: string(continuation),
 		}
 	}
+
+	tempRelation := addRelationPrefix(*filter.Relation, relationPrefix)
+	filter.Relation = &tempRelation
 
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
 
@@ -326,7 +335,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 						Type: spicedbTypeToKesselType(spiceDbRel.Resource.ObjectType),
 						Id:   spiceDbRel.Resource.ObjectId,
 					},
-					Relation: msg.Relationship.Relation,
+					Relation: strings.TrimPrefix(msg.Relationship.Relation, relationPrefix),
 					Subject: &apiV1beta1.SubjectReference{
 						Relation: optionalStringToStringPointer(spiceDbRel.Subject.OptionalRelation),
 						Subject: &apiV1beta1.ObjectReference{
@@ -347,6 +356,9 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 	if err := s.initialize(); err != nil {
 		return err
 	}
+
+	tempRelation := addRelationPrefix(*filter.Relation, relationPrefix)
+	filter.Relation = &tempRelation
 
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
 
@@ -499,6 +511,13 @@ func optionalStringToStringPointer(optional string) *string {
 	}
 
 	return &optional
+}
+
+func addRelationPrefix(relation, prefix string) string {
+	if !strings.HasPrefix(relation, prefix) {
+		return prefix + relation
+	}
+	return relation
 }
 
 func createSpiceDbRelationship(relationship *apiV1beta1.Relationship) *v1.Relationship {

@@ -1,29 +1,33 @@
-definition rbac/user {}
-
-definition rbac/group {
-  relation member: rbac/user | rbac/group#member
-}
-
 definition rbac/role {
-  relation view_the_thing: rbac/user:*
+	permission view_the_thing = t_view_the_thing
+	relation t_view_the_thing: rbac/user:*
 }
 
 definition rbac/role_binding {
-  relation subject : rbac/user | rbac/group#member
-  relation granted: rbac/role
-
-  permission view_the_thing = subject & granted->view_the_thing
+	permission subject = t_subject
+	relation t_subject: rbac/user | rbac/group#member
+	permission granted = t_granted
+	relation t_granted: rbac/role
+	permission view_the_thing = (subject & t_granted->view_the_thing)
 }
 
 definition rbac/workspace {
-  relation parent: rbac/workspace
-  relation user_grant: rbac/role_binding
-
-  permission view_the_thing = user_grant->view_the_thing
+	permission parent = t_parent
+	relation t_parent: rbac/workspace
+	permission user_grant = t_user_grant
+	relation t_user_grant: rbac/role_binding
+	permission view_the_thing = t_user_grant->view_the_thing
 }
 
 definition rbac/thing {
-  relation workspace: rbac/workspace
+	permission workspace = t_workspace
+	relation t_workspace: rbac/workspace
+	permission view = t_workspace->view_the_thing
+}
 
-  permission view = workspace->view_the_thing
+definition rbac/user {}
+
+definition rbac/group {
+	permission member = t_member
+	relation t_member: rbac/user | rbac/group#member
 }

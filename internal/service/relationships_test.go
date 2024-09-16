@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 )
 
 var container *data.LocalSpiceDbContainer
@@ -54,7 +55,8 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 			expected,
 		},
 	}
-	_, err = relationshipsService.CreateTuples(ctx, req)
+	reqCopy := proto.Clone(req)
+	_, err = relationshipsService.CreateTuples(ctx, reqCopy.(*v1beta1.CreateTuplesRequest))
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -102,7 +104,8 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 			expected,
 		},
 	}
-	_, err = relationshipsService.CreateTuples(ctx, req)
+	reqCopy := proto.Clone(req)
+	_, err = relationshipsService.CreateTuples(ctx, reqCopy.(*v1beta1.CreateTuplesRequest))
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()

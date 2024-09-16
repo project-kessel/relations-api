@@ -88,7 +88,6 @@ objects:
         logLevel: debug
         replicas: 1
         datastoreEngine: postgres
-        datastoreBootstrapFiles: /etc/bootstrap/schema.yaml
       secretName: dev-spicedb-config
       patches:
       - kind: Deployment
@@ -96,10 +95,6 @@ objects:
           spec:
             template:
               spec:
-                volumes:
-                - name:  bootstrap
-                  configMap:
-                    name: spicedb-schema
                 containers:
                 - name: spicedb
                   resources:
@@ -109,9 +104,6 @@ objects:
                     limits:
                       memory: "256Mi"
                       cpu: "100m"               
-                  volumeMounts:
-                  - name: bootstrap
-                    mountPath: /etc/bootstrap
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:
@@ -141,6 +133,15 @@ objects:
                     name: dev-spicedb-config
               - name: SPICEDB_ENDPOINT
                 value: relations-spicedb:50051
+              - name: SPICEDB_SCHEMA_FILE
+                value: /etc/schema/schema.zed
+            volumes:
+            - name: schema
+              configMap:
+                name: spicedb-schema
+            volumeMounts:
+              - name: schema
+                mountPath: /etc/schema
           webServices:
             public:
               enabled: true

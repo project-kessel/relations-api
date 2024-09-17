@@ -11,7 +11,7 @@ metadata:
       == "main"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: kessel
+    appstudio.openshift.io/application: kessel-relations
     appstudio.openshift.io/component: relations-api
     pipelines.appstudio.openshift.io/type: build
   name: relations-api-on-pull-request
@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/project-kessel-tenant/kessel/relations-api:on-pr-{{revision}}
+    value: quay.io/redhat-user-workloads/project-kessel-tenant/kessel-relations/relations-api:on-pr-{{revision}}
   - name: image-expires-after
     value: 5d
   - name: dockerfile

@@ -25,7 +25,14 @@ spec:
     value: quay.io/redhat-user-workloads/project-kessel-tenant/kessel/relations-api:{{revision}}
   - name: dockerfile
     value: ./Dockerfile
+  - name: path-context
+    value: .
   pipelineSpec:
+    description: |
+      This pipeline is ideal for building container images from a Containerfile while reducing network traffic.
+
+      _Uses `buildah` to create a container image. It also optionally creates a source image and runs some build-time tests. EC will flag a violation for [`trusted_task.trusted`](https://enterprisecontract.dev/docs/ec-policies/release_policy.html#trusted_task__trusted) if any tasks are added to the pipeline.
+      This pipeline is pushed as a Tekton bundle to [quay.io](https://quay.io/repository/konflux-ci/tekton-catalog/pipeline-docker-build?tab=tags)_
     finally:
     - name: show-sbom
       params:
@@ -377,7 +384,7 @@ spec:
         - name: name
           value: sast-snyk-check
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-sast-snyk-check:0.2@sha256:4b179c33fa61b2e44a4b47b479769d2abd267375f43cd4d158442980c7528df5
+          value: quay.io/konflux-ci/tekton-catalog/task-sast-snyk-check:0.2@sha256:82c42d27c9c59db6cf6c235e89f7b37f5cdfc75d0d361ca0ee91ae703ba72301
         - name: kind
           value: task
         resolver: bundles
@@ -402,7 +409,7 @@ spec:
         - name: name
           value: clamav-scan
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-clamav-scan:0.1@sha256:394ba5e541d20975edfa5ce57459cb878b5c1a2a9cdb8270ca4a8fd575f8ee43
+          value: quay.io/konflux-ci/tekton-catalog/task-clamav-scan:0.1@sha256:0e61e7fce97b089b216eccd8390b1c2a265454c81c6630449e0f648dfcd4fcfe
         - name: kind
           value: task
         resolver: bundles
@@ -443,7 +450,7 @@ spec:
         - name: name
           value: push-dockerfile
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-push-dockerfile:0.1@sha256:0d2b6d31dc8bc02c5493d7d28a163bb6c867be5f86c3a82388b0d5c69e18d352
+          value: quay.io/konflux-ci/tekton-catalog/task-push-dockerfile:0.1@sha256:92d63edd09636f97961ca18fac14b67935179d2c14b4a4d5f8087c614e8c2bd9
         - name: kind
           value: task
         resolver: bundles

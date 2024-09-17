@@ -259,6 +259,11 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 	for _, rel := range rels {
 		rel.Relation = addRelationPrefix(rel.Relation, relationPrefix)
 
+		if rel.Subject.GetRelation() != "" {
+			tempRelation := addRelationPrefix(rel.Subject.GetRelation(), relationPrefix)
+			rel.Subject.Relation = &tempRelation
+		}
+
 		relationshipUpdates = append(relationshipUpdates, &v1.RelationshipUpdate{
 			Operation:    operation,
 			Relationship: createSpiceDbRelationship(rel),
@@ -290,6 +295,11 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 	if filter.GetRelation() != "" {
 		tempRelation := addRelationPrefix(filter.GetRelation(), relationPrefix)
 		filter.Relation = &tempRelation
+	}
+
+	if filter.SubjectFilter.GetRelation() != "" {
+		tempRelation := addRelationPrefix(filter.SubjectFilter.GetRelation(), relationPrefix)
+		filter.SubjectFilter.Relation = &tempRelation
 	}
 
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
@@ -339,7 +349,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 					},
 					Relation: strings.TrimPrefix(msg.Relationship.Relation, relationPrefix),
 					Subject: &apiV1beta1.SubjectReference{
-						Relation: optionalStringToStringPointer(spiceDbRel.Subject.OptionalRelation),
+						Relation: optionalStringToStringPointer(strings.TrimPrefix(spiceDbRel.Subject.OptionalRelation, relationPrefix)),
 						Subject: &apiV1beta1.ObjectReference{
 							Type: spicedbTypeToKesselType(spiceDbRel.Subject.Object.ObjectType),
 							Id:   spiceDbRel.Subject.Object.ObjectId,
@@ -362,6 +372,11 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 	if filter.GetRelation() != "" {
 		tempRelation := addRelationPrefix(filter.GetRelation(), relationPrefix)
 		filter.Relation = &tempRelation
+	}
+
+	if filter.SubjectFilter.GetRelation() != "" {
+		tempRelation := addRelationPrefix(filter.SubjectFilter.GetRelation(), relationPrefix)
+		filter.SubjectFilter.Relation = &tempRelation
 	}
 
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)

@@ -343,6 +343,17 @@ func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T)
 	}, 0, "")
 
 	assert.NoError(t, err)
+
+	_, _, err = spiceDbRepo.ReadRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId: pointerize("bob"),
+		},
+	}, 0, "")
+
+	assert.NoError(t, err)
 }
 
 func TestWriteAndReadBackRelationships(t *testing.T) {

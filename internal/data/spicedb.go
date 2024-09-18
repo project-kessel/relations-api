@@ -258,6 +258,8 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 
 	for _, rel := range rels {
 		rel.Relation = addRelationPrefix(rel.Relation, relationPrefix)
+		// subject relations are intentionally not prefixed here
+		// bc we want to reference the corresponding permission
 
 		relationshipUpdates = append(relationshipUpdates, &v1.RelationshipUpdate{
 			Operation:    operation,
@@ -288,6 +290,8 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 	}
 
 	if filter.GetRelation() != "" {
+		// subject relations are intentionally not prefixed here
+		// bc we want to reference the corresponding permission
 		tempRelation := addRelationPrefix(filter.GetRelation(), relationPrefix)
 		filter.Relation = &tempRelation
 	}

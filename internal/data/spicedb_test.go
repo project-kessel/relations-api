@@ -66,6 +66,53 @@ func TestCreateRelationship(t *testing.T) {
 	assert.True(t, exists)
 }
 
+func TestCreateRelationshipWithSubjectRelation(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	preExisting := CheckForRelationship(spiceDbRepo, "bob", "rbac", "user", "", "member", "rbac", "group", "bob_club")
+	assert.False(t, preExisting)
+
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "user", "bob", ""),
+		createRelationship("rbac", "role_binding", "fan_binding", "granted", "rbac", "role", "fan", ""),
+		createRelationship("rbac", "role_binding", "fan_binding", "subject", "rbac", "group", "bob_club", "member"),
+		createRelationship("rbac", "role", "fan", "view_the_thing", "rbac", "user", "*", ""),
+	}
+
+	touch := biz.TouchSemantics(false)
+
+	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	assert.NoError(t, err)
+
+	container.WaitForQuantizationInterval()
+
+	exists := CheckForRelationship(spiceDbRepo, "bob", "rbac", "user", "", "member", "rbac", "group", "bob_club")
+	assert.True(t, exists)
+
+	exists = CheckForRelationship(spiceDbRepo, "bob_club", "rbac", "group", "member", "subject", "rbac", "role_binding", "fan_binding")
+	assert.True(t, exists)
+
+	// zed permission check rbac/role_binding:fan_binding subject rbac/user:bob
+	// bob is a subject of fan_binding
+	runSpiceDBCheck(t, ctx, *spiceDbRepo, "user", "rbac", "bob", "subject", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_TRUE)
+
+	// zed permission check rbac/role_binding:fan_binding subject rbac/user:alice
+	// alice is NOT a subject of fan_binding
+	runSpiceDBCheck(t, ctx, *spiceDbRepo, "user", "rbac", "alice", "subject", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_FALSE)
+
+	// zed permission check rbac/role_binding:fan_binding t_granted rbac/role:fan
+	// check that role binding is tied to correct role
+	runSpiceDBCheck(t, ctx, *spiceDbRepo, "role", "rbac", "fan", "granted", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_TRUE)
+
+	// zed permission check rbac/role_binding:fan_binding t_granted rbac/role:fake_fan
+	// check for non-existent role not tied to role binding
+	runSpiceDBCheck(t, ctx, *spiceDbRepo, "role", "rbac", "fake_fan", "granted", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_FALSE)
+}
+
 func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 	t.Parallel()
 
@@ -571,6 +618,38 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 
 func pointerize(value string) *string { //Used to turn string literals into pointers
 	return &value
+}
+
+func runSpiceDBCheck(t *testing.T, ctx context.Context, spiceDbRepo SpiceDbRepository, subjectType,
+	subjectNamespace, subjectID, relation, resourceType, resourceNamespace, resourceID string,
+	expectedAllowed apiV1beta1.CheckResponse_Allowed) {
+	check := apiV1beta1.CheckRequest{
+		Subject: &apiV1beta1.SubjectReference{
+			Subject: &apiV1beta1.ObjectReference{
+				Type: &apiV1beta1.ObjectType{
+					Name:      subjectType,
+					Namespace: subjectNamespace,
+				},
+				Id: subjectID,
+			},
+		},
+		Relation: relation,
+		Resource: &apiV1beta1.ObjectReference{
+			Type: &apiV1beta1.ObjectType{
+				Name:      resourceType,
+				Namespace: resourceNamespace,
+			},
+			Id: resourceID,
+		},
+	}
+
+	resp, err := spiceDbRepo.Check(ctx, &check)
+	assert.NoError(t, err)
+
+	expectedResponse := apiV1beta1.CheckResponse{
+		Allowed: expectedAllowed,
+	}
+	assert.Equal(t, &expectedResponse, resp)
 }
 
 func createRelationship(resourceNamespace string, resourceType string, resourceId string, relationship string, subjectNamespace string, subjectType string, subjectId string, subjectRelationship string) *apiV1beta1.Relationship {

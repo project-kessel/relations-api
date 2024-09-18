@@ -104,6 +104,14 @@ func TestCreateRelationshipWithSubjectRelation(t *testing.T) {
 	// alice is NOT a subject of fan_binding
 	runSpiceDBCheck(t, ctx, *spiceDbRepo, "user", "rbac", "alice", "subject", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_FALSE)
 
+	// zed permission check rbac/role_binding:fan_binding view_the_thing rbac/user:bob
+	// bob has view_the_thing permission
+	runSpiceDBCheck(t, ctx, *spiceDbRepo, "user", "rbac", "bob", "view_the_thing", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_TRUE)
+
+	// zed permission check rbac/role_binding:fan_binding subject rbac/user:alice
+	// alice does NOT have view_the_thing permission
+	runSpiceDBCheck(t, ctx, *spiceDbRepo, "user", "rbac", "alice", "view_the_thing", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_FALSE)
+
 	// zed permission check rbac/role_binding:fan_binding t_granted rbac/role:fan
 	// check that role binding is tied to correct role
 	runSpiceDBCheck(t, ctx, *spiceDbRepo, "role", "rbac", "fan", "granted", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_TRUE)

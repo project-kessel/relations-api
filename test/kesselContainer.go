@@ -119,7 +119,6 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 	if err := pool.Retry(func() error {
 		err = checkKeycloakHealth(fmt.Sprintf("http://localhost:%s", portMetric))
 		log.Info("Waiting for Keycloak to be ready...")
-		time.Sleep(20 * time.Second)
 		return err
 	}); err != nil {
 		log.Fatalf("Could not connect to keycloak container: %s", err)
@@ -130,7 +129,7 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 		basepath   = filepath.Dir(b)
 	)
 
-	targetArch := "amd64" // or "arm64", depending on your needs
+	targetArch := runtime.GOARCH // "amd64" or "arm64", depending on your needs
 	enable_auth := fmt.Sprintf("SPICEDB_ENABLEAUTH=%t", true)
 	sso := fmt.Sprintf("SPICEDB_JWKSURL=%s", kcurl)
 	name := strings.Trim(container.Name(), "/")
@@ -141,7 +140,7 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 	resource, err := pool.BuildAndRunWithBuildOptions(&dockertest.BuildOptions{
 		Dockerfile: "Dockerfile", // Path to your Dockerfile
 		ContextDir: "../",        // Context directory for the Dockerfile
-		Platform:   "linux/amd64",
+		Platform:   "linux/" + runtime.GOARCH,
 		BuildArgs: []docker.BuildArg{
 			{Name: "TARGETARCH", Value: targetArch},
 		},

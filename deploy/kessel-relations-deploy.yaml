@@ -32,13 +32,12 @@ objects:
     kind: ClowdApp
     metadata:
       name: ${CLOWDAPP_NAME}
-      namesapce: ${NAMESPACE}
     spec:
       envName: ${ENV_NAME}
       testing:
         iqePlugin: relations_api
       deployments:
-        - name: relations
+        - name: api
           minReplicas: ${{RELATIONS_REPLICAS}}
           podSpec:
             image: ${RELATIONS_IMAGE}:${RELATIONS_IMAGE_TAG}
@@ -74,13 +73,10 @@ objects:
 parameters:
   - description: Name of the ClowdApp
     name: CLOWDAPP_NAME
-    value: relations
-  - description: ClowdEnvironment name
+    value: kessel-relations
+  - description: ClowdEnvironment name (ephemeral, stage, prod)
     name: ENV_NAME
-    value: ${ENV_NAME}
-  - description: Namespace to deploy into
-    name: NAMESPACE
-    value: ${NAMESPACE}
+    required: true
   - description: App Image
     name: RELATIONS_IMAGE
     value: quay.io/cloudservices/kessel-relations

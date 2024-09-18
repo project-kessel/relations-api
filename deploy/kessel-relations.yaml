@@ -107,13 +107,13 @@ objects:
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:
-      name: relations
+      name: kessel-relations
     spec:
       envName: ${ENV_NAME}
       testing:
         iqePlugin: relations_api
       deployments:
-        - name: relations
+        - name: api
           minReplicas: ${{RELATIONS_REPLICAS}}
           podSpec:
             image: ${RELATIONS_IMAGE}:${RELATIONS_IMAGE_TAG}
@@ -147,12 +147,9 @@ objects:
               enabled: true
               apiPath: authz
 parameters:
-  - description: Name of the ClowdApp
-    name: CLOWDAPP_NAME
-    value: relations
-  - description : ClowdEnvironment name
+  - description: ClowdEnvironment name (ephemeral, stage, prod)
     name: ENV_NAME
-    value: insights-ephemeral
+    required: true
   - description: App Image
     name: RELATIONS_IMAGE
     value: quay.io/cloudservices/kessel-relations

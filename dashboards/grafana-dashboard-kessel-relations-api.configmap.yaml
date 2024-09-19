@@ -21,7 +21,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 2,
+      "id": 951500,
       "links": [],
       "panels": [
         {
@@ -179,7 +179,7 @@ data:
           "id": 5,
           "options": {
             "barRadius": 0,
-            "barWidth": 0.97,
+            "barWidth": 0.85,
             "fullHighlight": false,
             "groupWidth": 0.7,
             "legend": {
@@ -188,14 +188,14 @@ data:
               "placement": "bottom",
               "showLegend": true
             },
-            "orientation": "auto",
+            "orientation": "horizontal",
             "showValue": "auto",
             "stacking": "none",
             "tooltip": {
               "mode": "single",
               "sort": "none"
             },
-            "xField": "code",
+            "xField": "operation",
             "xTickLabelRotation": 0,
             "xTickLabelSpacing": 0
           },
@@ -242,7 +242,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -345,7 +344,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -450,7 +448,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -574,7 +571,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 24,
                 "gradientMode": "none",
@@ -669,7 +665,7 @@ data:
           {
             "allValue": "",
             "current": {
-              "selected": false,
+              "selected": true,
               "text": "All",
               "value": "$__all"
             },
@@ -677,7 +673,7 @@ data:
               "type": "prometheus",
               "uid": "$datasource"
             },
-            "definition": "label_values(operation)",
+            "definition": "label_values({job=\"kessel-relations-api\"},operation)",
             "description": "API Method",
             "hide": 0,
             "includeAll": true,
@@ -687,7 +683,7 @@ data:
             "options": [],
             "query": {
               "qryType": 1,
-              "query": "label_values(operation)",
+              "query": "label_values({job=\"kessel-relations-api\"},operation)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
@@ -700,7 +696,7 @@ data:
             "current": {
               "selected": false,
               "text": "crcs02ue1-prometheus",
-              "value": "fdy3k2jvla39cc"
+              "value": "PDD8BE47D10408F45"
             },
             "description": "Choose between the production (crcp01ue1-prometheus) or stage (crcs02ue1-prometheus) environments",
             "hide": 0,
@@ -718,14 +714,14 @@ data:
         ]
       },
       "time": {
-        "from": "now-5m",
+        "from": "now-15m",
         "to": "now"
       },
       "timepicker": {},
       "timezone": "browser",
       "title": "Kessel - Relations API",
       "uid": "ddxs3i6o0xpmoe",
-      "version": 1,
+      "version": 2,
       "weekStart": ""
     }
 kind: ConfigMap

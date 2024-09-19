@@ -79,7 +79,7 @@ parameters:
     required: true
   - description: App Image
     name: RELATIONS_IMAGE
-    value: quay.io/cloudservices/kessel-relations
+    value: quay.io/redhat-services-prod/project-kessel-tenant/kessel-relations/relations-api
   - description: Image Tag
     name: RELATIONS_IMAGE_TAG
     value: latest

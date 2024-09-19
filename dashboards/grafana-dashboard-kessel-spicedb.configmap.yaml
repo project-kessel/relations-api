@@ -23,7 +23,7 @@ data:
       "fiscalYearStartMonth": 0,
       "gnetId": 14765,
       "graphTooltip": 1,
-      "id": 6,
+      "id": 951501,
       "links": [],
       "liveNow": true,
       "panels": [
@@ -1365,7 +1365,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.0",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -1401,7 +1401,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -1513,7 +1512,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -1613,7 +1611,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -1655,37 +1652,7 @@ data:
               },
               "unit": "reqps"
             },
-            "overrides": [
-              {
-                "__systemRef": "hideSeriesFrom",
-                "matcher": {
-                  "id": "byNames",
-                  "options": {
-                    "mode": "exclude",
-                    "names": [
-                      "spicedb-4-spicedb-5fd7dcfb9d-7nxgs",
-                      "spicedb-4-spicedb-5fd7dcfb9d-8vqgv",
-                      "spicedb-4-spicedb-5fd7dcfb9d-btxz6",
-                      "spicedb-4-spicedb-5fd7dcfb9d-wb2s6",
-                      "spicedb-4-spicedb-5fd7dcfb9d-wcnkh",
-                      "spicedb-4-spicedb-5fd7dcfb9d-zgtpz"
-                    ],
-                    "prefix": "All except:",
-                    "readOnly": true
-                  }
-                },
-                "properties": [
-                  {
-                    "id": "custom.hideFrom",
-                    "value": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": true
-                    }
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "gridPos": {
             "h": 6,
@@ -1717,7 +1684,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum by (pod) (rate(grpc_server_started_total{job=\"$job\",grpc_service=\"$service\",grpc_service=\"authzed.api.v1.PermissionsService\"}[$interval]))",
+              "expr": "sum by (pod) (rate(grpc_server_started_total{job=\"$job\",grpc_service=\"$service\"}[$interval]))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1731,7 +1698,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum (rate(grpc_server_started_total{job=\"$job\",grpc_service=\"$service\",grpc_service=\"authzed.api.v1.PermissionsService\"}[$interval]))",
+              "expr": "sum (rate(grpc_server_started_total{job=\"$job\",grpc_service=\"$service\"}[$interval]))",
               "hide": false,
               "instant": false,
               "legendFormat": "Total",
@@ -1803,7 +1770,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.0",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -1885,7 +1852,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.0",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -1967,7 +1934,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.0",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -2049,7 +2016,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.0",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -2118,7 +2085,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.0",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -2187,7 +2154,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.0",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -2256,7 +2223,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.0",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -2320,7 +2287,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -2389,7 +2355,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(increase(grpc_server_handled_total{job=\"spicedb\"}[1m])) by (grpc_code)",
+              "expr": "sum(increase(grpc_server_handled_total{job=\"$job\"}[1m])) by (grpc_code)",
               "hide": false,
               "legendFormat": "__auto",
               "range": true,
@@ -2416,7 +2382,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -2486,7 +2451,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.5, sum(rate(grpc_server_handling_seconds_bucket{job=\"spicedb\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.5, sum(rate(grpc_server_handling_seconds_bucket{job=\"$job\"}[5m])) by (le))",
               "hide": false,
               "legendFormat": "50th",
               "range": true,
@@ -2498,7 +2463,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.99, sum(rate(grpc_server_handling_seconds_bucket{job=\"spicedb\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.99, sum(rate(grpc_server_handling_seconds_bucket{job=\"$job\"}[5m])) by (le))",
               "hide": false,
               "legendFormat": "99th",
               "range": true,
@@ -2526,7 +2491,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -2557,7 +2521,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -2624,7 +2589,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -2658,7 +2622,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -2741,7 +2706,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -2772,7 +2736,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2853,7 +2818,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 20,
                 "gradientMode": "scheme",
@@ -2886,7 +2850,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2959,7 +2924,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -2990,7 +2954,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3067,7 +3032,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -3098,7 +3062,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3175,7 +3140,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -3208,7 +3174,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.0",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -3279,7 +3245,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -3310,7 +3275,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -3376,7 +3342,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -3409,7 +3374,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -3475,7 +3441,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -3509,7 +3474,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -3671,7 +3637,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -3702,7 +3667,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3765,7 +3731,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "points",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -3798,7 +3763,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -3863,7 +3829,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "points",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -3896,7 +3861,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -3995,7 +3961,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               }
@@ -4011,7 +3978,7 @@ data:
           "id": 129,
           "options": {
             "barRadius": 0,
-            "barWidth": 0.97,
+            "barWidth": 0.85,
             "fullHighlight": false,
             "groupWidth": 0.7,
             "legend": {
@@ -4020,14 +3987,14 @@ data:
               "placement": "bottom",
               "showLegend": true
             },
-            "orientation": "auto",
+            "orientation": "horizontal",
             "showValue": "auto",
             "stacking": "none",
             "tooltip": {
               "mode": "single",
               "sort": "none"
             },
-            "xField": "code",
+            "xField": "grpc_code",
             "xTickLabelRotation": 0,
             "xTickLabelSpacing": 0
           },
@@ -4074,7 +4041,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -4105,7 +4071,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4176,7 +4143,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -4208,7 +4174,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4280,7 +4247,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -4314,7 +4280,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4403,7 +4370,6 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 24,
                 "gradientMode": "none",
@@ -4437,7 +4403,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4501,21 +4468,22 @@ data:
           {
             "current": {
               "selected": false,
-              "text": "spicedb",
-              "value": "spicedb"
+              "text": "kessel-relations-spicedb",
+              "value": "kessel-relations-spicedb"
             },
             "datasource": {
               "type": "prometheus",
               "uid": "$datasource"
             },
-            "definition": "label_values(job)",
+            "definition": "label_values({job=\"kessel-relations-spicedb\"},job)",
             "hide": 0,
             "includeAll": false,
             "multi": false,
             "name": "job",
             "options": [],
             "query": {
-              "query": "label_values(job)",
+              "qryType": 1,
+              "query": "label_values({job=\"kessel-relations-spicedb\"},job)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
@@ -4533,8 +4501,8 @@ data:
             "auto_min": "10s",
             "current": {
               "selected": false,
-              "text": "1h",
-              "value": "1h"
+              "text": "15m",
+              "value": "15m"
             },
             "hide": 0,
             "label": "Summary interval (set to roughly test duration, but no greater)",
@@ -4556,7 +4524,7 @@ data:
                 "value": "10m"
               },
               {
-                "selected": false,
+                "selected": true,
                 "text": "15m",
                 "value": "15m"
               },
@@ -4571,7 +4539,7 @@ data:
                 "value": "30m"
               },
               {
-                "selected": true,
+                "selected": false,
                 "text": "1h",
                 "value": "1h"
               }
@@ -4584,15 +4552,15 @@ data:
           },
           {
             "current": {
-              "selected": false,
-              "text": "authzed.api.v1.SchemaService",
-              "value": "authzed.api.v1.SchemaService"
+              "selected": true,
+              "text": "authzed.api.v1.PermissionsService",
+              "value": "authzed.api.v1.PermissionsService"
             },
             "datasource": {
               "type": "prometheus",
               "uid": "$datasource"
             },
-            "definition": "label_values(grpc_service)",
+            "definition": "label_values({job=\"kessel-relations-spicedb\"},grpc_service)",
             "hide": 0,
             "includeAll": false,
             "multi": false,
@@ -4600,7 +4568,7 @@ data:
             "options": [],
             "query": {
               "qryType": 1,
-              "query": "label_values(grpc_service)",
+              "query": "label_values({job=\"kessel-relations-spicedb\"},grpc_service)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
@@ -4613,7 +4581,7 @@ data:
             "current": {
               "selected": false,
               "text": "crcs02ue1-prometheus",
-              "value": "fdy3k2jvla39cc"
+              "value": "PDD8BE47D10408F45"
             },
             "hide": 0,
             "includeAll": false,
@@ -4630,15 +4598,15 @@ data:
           },
           {
             "current": {
-              "selected": false,
-              "text": "ReadRelationships",
-              "value": "ReadRelationships"
+              "selected": true,
+              "text": "All",
+              "value": "$__all"
             },
             "datasource": {
               "type": "prometheus",
               "uid": "${datasource}"
             },
-            "definition": "label_values(grpc_method)",
+            "definition": "label_values({job=\"kessel-relations-spicedb\"},grpc_method)",
             "description": "gRPC Method",
             "hide": 0,
             "includeAll": true,
@@ -4648,7 +4616,7 @@ data:
             "options": [],
             "query": {
               "qryType": 1,
-              "query": "label_values(grpc_method)",
+              "query": "label_values({job=\"kessel-relations-spicedb\"},grpc_method)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
@@ -4660,7 +4628,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-1h",
+        "from": "now-15m",
         "to": "now"
       },
       "timepicker": {
@@ -4687,9 +4655,9 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Kessel - SpiceDB ",
+      "title": "Kessel - SpiceDB",
       "uid": "gn38yKZnk-import",
-      "version": 1,
+      "version": 2,
       "weekStart": ""
     }
 kind: ConfigMap
@@ -4699,4 +4667,3 @@ metadata:
     grafana_dashboard: "true"
   annotations:
     grafana-folder: /grafana-dashboard-definitions/Kessel
-

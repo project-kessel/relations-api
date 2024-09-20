@@ -67,6 +67,9 @@ all:
 lint:
 	@echo "Linting code."
 	@$(DOCKER) run -t --rm -v $(PWD):/app -w /app golangci/golangci-lint golangci-lint run -v
+	@$(DOCKER) run -t --rm -v $(PWD):/data pipelinecomponents/yamllint:latest \
+		-c /data/.github/workflows/.yamllint /data/deploy/kessel-relations-deploy.yaml
+
 
 .PHONY: pr-check
 # generate pr-check

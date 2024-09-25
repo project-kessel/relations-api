@@ -107,9 +107,9 @@ data:
                 "uid": "$datasource"
               },
               "disableTextWrap": false,
-              "editorMode": "builder",
+              "editorMode": "code",
               "exemplar": false,
-              "expr": "sum by(code) (server_requests_code_total{operation=~\"$operation\"})",
+              "expr": "sum by(code) (server_requests_code_total{operation=~\"$operation\", job=\"kessel-relations-api\"})",
               "format": "table",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -207,9 +207,9 @@ data:
                 "uid": "$datasource"
               },
               "disableTextWrap": false,
-              "editorMode": "builder",
+              "editorMode": "code",
               "exemplar": false,
-              "expr": "sum by(operation) (server_requests_code_total{code!=\"0\"})",
+              "expr": "sum by(operation) (server_requests_code_total{code!=\"0\", job=\"kessel-relations-api\"})",
               "format": "table",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -314,7 +314,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(increase(server_requests_code_total[1m])) by (code)",
+              "expr": "sum(increase(server_requests_code_total{job=\"kessel-relations-api\"}[1m])) by (code)",
               "format": "time_series",
               "instant": false,
               "interval": "15s",
@@ -418,7 +418,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "(sum(rate(server_requests_seconds_bucket_seconds_bucket{le=\"0.25\", operation=~\"$operation\"}[5m])) by (operation)\n/\nsum(rate(server_requests_seconds_bucket_seconds_count[5m])) by (operation)) * 100",
+              "expr": "(sum(rate(server_requests_seconds_bucket_seconds_bucket{le=\"0.25\", operation=~\"$operation\", job=\"kessel-relations-api\"}[5m])) by (operation)\n/\nsum(rate(server_requests_seconds_bucket_seconds_count{job=\"kessel-relations-api\"}[5m])) by (operation)) * 100",
               "format": "time_series",
               "instant": false,
               "legendFormat": "__auto",
@@ -522,7 +522,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "histogram_quantile(0.95, sum by(le) (rate(server_requests_seconds_bucket_seconds_bucket{operation=~\"$operation\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(server_requests_seconds_bucket_seconds_bucket{operation=~\"$operation\", job=\"kessel-relations-api\"}[$__rate_interval])))",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": false,
@@ -538,8 +538,8 @@ data:
                 "uid": "$datasource"
               },
               "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "histogram_quantile(0.99, sum by(le) (rate(server_requests_seconds_bucket_seconds_bucket{operation=~\"$operation\"}[$__rate_interval])))",
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.99, sum by(le) (rate(server_requests_seconds_bucket_seconds_bucket{operation=~\"$operation\", job=\"kessel-relations-api\"}[$__rate_interval])))",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": false,
@@ -643,7 +643,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "irate(server_requests_seconds_bucket_seconds_count{operation=~\"$operation\"}[5m])",
+              "expr": "irate(server_requests_seconds_bucket_seconds_count{operation=~\"$operation\", job=\"kessel-relations-api\"}[5m])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -721,7 +721,7 @@ data:
       "timezone": "browser",
       "title": "Kessel - Relations API",
       "uid": "ddxs3i6o0xpmoe",
-      "version": 2,
+      "version": 3,
       "weekStart": ""
     }
 kind: ConfigMap

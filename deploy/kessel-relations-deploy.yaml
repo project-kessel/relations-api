@@ -40,7 +40,7 @@ objects:
         - name: api
           minReplicas: ${{RELATIONS_REPLICAS}}
           podSpec:
-            image: ${RELATIONS_IMAGE}:${RELATIONS_IMAGE_TAG}
+            image: ${RELATIONS_IMAGE}:${IMAGE_TAG}
             livenessProbe:
               httpGet:
                 path: /api/authz/livez
@@ -81,7 +81,8 @@ parameters:
     name: RELATIONS_IMAGE
     value: quay.io/redhat-services-prod/project-kessel-tenant/kessel-relations/relations-api
   - description: Image Tag
-    name: RELATIONS_IMAGE_TAG
+    name: IMAGE_TAG
+    required: true
     value: latest
   - description: Number of pods for spiceDB service
     name: SPICEDB_REPLICAS

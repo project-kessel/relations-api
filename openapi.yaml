@@ -326,7 +326,6 @@ components:
                     description: |-
                         Whether or not the request should ignore existing tuples (`true`),
                          or if the request should fail if the same tuple already exists (`false`).
-
                          Defaults to `false`.
                 tuples:
                     type: array
@@ -348,7 +347,7 @@ components:
         kessel.relations.v1beta1.ImportBulkTuplesResponse:
             type: object
             properties:
-                numLoaded:
+                numImported:
                     type: string
         kessel.relations.v1beta1.LookupResourcesResponse:
             type: object

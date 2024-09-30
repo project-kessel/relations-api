@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	KesselTupleService_CreateTuples_FullMethodName = "/kessel.relations.v1beta1.KesselTupleService/CreateTuples"
-	KesselTupleService_ReadTuples_FullMethodName   = "/kessel.relations.v1beta1.KesselTupleService/ReadTuples"
-	KesselTupleService_DeleteTuples_FullMethodName = "/kessel.relations.v1beta1.KesselTupleService/DeleteTuples"
+	KesselTupleService_CreateTuples_FullMethodName     = "/kessel.relations.v1beta1.KesselTupleService/CreateTuples"
+	KesselTupleService_ReadTuples_FullMethodName       = "/kessel.relations.v1beta1.KesselTupleService/ReadTuples"
+	KesselTupleService_DeleteTuples_FullMethodName     = "/kessel.relations.v1beta1.KesselTupleService/DeleteTuples"
+	KesselTupleService_ImportBulkTuples_FullMethodName = "/kessel.relations.v1beta1.KesselTupleService/ImportBulkTuples"
 )
 
 // KesselTupleServiceClient is the client API for KesselTupleService service.
@@ -39,6 +40,7 @@ type KesselTupleServiceClient interface {
 	CreateTuples(ctx context.Context, in *CreateTuplesRequest, opts ...grpc.CallOption) (*CreateTuplesResponse, error)
 	ReadTuples(ctx context.Context, in *ReadTuplesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ReadTuplesResponse], error)
 	DeleteTuples(ctx context.Context, in *DeleteTuplesRequest, opts ...grpc.CallOption) (*DeleteTuplesResponse, error)
+	ImportBulkTuples(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[ImportBulkTuplesRequest, ImportBulkTuplesResponse], error)
 }
 
 type kesselTupleServiceClient struct {
@@ -88,6 +90,19 @@ func (c *kesselTupleServiceClient) DeleteTuples(ctx context.Context, in *DeleteT
 	return out, nil
 }
 
+func (c *kesselTupleServiceClient) ImportBulkTuples(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[ImportBulkTuplesRequest, ImportBulkTuplesResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &KesselTupleService_ServiceDesc.Streams[1], KesselTupleService_ImportBulkTuples_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[ImportBulkTuplesRequest, ImportBulkTuplesResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type KesselTupleService_ImportBulkTuplesClient = grpc.ClientStreamingClient[ImportBulkTuplesRequest, ImportBulkTuplesResponse]
+
 // KesselTupleServiceServer is the server API for KesselTupleService service.
 // All implementations must embed UnimplementedKesselTupleServiceServer
 // for forward compatibility.
@@ -103,6 +118,7 @@ type KesselTupleServiceServer interface {
 	CreateTuples(context.Context, *CreateTuplesRequest) (*CreateTuplesResponse, error)
 	ReadTuples(*ReadTuplesRequest, grpc.ServerStreamingServer[ReadTuplesResponse]) error
 	DeleteTuples(context.Context, *DeleteTuplesRequest) (*DeleteTuplesResponse, error)
+	ImportBulkTuples(grpc.ClientStreamingServer[ImportBulkTuplesRequest, ImportBulkTuplesResponse]) error
 	mustEmbedUnimplementedKesselTupleServiceServer()
 }
 
@@ -121,6 +137,9 @@ func (UnimplementedKesselTupleServiceServer) ReadTuples(*ReadTuplesRequest, grpc
 }
 func (UnimplementedKesselTupleServiceServer) DeleteTuples(context.Context, *DeleteTuplesRequest) (*DeleteTuplesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTuples not implemented")
+}
+func (UnimplementedKesselTupleServiceServer) ImportBulkTuples(grpc.ClientStreamingServer[ImportBulkTuplesRequest, ImportBulkTuplesResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method ImportBulkTuples not implemented")
 }
 func (UnimplementedKesselTupleServiceServer) mustEmbedUnimplementedKesselTupleServiceServer() {}
 func (UnimplementedKesselTupleServiceServer) testEmbeddedByValue()                            {}
@@ -190,6 +209,13 @@ func _KesselTupleService_DeleteTuples_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KesselTupleService_ImportBulkTuples_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(KesselTupleServiceServer).ImportBulkTuples(&grpc.GenericServerStream[ImportBulkTuplesRequest, ImportBulkTuplesResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type KesselTupleService_ImportBulkTuplesServer = grpc.ClientStreamingServer[ImportBulkTuplesRequest, ImportBulkTuplesResponse]
+
 // KesselTupleService_ServiceDesc is the grpc.ServiceDesc for KesselTupleService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -211,6 +237,11 @@ var KesselTupleService_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "ReadTuples",
 			Handler:       _KesselTupleService_ReadTuples_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "ImportBulkTuples",
+			Handler:       _KesselTupleService_ImportBulkTuples_Handler,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "kessel/relations/v1beta1/relation_tuples.proto",

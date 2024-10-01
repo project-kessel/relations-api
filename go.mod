@@ -1,6 +1,7 @@
 module github.com/project-kessel/relations-api
 
 go 1.22.7
+
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.2-20240920164238-5a7b106cbb87.2
 	github.com/MicahParks/keyfunc/v3 v3.3.5
@@ -21,7 +22,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.30.0
 	go.uber.org/automaxprocs v1.6.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240814211410-ddb44dafa142
-	google.golang.org/grpc v1.67.0
+	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.34.2
 )
 

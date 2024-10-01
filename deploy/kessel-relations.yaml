@@ -103,7 +103,14 @@ objects:
                       cpu: "25m"
                     limits:
                       memory: "256Mi"
-                      cpu: "100m"               
+                      cpu: "100m"
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: spicedb-schema
+    data:
+      schema.zed: |-
+        ${{SPICEDB_SCHEMA}}
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:
@@ -159,6 +166,9 @@ parameters:
   - description: Number of pods for spiceDB service
     name: SPICEDB_REPLICAS
     value: '1'
+  - description: SpiceDB schema
+    name: SPICEDB_SCHEMA
+    value: ''
   - description: Number of pods for relations service
     name: RELATIONS_REPLICAS
     value: '1'    

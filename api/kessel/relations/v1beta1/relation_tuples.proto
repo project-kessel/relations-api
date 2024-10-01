@@ -34,12 +34,26 @@ service KesselTupleService {
 			delete: "/v1beta1/tuples"
 		};
 	};
+	rpc ImportBulkTuples (stream
+			ImportBulkTuplesRequest) returns (ImportBulkTuplesResponse) {
+		option (google.api.http) = {
+			post: "/v1beta1/tuples/bulkimport"
+			body: "*"
+		};
+	};
+}
+
+message ImportBulkTuplesRequest {
+	repeated Relationship tuples = 1 [(buf.validate.field).repeated.min_items = 1];
+}
+
+message ImportBulkTuplesResponse {
+	uint64 num_imported = 1;
 }
 
 message CreateTuplesRequest {
 	// Whether or not the request should ignore existing tuples (`true`),
 	// or if the request should fail if the same tuple already exists (`false`).
-	// 
 	// Defaults to `false`.
 	bool upsert = 1;
 	repeated Relationship tuples = 2;

@@ -267,6 +267,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v1beta1.DeleteTuplesResponse'
+    /v1beta1/tuples/bulkimport:
+        post:
+            tags:
+                - KesselTupleService
+            operationId: KesselTupleService_ImportBulkTuples
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.ImportBulkTuplesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.ImportBulkTuplesResponse'
 components:
     schemas:
         kessel.relations.v1.GetLivezResponse:
@@ -305,7 +323,10 @@ components:
             properties:
                 upsert:
                     type: boolean
-                    description: "Whether or not the request should ignore existing tuples (`true`),\n or if the request should fail if the same tuple already exists (`false`).\n \n Defaults to `false`."
+                    description: |-
+                        Whether or not the request should ignore existing tuples (`true`),
+                         or if the request should fail if the same tuple already exists (`false`).
+                         Defaults to `false`.
                 tuples:
                     type: array
                     items:
@@ -316,6 +337,18 @@ components:
         kessel.relations.v1beta1.DeleteTuplesResponse:
             type: object
             properties: {}
+        kessel.relations.v1beta1.ImportBulkTuplesRequest:
+            type: object
+            properties:
+                tuples:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.Relationship'
+        kessel.relations.v1beta1.ImportBulkTuplesResponse:
+            type: object
+            properties:
+                numImported:
+                    type: string
         kessel.relations.v1beta1.LookupResourcesResponse:
             type: object
             properties:

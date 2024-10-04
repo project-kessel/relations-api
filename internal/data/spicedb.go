@@ -263,6 +263,7 @@ func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[a
 		inputRelationships := (*req).Tuples
 		batch := []*v1.Relationship{}
 		for _, tuple := range inputRelationships {
+			tuple.Relation = addRelationPrefix(tuple.Relation, relationPrefix)
 			batch = append(batch, createSpiceDbRelationship(tuple))
 		}
 		client, err := s.client.ImportBulkRelationships(context.Background())

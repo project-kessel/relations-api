@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc"
 
 	"github.com/project-kessel/relations-api/internal/biz"
 
@@ -13,18 +14,20 @@ import (
 
 type RelationshipsService struct {
 	pb.UnimplementedKesselTupleServiceServer
-	createUsecase *biz.CreateRelationshipsUsecase
-	readUsecase   *biz.ReadRelationshipsUsecase
-	deleteUsecase *biz.DeleteRelationshipsUsecase
-	log           *log.Helper
+	createUsecase     *biz.CreateRelationshipsUsecase
+	readUsecase       *biz.ReadRelationshipsUsecase
+	deleteUsecase     *biz.DeleteRelationshipsUsecase
+	importBulkUsecase *biz.ImportBulkTuplesUsecase
+	log               *log.Helper
 }
 
-func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelationshipsUsecase, readUsecase *biz.ReadRelationshipsUsecase, deleteUsecase *biz.DeleteRelationshipsUsecase) *RelationshipsService {
+func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelationshipsUsecase, readUsecase *biz.ReadRelationshipsUsecase, deleteUsecase *biz.DeleteRelationshipsUsecase, importBulkUsecase *biz.ImportBulkTuplesUsecase) *RelationshipsService {
 	return &RelationshipsService{
-		log:           log.NewHelper(logger),
-		createUsecase: createUseCase,
-		readUsecase:   readUsecase,
-		deleteUsecase: deleteUsecase,
+		log:               log.NewHelper(logger),
+		createUsecase:     createUseCase,
+		readUsecase:       readUsecase,
+		deleteUsecase:     deleteUsecase,
+		importBulkUsecase: importBulkUsecase,
 	}
 }
 
@@ -71,4 +74,12 @@ func (s *RelationshipsService) DeleteTuples(ctx context.Context, req *pb.DeleteT
 	}
 
 	return &pb.DeleteTuplesResponse{}, nil
+}
+
+func (s *RelationshipsService) ImportBulkTuples(stream grpc.ClientStreamingServer[pb.ImportBulkTuplesRequest, pb.ImportBulkTuplesResponse]) error {
+	err := s.importBulkUsecase.ImportBulkTuples(stream)
+	if err != nil {
+		return fmt.Errorf("error import bulk tuples: %w", err)
+	}
+	return nil
 }

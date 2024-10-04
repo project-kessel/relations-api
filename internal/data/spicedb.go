@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"io"
 	"os"
 	"strings"
@@ -240,6 +242,45 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 		}
 	}()
 	return resources, errs, nil
+}
+
+func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[apiV1beta1.ImportBulkTuplesRequest, apiV1beta1.ImportBulkTuplesResponse]) error {
+	var totalImported uint64
+	for {
+		req, err := stream.Recv()
+		if err != nil {
+			if !errors.Is(err, io.EOF) {
+				if err := stream.SendAndClose(&apiV1beta1.ImportBulkTuplesResponse{NumImported: totalImported}); err != nil {
+					return status.Errorf(codes.Internal, "failed to send response: %v", err)
+				}
+			}
+			return err
+		}
+		inputRelationships := (*req).Tuples
+		batch := []*v1.Relationship{}
+		for _, tuple := range inputRelationships {
+			batch = append(batch, createSpiceDbRelationship(tuple))
+		}
+		client, err := s.client.ImportBulkRelationships(context.Background())
+		if err != nil {
+			return fmt.Errorf("failed to create SpiceDB client: %w", err)
+		}
+		if err = client.Send((*v1.ImportBulkRelationshipsRequest)(&v1.BulkImportRelationshipsRequest{
+			Relationships: batch,
+		})); err != nil {
+			if !errors.Is(err, io.EOF) {
+				return fmt.Errorf("failed to send bulkimport request: %w", err)
+			}
+			return err
+		}
+		if res, err := client.CloseAndRecv(); err != nil {
+			return fmt.Errorf("error receiving response from Spicedb for bulkimport request: %w", err)
+		} else {
+			log.Infof("total number of relationships loaded: %d", res.NumLoaded)
+			totalImported = res.NumLoaded
+			return stream.SendAndClose(&apiV1beta1.ImportBulkTuplesResponse{NumImported: totalImported})
+		}
+	}
 }
 
 func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics) error {

@@ -3,6 +3,9 @@ package data
 import (
 	"context"
 	"fmt"
+	"github.com/stretchr/testify/mock"
+	"google.golang.org/grpc/metadata"
+	"io"
 	"os"
 	"testing"
 
@@ -177,6 +180,80 @@ func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 	container.WaitForQuantizationInterval()
 
 	exists := CheckForRelationship(spiceDbRepo, "bob", "rbac", "user", "", "member", "rbac", "group", "bob_club")
+	assert.True(t, exists)
+}
+
+type MockgRPCClientStream struct {
+	mock.Mock
+}
+
+func (m *MockgRPCClientStream) SetHeader(md metadata.MD) error {
+	panic("implement me")
+}
+
+func (m *MockgRPCClientStream) SendHeader(md metadata.MD) error {
+	panic("implement me")
+}
+
+func (m *MockgRPCClientStream) SetTrailer(md metadata.MD) {
+	panic("implement me")
+}
+
+func (m *MockgRPCClientStream) Context() context.Context {
+	panic("implement me")
+}
+
+func (m *MockgRPCClientStream) SendMsg(_ any) error {
+	panic("implement me")
+}
+
+func (m *MockgRPCClientStream) RecvMsg(_ any) error {
+	panic("implement me")
+}
+
+func (m *MockgRPCClientStream) Recv() (*apiV1beta1.ImportBulkTuplesRequest, error) {
+	args := m.Called()
+	if req, ok := args.Get(0).(*apiV1beta1.ImportBulkTuplesRequest); ok {
+		return req, args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
+// SendAndClose simulates sending a response and closing the stream
+func (m *MockgRPCClientStream) SendAndClose(resp *apiV1beta1.ImportBulkTuplesResponse) error {
+	args := m.Called(resp)
+	return args.Error(0)
+}
+
+func (m *MockgRPCClientStream) CloseAndRecv() (*apiV1beta1.ImportBulkTuplesResponse, error) {
+	args := m.Called()
+	if res, ok := args.Get(0).(*apiV1beta1.ImportBulkTuplesResponse); ok {
+		return res, args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
+func TestImportBulkTuples(t *testing.T) {
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "bob_club", "t_member", "rbac", "user", "bob5", ""),
+		createRelationship("rbac", "group", "bob_club", "t_member", "rbac", "user", "bob3", ""),
+		createRelationship("rbac", "group", "bob_club", "t_member", "rbac", "user", "bob6", ""),
+		createRelationship("rbac", "group", "bob_club", "t_member", "rbac", "user", "bob9", ""),
+	}
+
+	mockgRPCClientStream := new(MockgRPCClientStream)
+	mockgRPCClientStream.On("Recv").Return(&apiV1beta1.ImportBulkTuplesRequest{Tuples: rels}, nil).Once()
+	mockgRPCClientStream.On("Recv").Return(nil, io.EOF).Once()
+	mockgRPCClientStream.On("SendAndClose", &apiV1beta1.ImportBulkTuplesResponse{NumImported: uint64(len(rels))}).Return(nil)
+
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	err = spiceDbRepo.ImportBulkTuples(mockgRPCClientStream)
+	assert.NoError(t, err)
+	container.WaitForQuantizationInterval()
+
+	exists := CheckForRelationship(spiceDbRepo, "bob5", "rbac", "user", "", "t_member", "rbac", "group", "bob_club")
 	assert.True(t, exists)
 }
 

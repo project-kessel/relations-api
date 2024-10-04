@@ -245,6 +245,10 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 }
 
 func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[apiV1beta1.ImportBulkTuplesRequest, apiV1beta1.ImportBulkTuplesResponse]) error {
+	if err := s.initialize(); err != nil {
+		return err
+	}
+
 	var totalImported uint64
 	for {
 		req, err := stream.Recv()

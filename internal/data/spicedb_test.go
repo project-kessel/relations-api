@@ -235,10 +235,10 @@ func (m *MockgRPCClientStream) CloseAndRecv() (*apiV1beta1.ImportBulkTuplesRespo
 
 func TestImportBulkTuples(t *testing.T) {
 	rels := []*apiV1beta1.Relationship{
-		createRelationship("rbac", "group", "bob_club", "t_member", "rbac", "user", "bob5", ""),
-		createRelationship("rbac", "group", "bob_club", "t_member", "rbac", "user", "bob3", ""),
-		createRelationship("rbac", "group", "bob_club", "t_member", "rbac", "user", "bob6", ""),
-		createRelationship("rbac", "group", "bob_club", "t_member", "rbac", "user", "bob9", ""),
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "user", "bob5", ""),
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "user", "bob3", ""),
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "user", "bob6", ""),
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "user", "bob9", ""),
 	}
 
 	mockgRPCClientStream := new(MockgRPCClientStream)
@@ -253,7 +253,7 @@ func TestImportBulkTuples(t *testing.T) {
 	assert.NoError(t, err)
 	container.WaitForQuantizationInterval()
 
-	exists := CheckForRelationship(spiceDbRepo, "bob5", "rbac", "user", "", "t_member", "rbac", "group", "bob_club")
+	exists := CheckForRelationship(spiceDbRepo, "bob5", "rbac", "user", "", "member", "rbac", "group", "bob_club")
 	assert.True(t, exists)
 }
 

@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"io"
 	"os"
 	"strings"
@@ -250,25 +248,30 @@ func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[a
 	}
 
 	var totalImported uint64
+	client, err := s.client.ImportBulkRelationships(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to create SpiceDB client: %w", err)
+	}
+
 	for {
-		req, err := stream.Recv()
-		if err != nil {
-			if !errors.Is(err, io.EOF) {
-				if err := stream.SendAndClose(&apiV1beta1.ImportBulkTuplesResponse{NumImported: totalImported}); err != nil {
-					return status.Errorf(codes.Internal, "failed to send response: %v", err)
+		req, streamErr := stream.Recv()
+		if streamErr != nil {
+			if req == nil && errors.Is(streamErr, io.EOF) {
+				if res, closeErr := client.CloseAndRecv(); closeErr != nil {
+					return fmt.Errorf("error receiving response from Spicedb for bulkimport request: %w", closeErr)
+				} else {
+					log.Infof("total number of relationships loaded: %d", res.NumLoaded)
+					totalImported = res.NumLoaded
+					return stream.SendAndClose(&apiV1beta1.ImportBulkTuplesResponse{NumImported: totalImported})
 				}
 			}
-			return err
+			return streamErr
 		}
 		inputRelationships := (*req).Tuples
 		batch := []*v1.Relationship{}
 		for _, tuple := range inputRelationships {
 			tuple.Relation = addRelationPrefix(tuple.Relation, relationPrefix)
 			batch = append(batch, createSpiceDbRelationship(tuple))
-		}
-		client, err := s.client.ImportBulkRelationships(context.Background())
-		if err != nil {
-			return fmt.Errorf("failed to create SpiceDB client: %w", err)
 		}
 		if err = client.Send((*v1.ImportBulkRelationshipsRequest)(&v1.BulkImportRelationshipsRequest{
 			Relationships: batch,
@@ -278,14 +281,8 @@ func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[a
 			}
 			return err
 		}
-		if res, err := client.CloseAndRecv(); err != nil {
-			return fmt.Errorf("error receiving response from Spicedb for bulkimport request: %w", err)
-		} else {
-			log.Infof("total number of relationships loaded: %d", res.NumLoaded)
-			totalImported = res.NumLoaded
-			return stream.SendAndClose(&apiV1beta1.ImportBulkTuplesResponse{NumImported: totalImported})
-		}
 	}
+
 }
 
 func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics) error {

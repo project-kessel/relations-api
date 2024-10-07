@@ -242,6 +242,49 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 	return resources, errs, nil
 }
 
+func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[apiV1beta1.ImportBulkTuplesRequest, apiV1beta1.ImportBulkTuplesResponse]) error {
+	if err := s.initialize(); err != nil {
+		return err
+	}
+
+	var totalImported uint64
+	client, err := s.client.ImportBulkRelationships(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to create SpiceDB client: %w", err)
+	}
+
+	for {
+		req, streamErr := stream.Recv()
+		if streamErr != nil {
+			if req == nil && errors.Is(streamErr, io.EOF) {
+				if res, closeErr := client.CloseAndRecv(); closeErr != nil {
+					return fmt.Errorf("error receiving response from Spicedb for bulkimport request: %w", closeErr)
+				} else {
+					log.Infof("total number of relationships loaded: %d", res.NumLoaded)
+					totalImported = res.NumLoaded
+					return stream.SendAndClose(&apiV1beta1.ImportBulkTuplesResponse{NumImported: totalImported})
+				}
+			}
+			return streamErr
+		}
+		inputRelationships := (*req).Tuples
+		batch := []*v1.Relationship{}
+		for _, tuple := range inputRelationships {
+			tuple.Relation = addRelationPrefix(tuple.Relation, relationPrefix)
+			batch = append(batch, createSpiceDbRelationship(tuple))
+		}
+		if err = client.Send((*v1.ImportBulkRelationshipsRequest)(&v1.BulkImportRelationshipsRequest{
+			Relationships: batch,
+		})); err != nil {
+			if !errors.Is(err, io.EOF) {
+				return fmt.Errorf("failed to send bulkimport request: %w", err)
+			}
+			return err
+		}
+	}
+
+}
+
 func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics) error {
 	if err := s.initialize(); err != nil {
 		return err

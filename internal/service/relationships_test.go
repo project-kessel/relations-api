@@ -267,7 +267,8 @@ func setup(t *testing.T) (error, *RelationshipsService) {
 	createRelationshipsUsecase := biz.NewCreateRelationshipsUsecase(spiceDbRepository, logger)
 	readRelationshipsUsecase := biz.NewReadRelationshipsUsecase(spiceDbRepository, logger)
 	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
-	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase)
+	importBulkUsecase := biz.NewImportBulkTuplesUsecase(spiceDbRepository, logger)
+	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase, importBulkUsecase)
 	return err, relationshipsService
 }
 
@@ -287,7 +288,8 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 	createRelationshipsUsecase := biz.NewCreateRelationshipsUsecase(spiceDbRepository, logger)
 	readRelationshipsUsecase := biz.NewReadRelationshipsUsecase(spiceDbRepository, logger)
 	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
-	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase)
+	bulkImportTuplesUsecase := biz.NewImportBulkTuplesUsecase(spiceDbRepository, logger)
+	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase, bulkImportTuplesUsecase)
 
 	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
 
@@ -341,7 +343,8 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 	createRelationshipsUsecase := biz.NewCreateRelationshipsUsecase(spiceDbRepository, logger)
 	readRelationshipsUsecase := biz.NewReadRelationshipsUsecase(spiceDbRepository, logger)
 	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
-	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase)
+	bulkImportTuplesUsecase := biz.NewImportBulkTuplesUsecase(spiceDbRepository, logger)
+	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase, bulkImportTuplesUsecase)
 
 	expected1 := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
 	expected2 := createRelationship(rbac_ns_type("group"), "other_bob_club", "member", rbac_ns_type("user"), "bob", "")

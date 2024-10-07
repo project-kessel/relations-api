@@ -28,7 +28,7 @@ const (
 	// SpicedbImage is the image used for containerized spiceDB in tests
 	SpicedbImage = "authzed/spicedb"
 	// SpicedbVersion is the image version used for containerized spiceDB in tests
-	SpicedbVersion = "v1.22.2"
+	SpicedbVersion = "v1.37.0"
 	// SpicedbSchemaBootstrapFile specifies an optional bootstrap schema file to be used for testing
 	SpicedbSchemaBootstrapFile = "spicedb-test-data/basic_schema.zed"
 	// SpicedbRelationsBootstrapFile specifies an optional bootstrap file containing relations to be used for testing

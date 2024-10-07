@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"google.golang.org/grpc"
 
 	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 
@@ -34,6 +35,7 @@ type ZanzibarRepository interface {
 	LookupSubjects(ctx context.Context, subjectType *v1beta1.ObjectType, subject_relation, relation string, resource *v1beta1.ObjectReference, limit uint32, continuation ContinuationToken) (chan *SubjectResult, chan error, error)
 	LookupResources(ctx context.Context, resouce_type *v1beta1.ObjectType, relation string, subject *v1beta1.SubjectReference, limit uint32, continuation ContinuationToken) (chan *ResourceResult, chan error, error)
 	IsBackendAvailable() error
+	ImportBulkTuples(stream grpc.ClientStreamingServer[v1beta1.ImportBulkTuplesRequest, v1beta1.ImportBulkTuplesResponse]) error
 }
 
 type CheckUsecase struct {
@@ -105,4 +107,17 @@ func NewDeleteRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *
 
 func (rc *DeleteRelationshipsUsecase) DeleteRelationships(ctx context.Context, r *v1beta1.RelationTupleFilter) error {
 	return rc.repo.DeleteRelationships(ctx, r)
+}
+
+type ImportBulkTuplesUsecase struct {
+	repo ZanzibarRepository
+	log  *log.Helper
+}
+
+func NewImportBulkTuplesUsecase(repo ZanzibarRepository, logger log.Logger) *ImportBulkTuplesUsecase {
+	return &ImportBulkTuplesUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
+func (rc *ImportBulkTuplesUsecase) ImportBulkTuples(client grpc.ClientStreamingServer[v1beta1.ImportBulkTuplesRequest, v1beta1.ImportBulkTuplesResponse]) error {
+	return rc.repo.ImportBulkTuples(client)
 }

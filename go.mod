@@ -5,7 +5,7 @@ go 1.22.7
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.2-20240920164238-5a7b106cbb87.2
 	github.com/MicahParks/keyfunc/v3 v3.3.5
-	github.com/authzed/authzed-go v0.16.0
+	github.com/authzed/authzed-go v1.0.0
 	github.com/authzed/grpcutil v0.0.0-20230908193239-4286bb1d6403
 	github.com/bufbuild/protovalidate-go v0.7.2
 	github.com/go-kratos/kratos/v2 v2.8.0

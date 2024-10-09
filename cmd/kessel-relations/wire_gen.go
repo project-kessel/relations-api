@@ -32,7 +32,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	readRelationshipsUsecase := biz.NewReadRelationshipsUsecase(spiceDbRepository, logger)
 	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
 	importBulkTuplesUsecase := biz.NewImportBulkTuplesUsecase(spiceDbRepository, logger)
-	relationshipsService := service.NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase,importBulkTuplesUsecase)
+	relationshipsService := service.NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase, importBulkTuplesUsecase)
 	isBackendAvaliableUsecase := biz.NewIsBackendAvailableUsecase(spiceDbRepository)
 	healthService := service.NewHealthService(isBackendAvaliableUsecase)
 	checkUsecase := biz.NewCheckUsecase(spiceDbRepository, logger)

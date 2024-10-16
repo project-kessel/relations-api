@@ -70,6 +70,7 @@ objects:
             public:
               enabled: true
               apiPath: authz
+              
 parameters:
   - description: Name of the ClowdApp
     name: CLOWDAPP_NAME

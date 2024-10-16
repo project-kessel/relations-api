@@ -9,7 +9,7 @@ objects:
       name: ${CLOWDAPP_NAME}-spicedb
     spec:
       config:
-        logLevel: info
+        logLevel: debug
         replicas: ${{SPICEDB_REPLICAS}}
         datastoreEngine: postgres
       secretName: spicedb-config

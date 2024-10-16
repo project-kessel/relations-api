@@ -9,7 +9,7 @@ objects:
       name: ${CLOWDAPP_NAME}-spicedb
     spec:
       config:
-        logLevel: debug
+        logLevel: info
         replicas: ${{SPICEDB_REPLICAS}}
         datastoreEngine: postgres
       secretName: spicedb-config
@@ -70,7 +70,6 @@ objects:
             public:
               enabled: true
               apiPath: authz
-              
 parameters:
   - description: Name of the ClowdApp
     name: CLOWDAPP_NAME

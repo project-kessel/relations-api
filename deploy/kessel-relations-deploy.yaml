@@ -70,6 +70,24 @@ objects:
             public:
               enabled: true
               apiPath: authz
+  - kind: PodDisruptionBudget
+    apiVersion: policy/v1
+    metadata:
+      name: kessel-relations-api-pdb
+    spec:
+      minAvailable: 1
+      selector:
+        matchLabels:
+          app: kessel-relations
+  - kind: PodDisruptionBudget
+    apiVersion: policy/v1
+    metadata:
+      name: kessel-spicedb-pdb
+    spec:
+      minAvailable: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: kessel-relations-spicedb-spicedb
 parameters:
   - description: Name of the ClowdApp
     name: CLOWDAPP_NAME

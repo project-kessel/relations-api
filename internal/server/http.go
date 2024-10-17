@@ -92,8 +92,8 @@ func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, 
 
 func NewWhiteListMatcher(ctx context.Context, operation string) bool {
 	whiteList := make(map[string]struct{})
-	whiteList["/kessel.relations.v1.KesselHealthService/GetReadyz"] = struct{}{}
-	whiteList["/kessel.relations.v1.KesselHealthService/GetLivez"] = struct{}{}
+	whiteList["/kessel.relations.v1.KesselRelationsHealthService/GetReadyz"] = struct{}{}
+	whiteList["/kessel.relations.v1.KesselRelationsHealthService/GetLivez"] = struct{}{}
 	whiteList["/grpc.health.v1.Health/Check"] = struct{}{}
 	if _, ok := whiteList[operation]; ok {
 		return false

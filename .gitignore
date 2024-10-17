@@ -36,6 +36,7 @@ bin/
 .vscode/
 .idea/
 *.swp
+.docker/
 
 # Local Bonfire Config
 deploy/local_bonfire_config.yaml

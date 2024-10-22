@@ -15,8 +15,10 @@ import (
 	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/status"
 )
 
 var localKesselContainer *LocalKesselContainer
@@ -257,6 +259,36 @@ func TestKesselAPIGRPC_LookupResources(t *testing.T) {
 			},
 		})
 	assert.NoError(t, err)
+}
+
+func TestKesselAPIGRPC_LookupResourcesInvalid(t *testing.T) {
+	//Ensures that validation middleware is still active with authentication enabled
+	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
+	conn, err := grpc.NewClient(
+		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
+	)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	client := v1beta1.NewKesselLookupServiceClient(conn)
+
+	stream, err := client.LookupResources(
+		context.Background(), &v1beta1.LookupResourcesRequest{})
+	assert.NoError(t, err)
+
+	_, err = stream.Recv() //Errors are returned with the first response, not the initial request
+
+	status, ok := status.FromError(err)
+	assert.True(t, ok)
+	assert.Equal(t, codes.InvalidArgument, status.Code())
 }
 
 func pointerize(value string) *string { //Used to turn string literals into pointers

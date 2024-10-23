@@ -63,9 +63,14 @@ objects:
             - name: schema
               configMap:
                 name: spicedb-schema
+            - name: relations-api-config
+              configMap:
+                name: relations-api-config
             volumeMounts:
               - name: schema
                 mountPath: /etc/schema
+              - name: relations-api-config
+                mountPath: /config
           webServices:
             public:
               enabled: true

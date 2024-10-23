@@ -4,6 +4,31 @@ metadata:
   name: relations
 objects:
   - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: relations-api-config
+    data:
+      config.yaml: |
+        server:
+          http:
+            addr: "${HTTPADDR:0.0.0.0:8000}"
+            timeout: 1s
+            pathprefix: "/api/authz"
+          grpc:
+            addr: "${GRPCADDR:0.0.0.0:9000}"
+            timeout: 1s
+          minLogLevel: Info
+          auth:
+            enableAuth: "${ENABLEAUTH:false}"
+            jwksUrl: "${JWKSURL:http://0.0.0.0:8180/jwks}"
+        data:
+          spiceDb:
+            useTLS: false
+            endpoint: "${ENDPOINT:0.0.0.0:50051}"
+            token: "${PRESHARED}" # token takes precedence over tokenFile
+            tokenFile: "${PRESHARED_FILE:.secrets/local-spicedb-secret}"
+            schemaFile: "${SCHEMA_FILE:deploy/schema.zed}"
+  - apiVersion: v1
     kind: Secret
     metadata:
       name: postgres-secret
@@ -103,7 +128,7 @@ objects:
                       cpu: "25m"
                     limits:
                       memory: "256Mi"
-                      cpu: "100m"               
+                      cpu: "100m"
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:
@@ -139,9 +164,14 @@ objects:
             - name: schema
               configMap:
                 name: spicedb-schema
+            - name: relations-api-config
+              configMap:
+                name: relations-api-config
             volumeMounts:
               - name: schema
                 mountPath: /etc/schema
+              - name: relations-api-config
+                mountPath: /config
           webServices:
             public:
               enabled: true
@@ -161,4 +191,4 @@ parameters:
     value: '1'
   - description: Number of pods for relations service
     name: RELATIONS_REPLICAS
-    value: '1'    
+    value: '1'

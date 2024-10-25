@@ -18,16 +18,16 @@ RUN make build
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10
 
-
+RUN mkdir /config
 COPY --from=builder /workspace/bin/kessel-relations /usr/local/bin/
-COPY --from=builder /workspace/configs/config.yaml /usr/local/bin/
+COPY --from=builder /workspace/configs/config.yaml /config
 
 EXPOSE 8000
 EXPOSE 9000
 
 USER 1001
 
-ENTRYPOINT ["/usr/local/bin/kessel-relations","-conf","/usr/local/bin/config.yaml"]
+ENTRYPOINT ["/usr/local/bin/kessel-relations","-conf","/config/config.yaml"]
 
 LABEL name="kessel-relations-api" \
       version="0.0.1" \

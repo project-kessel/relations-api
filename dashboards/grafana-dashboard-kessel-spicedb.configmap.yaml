@@ -4592,7 +4592,7 @@ data:
             "query": "prometheus",
             "queryValue": "",
             "refresh": 1,
-            "regex": "/(crcp01ue1-prometheus)|(crcs02ue1-prometheus)/",
+            "regex": "/(crcp01ue1-prometheus)|(crcs02ue1-prometheus)|(insights-perf-prometheus)/",
             "skipUrlSync": false,
             "type": "datasource"
           },
@@ -4657,7 +4657,7 @@ data:
       "timezone": "",
       "title": "Kessel - SpiceDB",
       "uid": "gn38yKZnk-import",
-      "version": 2,
+      "version": 3,
       "weekStart": ""
     }
 kind: ConfigMap

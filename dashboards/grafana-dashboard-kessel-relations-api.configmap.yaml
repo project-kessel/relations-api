@@ -721,7 +721,7 @@ data:
       "timezone": "browser",
       "title": "Kessel - Relations API",
       "uid": "ddxs3i6o0xpmoe",
-      "version": 3,
+      "version": 4,
       "weekStart": ""
     }
 kind: ConfigMap

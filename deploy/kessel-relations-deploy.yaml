@@ -23,11 +23,11 @@ objects:
                 - name: spicedb
                   resources:
                     requests:
-                      memory: "128Mi"
-                      cpu: "25m"
+                      memory: ${SPICEDB_REQUESTS_MEMORY}
+                      cpu: ${SPICEDB_REQUESTS_CPU}
                     limits:
-                      memory: "256Mi"
-                      cpu: "100m"
+                      memory: ${SPICEDB_LIMITS_MEMORY}
+                      cpu: ${SPICEDB_LIMITS_CPU}
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:
@@ -113,3 +113,15 @@ parameters:
   - description: Number of pods for relations service
     name: RELATIONS_REPLICAS
     value: '1'
+  - description: Memory request for SpiceDB
+    name: SPICEDB_REQUESTS_MEMORY
+    value: '128Mi'
+  - description: CPU request for SpiceDB
+    name: SPICEDB_REQUESTS_CPU
+    value: '25m'
+  - description: Memory limit for SpiceDB
+    name: SPICEDB_LIMITS_MEMORY
+    value: '256Mi'
+  - description: CPU limit for SpiceDB
+    name: SPICEDB_LIMITS_CPU
+    value: '100m'

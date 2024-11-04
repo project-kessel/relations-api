@@ -23,7 +23,6 @@ data:
       "fiscalYearStartMonth": 0,
       "gnetId": 14765,
       "graphTooltip": 1,
-      "id": 951501,
       "links": [],
       "liveNow": true,
       "panels": [
@@ -50,7 +49,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       },
                       {
                         "color": "red",
@@ -66,7 +66,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 0,
-                "y": 41
+                "y": 1
               },
               "id": 103,
               "maxDataPoints": 100,
@@ -87,7 +87,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -135,7 +135,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -147,7 +148,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 3,
-                "y": 41
+                "y": 1
               },
               "id": 123,
               "interval": "2s",
@@ -169,7 +170,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -216,7 +217,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -228,7 +230,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 6,
-                "y": 41
+                "y": 1
               },
               "id": 75,
               "maxDataPoints": 100,
@@ -250,7 +252,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -284,7 +286,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       },
                       {
                         "color": "red",
@@ -300,7 +303,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 9,
-                "y": 41
+                "y": 1
               },
               "id": 110,
               "maxDataPoints": 100,
@@ -321,7 +324,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -330,7 +333,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sum(rate(spicedb_cache_hits_total{cache=\"dispatch\",job=\"$job\",grpc_service=\"$service\"}[$interval]))\n/ \n(\n    sum(rate(spicedb_cache_hits_total{cache=\"dispatch\",job=\"$job\",grpc_service=\"$service\"}[$interval]) +\n    rate(spicedb_cache_misses_total{cache=\"dispatch\",job=\"$job\",grpc_service=\"$service\"}[$interval]))\n)",
+                  "expr": "sum(rate(spicedb_cache_hits_total{cache=\"dispatch\",job=\"$job\"}[$interval]))\n/ \n(\n    sum(rate(spicedb_cache_hits_total{cache=\"dispatch\",job=\"$job\"}[$interval]) +\n    rate(spicedb_cache_misses_total{cache=\"dispatch\",job=\"$job\"}[$interval]))\n)",
                   "format": "time_series",
                   "hide": false,
                   "instant": false,
@@ -357,7 +360,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -369,7 +373,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 0,
-                "y": 46
+                "y": 6
               },
               "id": 105,
               "maxDataPoints": 100,
@@ -391,7 +395,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -438,7 +442,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -450,7 +455,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 3,
-                "y": 46
+                "y": 6
               },
               "id": 109,
               "maxDataPoints": 100,
@@ -472,7 +477,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -519,7 +524,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -531,7 +537,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 6,
-                "y": 46
+                "y": 6
               },
               "id": 112,
               "maxDataPoints": 100,
@@ -553,7 +559,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -601,7 +607,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -613,7 +620,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 9,
-                "y": 46
+                "y": 6
               },
               "id": 111,
               "maxDataPoints": 100,
@@ -635,7 +642,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -669,7 +676,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -681,7 +689,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 0,
-                "y": 51
+                "y": 11
               },
               "id": 104,
               "maxDataPoints": 100,
@@ -703,7 +711,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -750,7 +758,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -762,7 +771,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 3,
-                "y": 51
+                "y": 11
               },
               "id": 114,
               "maxDataPoints": 100,
@@ -784,7 +793,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -831,7 +840,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -843,7 +853,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 6,
-                "y": 51
+                "y": 11
               },
               "id": 115,
               "maxDataPoints": 100,
@@ -865,7 +875,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -913,7 +923,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -925,7 +936,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 9,
-                "y": 51
+                "y": 11
               },
               "id": 117,
               "maxDataPoints": 100,
@@ -947,7 +958,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -981,7 +992,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -993,7 +1005,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 0,
-                "y": 56
+                "y": 16
               },
               "id": 97,
               "maxDataPoints": 100,
@@ -1015,7 +1027,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -1062,7 +1074,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -1074,7 +1087,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 3,
-                "y": 56
+                "y": 16
               },
               "id": 113,
               "maxDataPoints": 100,
@@ -1096,7 +1109,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -1143,7 +1156,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -1155,7 +1169,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 6,
-                "y": 56
+                "y": 16
               },
               "id": 116,
               "maxDataPoints": 100,
@@ -1177,7 +1191,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -1225,7 +1239,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       }
                     ]
                   },
@@ -1237,7 +1252,7 @@ data:
                 "h": 5,
                 "w": 3,
                 "x": 9,
-                "y": 56
+                "y": 16
               },
               "id": 118,
               "maxDataPoints": 100,
@@ -1259,7 +1274,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "11.2.0",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -4456,7 +4471,7 @@ data:
           "type": "timeseries"
         }
       ],
-      "refresh": "10s",
+      "refresh": "",
       "schemaVersion": 39,
       "tags": [
         "gRPC",
@@ -4501,8 +4516,8 @@ data:
             "auto_min": "10s",
             "current": {
               "selected": false,
-              "text": "15m",
-              "value": "15m"
+              "text": "10m",
+              "value": "10m"
             },
             "hide": 0,
             "label": "Summary interval (set to roughly test duration, but no greater)",
@@ -4519,12 +4534,12 @@ data:
                 "value": "5m"
               },
               {
-                "selected": false,
+                "selected": true,
                 "text": "10m",
                 "value": "10m"
               },
               {
-                "selected": true,
+                "selected": false,
                 "text": "15m",
                 "value": "15m"
               },
@@ -4552,7 +4567,7 @@ data:
           },
           {
             "current": {
-              "selected": true,
+              "selected": false,
               "text": "authzed.api.v1.PermissionsService",
               "value": "authzed.api.v1.PermissionsService"
             },
@@ -4580,8 +4595,8 @@ data:
           {
             "current": {
               "selected": false,
-              "text": "crcs02ue1-prometheus",
-              "value": "PDD8BE47D10408F45"
+              "text": "insights-perf-prometheus",
+              "value": "PAE149AA876DDB381"
             },
             "hide": 0,
             "includeAll": false,
@@ -4598,7 +4613,7 @@ data:
           },
           {
             "current": {
-              "selected": true,
+              "selected": false,
               "text": "All",
               "value": "$__all"
             },
@@ -4657,7 +4672,7 @@ data:
       "timezone": "",
       "title": "Kessel - SpiceDB",
       "uid": "gn38yKZnk-import",
-      "version": 3,
+      "version": 4,
       "weekStart": ""
     }
 kind: ConfigMap

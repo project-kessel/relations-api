@@ -1,6 +1,6 @@
 # Kessel Relations API
 
-Kessel Relations API is a Zanzibar-inspired frontend for relationship-based access control.
+Kessel Relations API is a Zanzibar-inspired frontend for relationship-based access control (ReBAC).
 
 ## Contributing
 

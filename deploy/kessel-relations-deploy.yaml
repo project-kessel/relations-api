@@ -160,8 +160,8 @@ parameters:
     name: SPICEDB_QUANTIZATION_STALENESS_PERCENT
     value: '0.1'
   - description: Maximum number of open connections to datastore
-    name: SPICEDB_DATASTORE_CONN_POOL_READ_MAX_OPEN
+    name: SPICEDB_DATASTORE_MAX_CONN_OPEN
     value: '20'
   - description: Minimum number of open connections to datastore
-    name: SPICEDB_DATASTORE_CONN_POOL_READ_MIN_OPEN
+    name: SPICEDB_DATASTORE_MIN_CONN_OPEN
     value: '20'

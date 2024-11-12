@@ -49,6 +49,13 @@ objects:
               httpGet:
                 path: /api/authz/readyz
                 port: 8000
+            resources:
+              requests:
+                memory: ${RELATIONS_REQUESTS_MEMORY}
+                cpu: ${RELATIONS_REQUESTS_CPU}
+              limits:
+                memory: ${RELATIONS_LIMITS_MEMORY} 
+                cpu: ${RELATIONS_LIMITS_CPU}
             env:
               - name: SPICEDB_PRESHARED
                 valueFrom:
@@ -125,3 +132,15 @@ parameters:
   - description: CPU limit for SpiceDB
     name: SPICEDB_LIMITS_CPU
     value: '100m'
+  - description: Memory request for relations service
+    name: RELATIONS_REQUESTS_MEMORY
+    value: '512Mi'
+  - description: CPU request for relations service
+    name: RELATIONS_REQUESTS_CPU
+    value: '150m'
+  - description: Memory limit for relations service
+    name: RELATIONS_LIMITS_MEMORY
+    value: '1Gi'
+  - description: CPU limit for relations service
+    name: RELATIONS_LIMITS_CPU
+    value: '300m'

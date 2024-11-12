@@ -54,7 +54,7 @@ objects:
                 memory: ${RELATIONS_REQUESTS_MEMORY}
                 cpu: ${RELATIONS_REQUESTS_CPU}
               limits:
-                memory: ${RELATIONS_LIMITS_MEMORY} 
+                memory: ${RELATIONS_LIMITS_MEMORY}
                 cpu: ${RELATIONS_LIMITS_CPU}
             env:
               - name: SPICEDB_PRESHARED

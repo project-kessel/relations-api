@@ -28,6 +28,15 @@ objects:
                     limits:
                       memory: ${SPICEDB_LIMITS_MEMORY}
                       cpu: ${SPICEDB_LIMITS_CPU}
+                  env:
+                    - name: SPICEDB_DATASTORE_REVISION_QUANTIZATION_INTERVAL
+                      value: ${SPICEDB_QUANTIZATION_INTERVAL}
+                    - name: SPICEDB_DATASTORE_REVISION_QUANTIZATION_MAX_STALENESS_PERCENT
+                      value: ${SPICEDB_QUANTIZATION_STALENESS_PERCENT}
+                    - name: SPICEDB_DATASTORE_CONN_POOL_READ_MAX_OPEN
+                      value: ${SPICEDB_DATASTORE_MAX_CONN_OPEN}
+                    - name: SPICEDB_DATASTORE_CONN_POOL_READ_MIN_OPEN
+                      value: ${SPICEDB_DATASTORE_MIN_CONN_OPEN}
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:
@@ -144,3 +153,15 @@ parameters:
   - description: CPU limit for relations service
     name: RELATIONS_LIMITS_CPU
     value: '300m'
+  - description: SpiceDB quantization interval in seconds
+    name: SPICEDB_QUANTIZATION_INTERVAL
+    value: '5s'
+  - description: SpiceDB quantization max staleness percent (float)
+    name: SPICEDB_QUANTIZATION_STALENESS_PERCENT
+    value: '0.1'
+  - description: Maximum number of open connections to datastore
+    name: SPICEDB_DATASTORE_MAX_CONN_OPEN
+    value: '20'
+  - description: Minimum number of open connections to datastore
+    name: SPICEDB_DATASTORE_MIN_CONN_OPEN
+    value: '20'

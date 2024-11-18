@@ -22,13 +22,13 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": null,
+      "id": 957957,
       "links": [],
       "panels": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "${Datasource}"
           },
           "description": "Periods of lag, when the rate of replication events generated exceeds the rate at which it's consumed by relations-api.",
           "fieldConfig": {
@@ -93,7 +93,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${datasource}"
+                "uid": "${Datasource}"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -129,8 +129,8 @@ data:
                 }
               ],
               "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
+                "type": "__expr__",
+                "uid": "${DS_EXPRESSION}"
               },
               "expression": "A",
               "hide": false,
@@ -145,7 +145,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "${Datasource}"
           },
           "description": "The rate at which replication events are created and propagated should be matched closely by the rate at which replication events are processed and relations are applied to relations-api.",
           "fieldConfig": {
@@ -253,7 +253,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${datasource}"
+                "uid": "${Datasource}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -273,7 +273,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "${Datasource}"
           },
           "fieldConfig": {
             "defaults": {
@@ -352,7 +352,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${datasource}"
+                "uid": "${Datasource}"
               },
               "editorMode": "code",
               "expr": "sum(kafka_connect_source_task_source_record_write_total{connector=\"rbac-debezium\"})",
@@ -368,7 +368,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "${Datasource}"
           },
           "fieldConfig": {
             "defaults": {
@@ -447,7 +447,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${datasource}"
+                "uid": "${Datasource}"
               },
               "editorMode": "code",
               "expr": "sum(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"})",
@@ -470,7 +470,7 @@ data:
         "list": [
           {
             "current": {
-              "selected": true,
+              "selected": false,
               "text": "crcs02ue1-prometheus",
               "value": "PDD8BE47D10408F45"
             },
@@ -496,7 +496,7 @@ data:
       "timezone": "browser",
       "title": "Kessel  - Relations API data sync",
       "uid": "ce3ty1vy1gpvkd",
-      "version": 1,
+      "version": 2,
       "weekStart": ""
     }
 kind: ConfigMap

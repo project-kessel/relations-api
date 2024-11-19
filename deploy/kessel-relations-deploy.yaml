@@ -27,7 +27,7 @@ objects:
                 - name: spicedb
                   volumeMounts:
                   - name: rds-tls
-                    mountPath: /etc/tls/rds.crt
+                    mountPath: /etc/tls/rds.pem
                     subPath: db.ca_cert
                   resources:
                     requests:

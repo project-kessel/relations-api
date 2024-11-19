@@ -19,8 +19,16 @@ objects:
           spec:
             template:
               spec:
+                volumes:
+                - name: kessel-relations-spicedb
+                  secret:
+                    secretName: kessel-relations-spicedb
                 containers:
                 - name: spicedb
+                  volumeMounts:
+                  - name: rds-tls
+                    mountPath: /etc/tls/rds.crt
+                    subPath: db.ca_cert
                   resources:
                     requests:
                       memory: ${SPICEDB_REQUESTS_MEMORY}

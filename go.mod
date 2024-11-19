@@ -7,7 +7,7 @@ require (
 	github.com/MicahParks/keyfunc/v3 v3.3.5
 	github.com/authzed/authzed-go v1.1.1
 	github.com/authzed/grpcutil v0.0.0-20230908193239-4286bb1d6403
-	github.com/bufbuild/protovalidate-go v0.7.2
+	github.com/bufbuild/protovalidate-go v0.7.3
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/wire v0.6.0
@@ -27,6 +27,7 @@ require (
 )
 
 require (
+	cel.dev/expr v0.18.0 // indirect
 	cloud.google.com/go/compute/metadata v0.5.1 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
@@ -51,7 +52,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/form/v4 v4.2.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/google/cel-go v0.21.0 // indirect
+	github.com/google/cel-go v0.22.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect

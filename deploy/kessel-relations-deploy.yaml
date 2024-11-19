@@ -20,7 +20,7 @@ objects:
             template:
               spec:
                 volumes:
-                - name: kessel-relations-spicedb
+                - name: rds-tls
                   secret:
                     secretName: kessel-relations-spicedb
                 containers:

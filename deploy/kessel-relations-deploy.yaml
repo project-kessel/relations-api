@@ -14,15 +14,26 @@ objects:
         datastoreEngine: postgres
       secretName: spicedb-config
       patches:
+      - kind: Job
+        patch:
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: migrate
+                    volumeMounts:
+                      - mountPath: /etc/tls/rds.pem
+                        name: rds-tls
+                        subPath: db.ca_cert
+                volumes:
+                  - name: rds-tls
+                    secret:
+                      secretName: kessel-relations-spicedb
       - kind: Deployment
         patch:
           spec:
             template:
               spec:
-                volumes:
-                  - name: rds-tls
-                    secret:
-                      secretName: kessel-relations-spicedb
                 containers:
                 - name: migrate
                   volumeMounts:
@@ -30,10 +41,6 @@ objects:
                       mountPath: /etc/tls/rds.pem
                       subPath: db.ca_cert
                 - name: spicedb
-                  volumeMounts:
-                    - name: rds-tls
-                      mountPath: /etc/tls/rds.pem
-                      subPath: db.ca_cert
                   resources:
                     requests:
                       memory: ${SPICEDB_REQUESTS_MEMORY}
@@ -50,6 +57,14 @@ objects:
                       value: ${SPICEDB_DATASTORE_MAX_CONN_OPEN}
                     - name: SPICEDB_DATASTORE_CONN_POOL_READ_MIN_OPEN
                       value: ${SPICEDB_DATASTORE_MIN_CONN_OPEN}
+                  volumeMounts:
+                    - name: rds-tls
+                      mountPath: /etc/tls/rds.pem
+                      subPath: db.ca_cert
+                volumes:
+                  - name: rds-tls
+                    secret:
+                      secretName: kessel-relations-spicedb
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:

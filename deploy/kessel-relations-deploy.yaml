@@ -35,11 +35,6 @@ objects:
             template:
               spec:
                 containers:
-                - name: migrate
-                  volumeMounts:
-                    - name: rds-tls
-                      mountPath: /etc/tls/rds.pem
-                      subPath: db.ca_cert
                 - name: spicedb
                   resources:
                     requests:

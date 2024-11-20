@@ -24,6 +24,11 @@ objects:
                   secret:
                     secretName: kessel-relations-spicedb
                 containers:
+                - name: migrate
+                  volumeMounts:
+                  - name: rds-tls
+                    mountPath: /etc/tls/rds.pem
+                    subPath: db.ca_cert
                 - name: spicedb
                   volumeMounts:
                   - name: rds-tls

@@ -22,7 +22,6 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 957360,
       "links": [],
       "panels": [
         {
@@ -68,7 +67,7 @@ data:
           },
           "gridPos": {
             "h": 9,
-            "w": 10,
+            "w": 12,
             "x": 0,
             "y": 0
           },
@@ -232,8 +231,8 @@ data:
           },
           "gridPos": {
             "h": 9,
-            "w": 10,
-            "x": 10,
+            "w": 12,
+            "x": 12,
             "y": 0
           },
           "id": 1,
@@ -325,15 +324,111 @@ data:
                     "value": 80
                   }
                 ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 9
+          },
+          "id": 5,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PDD8BE47D10408F45"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[3m])) / (sum(rate(kafka_connect_source_task_source_record_write_total{connector=\"rbac-debezium\"}[3m])) -0.009)",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Keep up rate % (100% is keeping up)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${Datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
               }
             },
             "overrides": []
           },
           "gridPos": {
             "h": 9,
-            "w": 10,
+            "w": 12,
             "x": 0,
-            "y": 9
+            "y": 18
           },
           "id": 3,
           "options": {
@@ -426,9 +521,9 @@ data:
           },
           "gridPos": {
             "h": 9,
-            "w": 10,
-            "x": 10,
-            "y": 9
+            "w": 12,
+            "x": 12,
+            "y": 18
           },
           "id": 4,
           "options": {
@@ -470,7 +565,7 @@ data:
         "list": [
           {
             "current": {
-              "selected": true,
+              "selected": false,
               "text": "crcs02ue1-prometheus",
               "value": "PDD8BE47D10408F45"
             },
@@ -489,14 +584,14 @@ data:
         ]
       },
       "time": {
-        "from": "now-3h",
+        "from": "now-30m",
         "to": "now"
       },
       "timepicker": {},
       "timezone": "browser",
       "title": "Kessel  - Relations API data sync",
       "uid": "ce3ty1vy1gpvkd",
-      "version": 2,
+      "version": 22,
       "weekStart": ""
     }
 kind: ConfigMap

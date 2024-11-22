@@ -192,4 +192,4 @@ parameters:
     value: '20'
   - description: Enable the experimental schema cache which makes use of the Watch API for automatic updates
     name: SPICEDB_ENABLE_WATCHABLE_SCHEMA_CACHE
-    value: true
+    value: false

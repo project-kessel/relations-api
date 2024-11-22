@@ -190,6 +190,6 @@ parameters:
   - description: Minimum number of open connections to datastore
     name: SPICEDB_DATASTORE_MIN_CONN_OPEN
     value: '20'
-  - description: Enable the experimental schema cache which makes use of the Watch API for automatic updates 
+  - description: Enable the experimental schema cache which makes use of the Watch API for automatic updates
     name: SPICEDB_ENABLE_WATCHABLE_SCHEMA_CACHE
     value: true

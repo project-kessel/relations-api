@@ -16,7 +16,7 @@ objects:
             pathprefix: "/api/authz"
           grpc:
             addr: "${GRPCADDR:0.0.0.0:9000}"
-            timeout: 1s
+            timeout: 30s
           minLogLevel: Info
           auth:
             enableAuth: "${ENABLEAUTH:false}"

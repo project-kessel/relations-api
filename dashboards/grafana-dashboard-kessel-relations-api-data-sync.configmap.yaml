@@ -592,7 +592,7 @@ data:
       "timezone": "browser",
       "title": "Kessel  - Relations API data sync",
       "uid": "ce3ty1vy1gpvkd",
-      "version": 22,
+      "version": 3,
       "weekStart": ""
     }
 kind: ConfigMap

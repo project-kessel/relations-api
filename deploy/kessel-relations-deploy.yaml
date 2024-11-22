@@ -52,6 +52,8 @@ objects:
                       value: ${SPICEDB_DATASTORE_MAX_CONN_OPEN}
                     - name: SPICEDB_DATASTORE_CONN_POOL_READ_MIN_OPEN
                       value: ${SPICEDB_DATASTORE_MIN_CONN_OPEN}
+                    - name: SPICEDB_ENABLE_EXPERIMENTAL_WATCHABLE_SCHEMA_CACHE
+                      value: ${SPICEDB_ENABLE_WATCHABLE_SCHEMA_CACHE}
                   volumeMounts:
                     - name: rds-tls
                       mountPath: /etc/tls/rds.pem
@@ -188,3 +190,6 @@ parameters:
   - description: Minimum number of open connections to datastore
     name: SPICEDB_DATASTORE_MIN_CONN_OPEN
     value: '20'
+  - description: Enable the experimental schema cache which makes use of the Watch API for automatic updates
+    name: SPICEDB_ENABLE_WATCHABLE_SCHEMA_CACHE
+    value: false

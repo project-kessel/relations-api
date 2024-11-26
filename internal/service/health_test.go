@@ -47,18 +47,53 @@ func TestHealthService_GetReadyz_SpiceDBUnavailable(t *testing.T) {
 
 	d := &DummyZanzibar{}
 	service := createDummyHealthService(d)
+	d.SetAvailable(false)
 	resp, err := service.GetReadyz(ctx, &pb.GetReadyzRequest{})
 
 	assert.NoError(t, err)
 	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "Unavailable", Code: 503})
 }
 
+func TestHealthService_GetReadyz_StillReadyAfterBackendLaterUnavailable(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.TODO()
+
+	d := &DummyZanzibar{}
+	service := createDummyHealthService(d)
+	resp, err := service.GetReadyz(ctx, &pb.GetReadyzRequest{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "Unavailable", Code: 503})
+
+	d.SetAvailable(true)
+	resp, err = service.GetReadyz(ctx, &pb.GetReadyzRequest{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "OK", Code: 200})
+
+	d.SetAvailable(false)
+	resp, err = service.GetReadyz(ctx, &pb.GetReadyzRequest{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "OK", Code: 200})
+}
+
 type DummyZanzibar struct {
 	biz.ZanzibarRepository
+	available bool
+}
+
+func (dz *DummyZanzibar) SetAvailable(available bool) {
+	dz.available = available
 }
 
 func (dz *DummyZanzibar) IsBackendAvailable() error {
-	return fmt.Errorf("Unavailable")
+	if !dz.available {
+		return fmt.Errorf("Unavailable")
+	} else {
+		return nil
+	}
 }
 
 func createDummyHealthService(d *DummyZanzibar) *HealthService {

@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10 AS builder
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10-1130 AS builder
 
 ARG TARGETARCH
 USER root
@@ -16,7 +16,7 @@ COPY . ./
 RUN go mod vendor
 RUN make build
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10-1130
 
 RUN mkdir /config
 COPY --from=builder /workspace/bin/kessel-relations /usr/local/bin/

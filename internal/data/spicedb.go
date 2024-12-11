@@ -197,6 +197,7 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 		ResourceObjectType: kesselTypeToSpiceDBType(resouce_type),
 		Permission:         relation,
 		Subject: &v1.SubjectReference{
+			OptionalRelation: optionalStringPointerToString(subject.Relation),
 			Object: &v1.ObjectReference{
 				ObjectType: kesselTypeToSpiceDBType(subject.Subject.Type),
 				ObjectId:   subject.Subject.Id,
@@ -554,6 +555,13 @@ func kesselTypeToSpiceDBType(kesselType *apiV1beta1.ObjectType) string {
 	}
 
 	return kesselType.Name
+}
+
+func optionalStringPointerToString(optional *string) string {
+	if optional == nil {
+		return ""
+	}
+	return *optional
 }
 
 func optionalStringToStringPointer(optional string) *string {

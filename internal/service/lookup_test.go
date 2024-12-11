@@ -177,6 +177,64 @@ func TestLookupService_LookupSubjects_TwoResults(t *testing.T) {
 	assert.ElementsMatch(t, []string{"u1", "u2"}, ids)
 }
 
+func TestLookupService_LookupResources_IgnoresSubjectRelation(t *testing.T) {
+	t.Parallel()
+	ctx := context.TODO()
+	spicedb, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	memberRelation := "member"
+	err = spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
+		{
+			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("role_binding"), Id: "rb1"},
+			Relation: "subject",
+			Subject:  &v1beta1.SubjectReference{Relation: &memberRelation, Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("group"), Id: "g1"}},
+		},
+	}, biz.TouchSemantics(true))
+	assert.NoError(t, err)
+
+	err = spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
+		{
+			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("group"), Id: "g1"},
+			Relation: "member",
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("user"), Id: "p1"}},
+		},
+	}, biz.TouchSemantics(true))
+	assert.NoError(t, err)
+
+	container.WaitForQuantizationInterval()
+
+	service := createLookupService(spicedb)
+	responseCollector := NewLookup_ResourcesServerStub(ctx)
+	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
+		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("user"), Id: "p1"}},
+		Relation: "subject",
+		ResourceType: &v1beta1.ObjectType{
+			Name:      "role_binding",
+			Namespace: "rbac",
+		},
+	}, responseCollector)
+	assert.NoError(t, err)
+	ids := responseCollector.GetIDs()
+
+	assert.ElementsMatch(t, []string{"rb1"}, ids)
+
+	responseCollector = NewLookup_ResourcesServerStub(ctx)
+	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
+		Subject:  &v1beta1.SubjectReference{Relation: &memberRelation, Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("group"), Id: "g1"}},
+		Relation: "subject",
+		ResourceType: &v1beta1.ObjectType{
+			Name:      "role_binding",
+			Namespace: "rbac",
+		},
+	}, responseCollector)
+	assert.NoError(t, err)
+	ids = responseCollector.GetIDs()
+
+	assert.ElementsMatch(t, []string{"rb1"}, ids)
+
+}
+
 func createLookupService(spicedb *data.SpiceDbRepository) *LookupService {
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,

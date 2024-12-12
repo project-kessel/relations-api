@@ -97,7 +97,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "min_over_time((sum(rate(relations_replication_event_total[3m])) - sum(rate(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[3m])))[3m:15s]) > 0.01",
+              "expr": "min_over_time((sum(rate(relations_replication_event_total[3m])) - sum(rate(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[3m])))[1m:15s]) > 0.01",
               "format": "time_series",
               "instant": false,
               "legendFormat": "__auto",
@@ -105,7 +105,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "RBAC -> Relations API: Excessive lag events (>0.1 rate diff for 3m))",
+          "title": "RBAC -> Relations API: Excessive lag events (>0.1 rate diff for 1m))",
           "type": "state-timeline"
         },
         {

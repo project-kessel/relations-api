@@ -61,10 +61,45 @@ func TestMain(m *testing.M) {
 
 	wg.Wait()
 
+	// make initial empty request to load schema for first time use.
+	localKesselContainer.spicedbContainer.WaitForQuantizationInterval()
+	err = loadSchema()
+	if err != nil {
+		localKesselContainer.Close()
+		panic(fmt.Errorf("Failed to load schema, %w", err))
+	}
+	// wait a bit before activating tests that will actually use the loaded schema
+	localKesselContainer.spicedbContainer.WaitForQuantizationInterval()
+
 	result := m.Run()
 
 	localKesselContainer.Close()
 	os.Exit(result)
+}
+
+func loadSchema() error {
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
+	conn, err := grpc.NewClient(
+		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
+	)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	client := v1beta1.NewKesselTupleServiceClient(conn)
+
+	// send empty CreateTuplesRequest to hit service and load schema.
+	_, err = client.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func TestKesselAPIGRPC_CreateTuples(t *testing.T) {

@@ -85,7 +85,7 @@ func TestKesselAPIGRPC_CreateTuples(t *testing.T) {
 	}
 
 	client := v1beta1.NewKesselTupleServiceClient(conn)
-	rels := createRelations("user", "bob", "member", "group", "bob_club")
+	rels := createRelations("principal", "bob", "member", "group", "bob_club")
 	_, err = client.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{
 		Tuples: rels,
 	})
@@ -117,7 +117,7 @@ func TestKesselAPIGRPC_ReadTuples(t *testing.T) {
 			Relation:          pointerize("member"),
 			SubjectFilter: &v1beta1.SubjectFilter{
 				SubjectNamespace: pointerize("rbac"),
-				SubjectType:      pointerize("user"),
+				SubjectType:      pointerize("principal"),
 				SubjectId:        pointerize("bob"),
 			},
 		},
@@ -151,7 +151,7 @@ func TestKesselAPIGRPC_DeleteTuples(t *testing.T) {
 			Relation:          pointerize("member"),
 			SubjectFilter: &v1beta1.SubjectFilter{
 				SubjectNamespace: pointerize("rbac"),
-				SubjectType:      pointerize("user"),
+				SubjectType:      pointerize("principal"),
 				SubjectId:        pointerize("bob"),
 			},
 		},
@@ -182,7 +182,7 @@ func TestKesselAPIGRPC_Check(t *testing.T) {
 			Subject: &v1beta1.ObjectReference{
 				Type: &v1beta1.ObjectType{
 					Namespace: "rbac",
-					Name:      "user",
+					Name:      "principal",
 				},
 				Id: "bob",
 			},
@@ -221,7 +221,7 @@ func TestKesselAPIGRPC_LookupSubjects(t *testing.T) {
 		context.Background(), &v1beta1.LookupSubjectsRequest{
 			Resource:    &v1beta1.ObjectReference{Type: simple_type("thing"), Id: "thing1"},
 			Relation:    "view",
-			SubjectType: simple_type("user"),
+			SubjectType: simple_type("principal"),
 		})
 	assert.NoError(t, err)
 }
@@ -251,7 +251,7 @@ func TestKesselAPIGRPC_LookupResources(t *testing.T) {
 			Subject: &v1beta1.SubjectReference{
 				Subject: &v1beta1.ObjectReference{
 					Type: &v1beta1.ObjectType{
-						Name:      "user",
+						Name:      "principal",
 						Namespace: "rbac",
 					},
 					Id: "bob",

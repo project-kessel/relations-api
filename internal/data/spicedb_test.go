@@ -100,7 +100,7 @@ func TestCreateRelationshipWithSubjectRelation(t *testing.T) {
 	exists = CheckForRelationship(spiceDbRepo, "bob_club", "rbac", "group", "member", "subject", "rbac", "role_binding", "fan_binding")
 	assert.True(t, exists)
 
-	// zed permission check rbac/role_binding:fan_binding subject rbac/user:bob
+	// zed permission check rbac/role_binding:fan_binding subject rbac/principal:bob
 	// bob is a subject of fan_binding
 	runSpiceDBCheck(t, ctx, spiceDbRepo, "principal", "rbac", "bob", "subject", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_TRUE)
 

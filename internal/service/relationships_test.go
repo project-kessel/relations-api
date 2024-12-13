@@ -48,7 +48,7 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
-	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
+	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
 
 	req := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
@@ -69,7 +69,7 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:        pointerize("bob"),
 			SubjectNamespace: pointerize("rbac"),
-			SubjectType:      pointerize("user"),
+			SubjectType:      pointerize("principal"),
 		},
 	},
 	}
@@ -98,7 +98,7 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 	assert.NoError(t, err)
 
 	ctx := context.Background()
-	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
+	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
 	req := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
 			expected,
@@ -118,7 +118,7 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:        pointerize("bob"),
 			SubjectNamespace: pointerize("rbac"),
-			SubjectType:      pointerize("user"),
+			SubjectType:      pointerize("principal"),
 		},
 	},
 	}
@@ -201,7 +201,7 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
 
-	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
+	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
 
 	ctx := context.Background()
 	req := &v1beta1.CreateTuplesRequest{
@@ -220,7 +220,7 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:        pointerize("bob"),
 			SubjectNamespace: pointerize("rbac"),
-			SubjectType:      pointerize("user"),
+			SubjectType:      pointerize("principal"),
 		},
 	}}
 	_, err = relationshipsService.DeleteTuples(ctx, delreq)
@@ -236,7 +236,7 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:        pointerize("bob"),
 			SubjectNamespace: pointerize("rbac"),
-			SubjectType:      pointerize("user"),
+			SubjectType:      pointerize("principal"),
 		},
 	},
 	}
@@ -291,7 +291,7 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 	bulkImportTuplesUsecase := biz.NewImportBulkTuplesUsecase(spiceDbRepository, logger)
 	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase, bulkImportTuplesUsecase)
 
-	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
+	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
 
 	reqCr := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
@@ -311,7 +311,7 @@ func TestRelationshipsService_ReadRelationships(t *testing.T) {
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:        pointerize("bob"),
 			SubjectNamespace: pointerize("rbac"),
-			SubjectType:      pointerize("user"),
+			SubjectType:      pointerize("principal"),
 		},
 	},
 	}
@@ -346,8 +346,8 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 	bulkImportTuplesUsecase := biz.NewImportBulkTuplesUsecase(spiceDbRepository, logger)
 	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase, bulkImportTuplesUsecase)
 
-	expected1 := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("user"), "bob", "")
-	expected2 := createRelationship(rbac_ns_type("group"), "other_bob_club", "member", rbac_ns_type("user"), "bob", "")
+	expected1 := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
+	expected2 := createRelationship(rbac_ns_type("group"), "other_bob_club", "member", rbac_ns_type("principal"), "bob", "")
 
 	reqCr := &v1beta1.CreateTuplesRequest{
 		Tuples: []*v1beta1.Relationship{
@@ -366,7 +366,7 @@ func TestRelationshipsService_ReadRelationships_Paginated(t *testing.T) {
 		SubjectFilter: &v1beta1.SubjectFilter{
 			SubjectId:        pointerize("bob"),
 			SubjectNamespace: pointerize("rbac"),
-			SubjectType:      pointerize("user"),
+			SubjectType:      pointerize("principal"),
 		},
 	},
 		Pagination: &v1beta1.RequestPagination{

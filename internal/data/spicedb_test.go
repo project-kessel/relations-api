@@ -104,15 +104,15 @@ func TestCreateRelationshipWithSubjectRelation(t *testing.T) {
 	// bob is a subject of fan_binding
 	runSpiceDBCheck(t, ctx, spiceDbRepo, "principal", "rbac", "bob", "subject", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_TRUE)
 
-	// zed permission check rbac/role_binding:fan_binding subject rbac/user:alice
+	// zed permission check rbac/role_binding:fan_binding subject rbac/principal:alice
 	// alice is NOT a subject of fan_binding
 	runSpiceDBCheck(t, ctx, spiceDbRepo, "principal", "rbac", "alice", "subject", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_FALSE)
 
-	// zed permission check rbac/role_binding:fan_binding view_widget rbac/user:bob
+	// zed permission check rbac/role_binding:fan_binding view_widget rbac/principal:bob
 	// bob has view_widget permission
 	runSpiceDBCheck(t, ctx, spiceDbRepo, "principal", "rbac", "bob", "view_widget", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_TRUE)
 
-	// zed permission check rbac/role_binding:fan_binding subject rbac/user:alice
+	// zed permission check rbac/role_binding:fan_binding subject rbac/principal:alice
 	// alice does NOT have view_widget permission
 	runSpiceDBCheck(t, ctx, spiceDbRepo, "principal", "rbac", "alice", "view_widget", "role_binding", "rbac", "fan_binding", apiV1beta1.CheckResponse_ALLOWED_FALSE)
 
@@ -618,11 +618,6 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		return
 	}
 
-	//group:bob_club#member@user:bob
-	//workspace:test#user_grant@role_binding:rb_test
-	//role_binding:rb_test#granted@role:rl1
-	//role_binding:rb_test#subject@user:bob
-	//role:rl1#view_the_thing@user:*
 	rels := []*apiV1beta1.Relationship{
 		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
 		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "rb_test", ""),
@@ -653,7 +648,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		},
 		Id: "test",
 	}
-	// zed permission check workspace:test view_widget user:bob --explain
+	// zed permission check rbac/workspace:test view_widget rbac/principal:bob --explain
 	check := apiV1beta1.CheckRequest{
 		Subject:  subject,
 		Relation: "view_widget",
@@ -669,7 +664,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 	}
 	assert.Equal(t, &checkResponse, resp)
 
-	//Remove // role_binding:rb_test#subject@user:bob
+	//Remove // rbac/role_binding:rb_test#t_subject@rbac/principal:bob
 	err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:        pointerize("rb_test"),
 		ResourceNamespace: pointerize("rbac"),
@@ -685,7 +680,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		return
 	}
 
-	// zed permission check workspace:test view_widget user:bob --explain
+	// zed permission check rbac/workspace:test view_widget rbac/principal:bob --explain
 	check2 := apiV1beta1.CheckRequest{
 		Subject:  subject,
 		Relation: "view_widget",

@@ -105,7 +105,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "RBAC -> Relations API: Excessive lag events (>0.1 rate diff for 1m))",
+          "title": "RBAC -> Relations API: Excessive lag events (>0.01 rate diff for 1m))",
           "type": "state-timeline"
         },
         {

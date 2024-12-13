@@ -1,12 +1,12 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10 AS builder
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10-1130 AS builder
 
 ARG TARGETARCH
 USER root
 RUN microdnf install -y tar gzip make which
 
 # install platform specific go version
-RUN curl -O -J  https://dl.google.com/go/go1.22.0.linux-${TARGETARCH}.tar.gz
-RUN tar -C /usr/local -xzf go1.22.0.linux-${TARGETARCH}.tar.gz
+RUN curl -O -J  https://dl.google.com/go/go1.22.7.linux-${TARGETARCH}.tar.gz
+RUN tar -C /usr/local -xzf go1.22.7.linux-${TARGETARCH}.tar.gz
 RUN ln -s /usr/local/go/bin/go /usr/local/bin/go
 
 WORKDIR /workspace
@@ -16,7 +16,7 @@ COPY . ./
 RUN go mod vendor
 RUN make build
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10-1130
 
 RUN mkdir /config
 COPY --from=builder /workspace/bin/kessel-relations /usr/local/bin/

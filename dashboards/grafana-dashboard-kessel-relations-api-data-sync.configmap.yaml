@@ -47,7 +47,7 @@ data:
                 "lineWidth": 0,
                 "spanNulls": false
               },
-              "displayName": "Periods of lag",
+              "displayName": "Events",
               "fieldMinMax": false,
               "mappings": [],
               "thresholds": {
@@ -97,49 +97,15 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(rate(kafka_connect_source_task_source_record_write_total{connector=\"rbac-debezium\"}[3m])) -0.009 - sum(rate(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[3m])) > 0",
+              "expr": "min_over_time((sum(rate(relations_replication_event_total[3m])) - sum(rate(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[3m])))[1m:15s]) > 0.01",
+              "format": "time_series",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
-            },
-            {
-              "conditions": [
-                {
-                  "evaluator": {
-                    "params": [
-                      0,
-                      100
-                    ],
-                    "type": "within_range"
-                  },
-                  "operator": {
-                    "type": "when"
-                  },
-                  "query": {
-                    "params": [
-                      "A"
-                    ]
-                  },
-                  "reducer": {
-                    "params": [],
-                    "type": "min"
-                  },
-                  "type": "query"
-                }
-              ],
-              "datasource": {
-                "type": "__expr__",
-                "uid": "${DS_EXPRESSION}"
-              },
-              "expression": "A",
-              "hide": false,
-              "reducer": "mean",
-              "refId": "B",
-              "type": "classic_conditions"
             }
           ],
-          "title": "Rbac -> Relations API: Lag detected",
+          "title": "RBAC -> Relations API: Excessive lag events (>0.01 rate diff for 1m))",
           "type": "state-timeline"
         },
         {
@@ -147,7 +113,6 @@ data:
             "type": "prometheus",
             "uid": "${Datasource}"
           },
-          "description": "The rate at which replication events are created and propagated should be matched closely by the rate at which replication events are processed and relations are applied to relations-api.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -170,9 +135,6 @@ data:
                 },
                 "insertNulls": false,
                 "lineInterpolation": "linear",
-                "lineStyle": {
-                  "fill": "solid"
-                },
                 "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
@@ -198,37 +160,12 @@ data:
                   },
                   {
                     "color": "red",
-                    "value": 0
+                    "value": 0.01
                   }
                 ]
               }
             },
-            "overrides": [
-              {
-                "__systemRef": "hideSeriesFrom",
-                "matcher": {
-                  "id": "byNames",
-                  "options": {
-                    "mode": "exclude",
-                    "names": [
-                      "sum(rate(kafka_connect_source_task_source_record_write_total{connector=\"rbac-debezium\"}[3m])) -0.009 - sum(rate(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[3m]))"
-                    ],
-                    "prefix": "All except:",
-                    "readOnly": true
-                  }
-                },
-                "properties": [
-                  {
-                    "id": "custom.hideFrom",
-                    "value": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": true
-                    }
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "gridPos": {
             "h": 9,
@@ -236,7 +173,7 @@ data:
             "x": 12,
             "y": 0
           },
-          "id": 1,
+          "id": 6,
           "options": {
             "legend": {
               "calcs": [],
@@ -255,115 +192,15 @@ data:
                 "type": "prometheus",
                 "uid": "${Datasource}"
               },
-              "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "sum(rate(kafka_connect_source_task_source_record_write_total{connector=\"rbac-debezium\"}[3m])) -0.009 - sum(rate(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[3m]))",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "RBAC -> Relations API: Rate of Rbac replication event creation minus rate of relations-api consumption ",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${Datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "percentunit"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 24,
-            "x": 0,
-            "y": 9
-          },
-          "id": 5,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "PDD8BE47D10408F45"
-              },
-              "editorMode": "code",
-              "expr": "sum(rate(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[3m])) / (sum(rate(kafka_connect_source_task_source_record_write_total{connector=\"rbac-debezium\"}[3m])) -0.009)",
+              "expr": "sum(rate(relations_replication_event_total[3m])) - sum(rate(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[3m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Keep up rate % (100% is keeping up)",
+          "title": "RBAC -> Relations API: Replication event creation rate minus sink rate [3m]",
           "type": "timeseries"
         },
         {
@@ -429,7 +266,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 9
           },
           "id": 3,
           "options": {
@@ -451,14 +288,14 @@ data:
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "sum(kafka_connect_source_task_source_record_write_total{connector=\"rbac-debezium\"})",
+              "expr": "sum(relations_replication_event_total)",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Rbac replication event count",
+          "title": "RBAC replication event count",
           "type": "timeseries"
         },
         {
@@ -524,7 +361,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 9
           },
           "id": 4,
           "options": {
@@ -555,6 +392,329 @@ data:
           ],
           "title": "Relations API applied replication event count",
           "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${Datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 0,
+            "y": 18
+          },
+          "id": 7,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Datasource}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(relations_replication_event_total[$__range]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Replication events increase",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${Datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 5,
+            "y": 18
+          },
+          "id": 8,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Datasource}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[$__range]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Sinked events increase",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${Datasource}"
+          },
+          "description": "Includes debezium heartbeats, which are not replication events (2 per 5 mins)",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 10,
+            "y": 18
+          },
+          "id": 9,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Datasource}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(kafka_connect_source_task_source_record_write_total{connector=\"rbac-debezium\"}[$__range]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Debezium events increase",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${Datasource}"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 16,
+            "y": 18
+          },
+          "id": 10,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Datasource}"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(relations_replication_event_total[$__range]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Replication event rate",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${Datasource}"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 20,
+            "y": 18
+          },
+          "id": 11,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Datasource}"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(kafka_connect_sink_task_sink_record_send_total{connector=\"relations-sink-connector\"}[$__range]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Sink rate",
+          "type": "stat"
         }
       ],
       "refresh": "",
@@ -566,7 +726,7 @@ data:
         "list": [
           {
             "current": {
-              "selected": false,
+              "selected": true,
               "text": "crcs02ue1-prometheus",
               "value": "PDD8BE47D10408F45"
             },
@@ -592,7 +752,7 @@ data:
       "timezone": "browser",
       "title": "Kessel  - Relations API data sync",
       "uid": "ce3ty1vy1gpvkd",
-      "version": 3,
+      "version": 4,
       "weekStart": ""
     }
 kind: ConfigMap

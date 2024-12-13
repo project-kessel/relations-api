@@ -109,7 +109,7 @@ func TestLookupService_LookupResources_OneResult(t *testing.T) {
 		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"}},
 		Relation: "workspace",
 		ResourceType: &v1beta1.ObjectType{
-			Name:      "thing",
+			Name:      "widget",
 			Namespace: "rbac",
 		},
 	}, responseCollector)
@@ -135,7 +135,7 @@ func TestLookupService_LookupResources_TwoResults(t *testing.T) {
 	//&v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("role_binding"), Id: "default_viewers"}}
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
 	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
-		Subject: &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("user"), Id: "u1"}},
+		Subject: &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("principal"), Id: "u1"}},
 		//Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"}},
 		Relation: "subject",
 		ResourceType: &v1beta1.ObjectType{
@@ -167,9 +167,9 @@ func TestLookupService_LookupSubjects_TwoResults(t *testing.T) {
 
 	responseCollector := NewLookup_SubjectsServerStub(ctx)
 	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
-		SubjectType: rbac_ns_type("user"),
+		SubjectType: rbac_ns_type("principal"),
 		Relation:    "view",
-		Resource:    &v1beta1.ObjectReference{Type: rbac_ns_type("thing"), Id: "thing1"},
+		Resource:    &v1beta1.ObjectReference{Type: rbac_ns_type("widget"), Id: "thing1"},
 	}, responseCollector)
 	assert.NoError(t, err)
 	ids := responseCollector.GetIDs()
@@ -197,7 +197,7 @@ func TestLookupService_LookupResources_IgnoresSubjectRelation(t *testing.T) {
 		{
 			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("group"), Id: "g1"},
 			Relation: "member",
-			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("user"), Id: "p1"}},
+			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("principal"), Id: "p1"}},
 		},
 	}, biz.TouchSemantics(true))
 	assert.NoError(t, err)
@@ -207,7 +207,7 @@ func TestLookupService_LookupResources_IgnoresSubjectRelation(t *testing.T) {
 	service := createLookupService(spicedb)
 	responseCollector := NewLookup_ResourcesServerStub(ctx)
 	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
-		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("user"), Id: "p1"}},
+		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("principal"), Id: "p1"}},
 		Relation: "subject",
 		ResourceType: &v1beta1.ObjectType{
 			Name:      "role_binding",

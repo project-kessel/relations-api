@@ -1,32 +1,44 @@
 version 0.1
 namespace rbac
 
-public type user {}
+public type principal {}
 
 public type group {
-    relation member: [Any user or group.member]
+    relation member: [Any principal or group.member]
 }
 
 public type role {
-    relation view_the_thing: [bool]
 }
 
 public type role_binding {
-    relation subject: [Any user or group.member]
+    relation subject: [Any principal or group.member]
     relation granted: [AtLeastOne role]
-
-    relation view_the_thing: subject and granted.view_the_thing
 }
 
 public type workspace {
     relation parent: [AtMostOne workspace]
     relation user_grant: [Any role_binding]
-
-    relation view_the_thing: user_grant.view_the_thing
 }
 
-public type thing {
+public type widget {
     relation workspace: [ExactlyOne workspace]
 
-    relation view: workspace.view_the_thing
+    @add_permission(name:'view_widget')
+    relation view: workspace.view_widget or use
+    @add_permission(name:'use_widget')
+    relation use: workspace.use_widget
+}
+
+internal extension add_permission(name) {
+    type role {
+        private relation ${name}: [bool]
+    }
+
+    type role_binding {
+        internal relation ${name}: subject and granted.${name}
+    }
+
+    type workspace {
+        internal relation ${name}: user_grant.${name} or parent.${name}
+    }
 }

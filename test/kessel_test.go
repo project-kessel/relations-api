@@ -92,10 +92,28 @@ func loadSchema() error {
 		fmt.Print(err)
 	}
 
-	client := v1beta1.NewKesselTupleServiceClient(conn)
+	client := v1beta1.NewKesselCheckServiceClient(conn)
 
-	// send empty CreateTuplesRequest to hit service and load schema.
-	_, err = client.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{})
+	// send valid CheckRequest to hit service and load schema.
+	_, err = client.Check(context.Background(), &v1beta1.CheckRequest{
+		Subject: &v1beta1.SubjectReference{
+			Subject: &v1beta1.ObjectReference{
+				Type: &v1beta1.ObjectType{
+					Namespace: "rbac",
+					Name:      "principal",
+				},
+				Id: "initial-tester",
+			},
+		},
+		Relation: "member",
+		Resource: &v1beta1.ObjectReference{
+			Type: &v1beta1.ObjectType{
+				Namespace: "rbac",
+				Name:      "group",
+			},
+			Id: "initial-loading",
+		},
+	})
 	if err != nil {
 		return err
 	}

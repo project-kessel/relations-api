@@ -102,7 +102,7 @@ func loadSchema() error {
 					Namespace: "rbac",
 					Name:      "principal",
 				},
-				Id: "initial-tester",
+				Id: "bob",
 			},
 		},
 		Relation: "member",
@@ -111,7 +111,7 @@ func loadSchema() error {
 				Namespace: "rbac",
 				Name:      "group",
 			},
-			Id: "initial-loading",
+			Id: "bob_club",
 		},
 	})
 	if err != nil {

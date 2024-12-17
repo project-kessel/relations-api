@@ -140,7 +140,7 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 	}
 
 	_, err = relationshipsService.CreateTuples(ctx, req)
-	assert.Equal(t, status.Convert(err).Code(), codes.AlreadyExists)
+	assert.Equal(t, codes.AlreadyExists, status.Convert(err).Code())
 
 }
 
@@ -172,7 +172,7 @@ func TestRelationshipsService_CreateRelationshipsWithBadSubjectType(t *testing.T
 	}
 	_, err = relationshipsService.CreateTuples(ctx, req)
 	assert.Error(t, err)
-	assert.Equal(t, status.Convert(err).Code(), codes.FailedPrecondition)
+	assert.Equal(t, codes.FailedPrecondition, status.Convert(err).Code())
 	assert.Contains(t, err.Error(),
 		fmt.Sprintf("object definition `%s/%s` not found", badSubjectType.GetNamespace(), badSubjectType.GetName()))
 }

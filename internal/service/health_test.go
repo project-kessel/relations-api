@@ -23,7 +23,7 @@ func TestHealthService_GetLivez(t *testing.T) {
 	resp, err := service.GetLivez(ctx, &pb.GetLivezRequest{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, resp, &pb.GetLivezResponse{Status: "OK", Code: 200})
+	assert.Equal(t, &pb.GetLivezResponse{Status: "OK", Code: 200}, resp)
 }
 
 func TestHealthService_GetReadyz_SpiceDBAvailable(t *testing.T) {
@@ -37,7 +37,7 @@ func TestHealthService_GetReadyz_SpiceDBAvailable(t *testing.T) {
 	resp, err := service.GetReadyz(ctx, &pb.GetReadyzRequest{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "OK", Code: 200})
+	assert.Equal(t, &pb.GetReadyzResponse{Status: "OK", Code: 200}, resp)
 }
 
 func TestHealthService_GetReadyz_SpiceDBUnavailable(t *testing.T) {
@@ -51,7 +51,7 @@ func TestHealthService_GetReadyz_SpiceDBUnavailable(t *testing.T) {
 	resp, err := service.GetReadyz(ctx, &pb.GetReadyzRequest{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "Unavailable", Code: 503})
+	assert.Equal(t, &pb.GetReadyzResponse{Status: "Unavailable", Code: 503}, resp)
 }
 
 func TestHealthService_GetReadyz_StillReadyAfterBackendLaterUnavailable(t *testing.T) {
@@ -64,19 +64,19 @@ func TestHealthService_GetReadyz_StillReadyAfterBackendLaterUnavailable(t *testi
 	resp, err := service.GetReadyz(ctx, &pb.GetReadyzRequest{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "Unavailable", Code: 503})
+	assert.Equal(t, &pb.GetReadyzResponse{Status: "Unavailable", Code: 503}, resp)
 
 	d.SetAvailable(true)
 	resp, err = service.GetReadyz(ctx, &pb.GetReadyzRequest{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "OK", Code: 200})
+	assert.Equal(t, &pb.GetReadyzResponse{Status: "OK", Code: 200}, resp)
 
 	d.SetAvailable(false)
 	resp, err = service.GetReadyz(ctx, &pb.GetReadyzRequest{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, resp, &pb.GetReadyzResponse{Status: "OK", Code: 200})
+	assert.Equal(t, &pb.GetReadyzResponse{Status: "OK", Code: 200}, resp)
 }
 
 type DummyZanzibar struct {

@@ -50,7 +50,7 @@ func TestValidationMiddleware_InvalidRequest(t *testing.T) {
 		Resource: &v1beta1.ObjectReference{},
 	})
 	assert.Error(t, err)
-	assert.Equal(t, resp, nil)
+	assert.Equal(t, nil, resp)
 }
 
 type DummyServerStream struct {

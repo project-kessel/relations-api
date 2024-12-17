@@ -146,7 +146,7 @@ func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 
 	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.Error(t, err)
-	assert.Equal(t, status.Convert(err).Code(), codes.AlreadyExists)
+	assert.Equal(t, codes.AlreadyExists, status.Convert(err).Code())
 
 	container.WaitForQuantizationInterval()
 
@@ -338,7 +338,7 @@ func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {
 
 	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.Error(t, err)
-	assert.Equal(t, status.Convert(err).Code(), codes.FailedPrecondition)
+	assert.Equal(t, codes.FailedPrecondition, status.Convert(err).Code())
 	assert.Contains(t, err.Error(),
 		fmt.Sprintf("object definition `%s/%s` not found", "rbac", badSubjectType))
 }
@@ -360,7 +360,7 @@ func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
 
 	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.Error(t, err)
-	assert.Equal(t, status.Convert(err).Code(), codes.FailedPrecondition)
+	assert.Equal(t, codes.FailedPrecondition, status.Convert(err).Code())
 	assert.Contains(t, err.Error(),
 		fmt.Sprintf("object definition `%s/%s` not found", "rbac", badObjectType))
 

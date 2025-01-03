@@ -7,7 +7,7 @@ require (
 	github.com/MicahParks/keyfunc/v3 v3.3.5
 	github.com/authzed/authzed-go v1.2.0
 	github.com/authzed/grpcutil v0.0.0-20240123194739-2ea1e3d2d98b
-	github.com/bufbuild/protovalidate-go v0.8.0
+	github.com/bufbuild/protovalidate-go v0.8.2
 	github.com/go-kratos/kratos/v2 v2.8.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/wire v0.6.0

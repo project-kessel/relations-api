@@ -2,24 +2,27 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10-1154 AS builder
 
 ARG TARGETARCH
 USER root
-RUN microdnf install -y tar gzip make which
-
-# install platform specific go version
-RUN curl -O -J  https://dl.google.com/go/go1.22.7.linux-${TARGETARCH}.tar.gz
-RUN tar -C /usr/local -xzf go1.22.7.linux-${TARGETARCH}.tar.gz
-RUN ln -s /usr/local/go/bin/go /usr/local/bin/go
+RUN microdnf install -y tar gzip make which go-toolset
 
 WORKDIR /workspace
 
 COPY . ./
 
+ENV CGO_ENABLED 1
 RUN go mod vendor
 RUN make build
 
+# adds fips-detect tool for FIPS validation -- likely not needed long term
+RUN mkdir /tmp/go && GOPATH=/tmp/go GOCACHE=/tmp/go go install github.com/acardace/fips-detect@latest
+
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10-1154
 
+# installs RHEL fork of go to be able to validate with go tools for FIPS -- likely not needed long term
+RUN microdnf install -y go-toolset
 RUN mkdir /config
+
 COPY --from=builder /workspace/bin/kessel-relations /usr/local/bin/
+COPY --from=builder /tmp/go/bin/fips-detect /usr/local/bin/
 COPY --from=builder /workspace/configs/config.yaml /config
 
 EXPOSE 8000

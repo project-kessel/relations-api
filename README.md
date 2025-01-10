@@ -14,7 +14,10 @@ make init
 
 ### Build
 
-`make build`
+```shell
+# when building locally, use the local-build option as FIPS_ENABLED is set by default for builds
+make local-build
+```
 
 (Configs must be specified to run binary, e.g. `./bin/kessel-relations -conf configs`, or run make target, below.)
 
@@ -129,13 +132,13 @@ You should have logged into a valid openshift cluster using the oc login command
 #### Option 1: Using the config from app-interface (RedHat Internal only)
 
 * Create a config map inside a local temp directory. You can leverage the template [here](./deploy/schema-configmaps/schema-configmap-template.yaml). The template can be used to inject any schema definition file you like by providing the contents of a schema definition file as the parameter.
-  
+
   ```shell
   # Example, create a configmap using the current default schema
   TEMP_DIR=$(mktemp -d)
 
   # SCHEMA_FILE can be a path to any desired schema definition file in yaml format
-  SCHEMA_FILE=./deploy/schema.yaml 
+  SCHEMA_FILE=./deploy/schema.yaml
 
   oc process --local \
     -f deploy/schema-configmaps/schema-configmap-template.yaml \
@@ -144,7 +147,7 @@ You should have logged into a valid openshift cluster using the oc login command
   ```
 
 * Run the following command:
-  * `bonfire deploy relations --import-configmaps  --configmaps-dir $TEMP_DIR` 
+  * `bonfire deploy relations --import-configmaps  --configmaps-dir $TEMP_DIR`
 
 #### Option 2: Using the deploy.sh script in this repository
 
@@ -181,3 +184,14 @@ Example:
 - Updates config bonfire file and add rbac component
 - Deploys rbac together with relationships application
   - Hardcoded image is used with grpc client for calling relationships
+
+## Validating FIPS
+Relations API is configured to build with FIPS capable libraries and produce FIPS capaable binaries when running on FIPS enabled clusters.
+To validate the current running container is FIPS capable:
+```shell
+# exec or rsh into running pod
+# using fips-detect (https://github.com/acardace/fips-detect)
+fips-detect /usr/local/bin/kessel-relations
+# using go tool
+go tool nm /usr/local/bin/kessel-relations | grep FIPS
+```

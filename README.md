@@ -154,7 +154,7 @@ The [deploy script](deploy/deploy.sh) under the [deploy](deploy) folder, will de
 
 `./deploy.sh`
 
-- Creates a postgres pod and service (Note: No PVC)
+- Creates a postgres pod and service (Note: No Persistent Volume Claim - PVC)
 - Creates a spiceDB secret - that contains: a preshared key and Postgres connection URI
 - Creates a Configmap object - that serves as a bootstrap schema for spiceDB (by default it uses the schema.yaml file under deploy)
 - Creates the spiceDB service

@@ -9,7 +9,7 @@ objects:
       name: ${CLOWDAPP_NAME}-spicedb
     spec:
       config:
-        logLevel: debug
+        logLevel: ${SPICEDB_LOG_LEVEL}
         replicas: ${{SPICEDB_REPLICAS}}
         datastoreEngine: postgres
       secretName: spicedb-config
@@ -193,3 +193,6 @@ parameters:
   - description: Enable the experimental schema cache which makes use of the Watch API for automatic updates
     name: SPICEDB_ENABLE_WATCHABLE_SCHEMA_CACHE
     value: 'false'
+  - description: SpiceDB log level - possible values ("trace", "debug", "info", "warn", "error")
+    name: SPICEDB_LOG_LEVEL
+    value: debug

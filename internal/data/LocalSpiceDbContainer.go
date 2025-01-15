@@ -33,6 +33,9 @@ const (
 	SpicedbSchemaBootstrapFile = "spicedb-test-data/basic_schema.zed"
 	// SpicedbRelationsBootstrapFile specifies an optional bootstrap file containing relations to be used for testing
 	SpicedbRelationsBootstrapFile = ""
+	// FullyConsistent specifices the consistency mode used for our read API calls
+	// may experience different results between tests and manual probing if the values differ
+	FullyConsistent = true // Should probably be inline with our config file. (TODO: Can we make our tests grab the same value?)
 )
 
 // LocalSpiceDbContainer struct that holds pointers to the container, dockertest pool and exposes the port
@@ -136,7 +139,9 @@ func (l *LocalSpiceDbContainer) NewToken() (string, error) {
 
 // WaitForQuantizationInterval needed to avoid read-before-write when loading the schema
 func (l *LocalSpiceDbContainer) WaitForQuantizationInterval() {
-	time.Sleep(10 * time.Millisecond)
+	if !FullyConsistent {
+		time.Sleep(10 * time.Millisecond)
+	}
 }
 
 // CreateClient creates a new client that connects to the dockerized spicedb instance and the right store
@@ -162,10 +167,11 @@ func (l *LocalSpiceDbContainer) CreateSpiceDbRepository() (*SpiceDbRepository, e
 	defer os.RemoveAll(tmpDir)
 
 	spiceDbConf := &conf.Data_SpiceDb{
-		UseTLS:     false,
-		Endpoint:   "localhost:" + l.port,
-		Token:      tmpFile.Name(),
-		SchemaFile: l.schemaLocation,
+		UseTLS:          false,
+		Endpoint:        "localhost:" + l.port,
+		Token:           tmpFile.Name(),
+		SchemaFile:      l.schemaLocation,
+		FullyConsistent: FullyConsistent, // Should be inline with our config file
 	}
 	repo, _, err := NewSpiceDbRepository(&conf.Data{SpiceDb: spiceDbConf}, l.logger)
 	if err != nil {

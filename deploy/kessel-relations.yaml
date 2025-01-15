@@ -34,6 +34,7 @@ objects:
             token: "${PRESHARED}" # token takes precedence over tokenFile
             tokenFile: "${PRESHARED_FILE:.secrets/local-spicedb-secret}"
             schemaFile: "${SCHEMA_FILE:deploy/schema.zed}"
+            fullyConsistent: false
   - apiVersion: v1
     kind: Secret
     metadata:

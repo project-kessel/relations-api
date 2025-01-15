@@ -4,7 +4,7 @@ go 1.22.7
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.2-20241127180247-a33202765966.1
-	github.com/MicahParks/keyfunc/v3 v3.3.8
+	github.com/MicahParks/keyfunc/v3 v3.3.10
 	github.com/authzed/authzed-go v1.2.1
 	github.com/authzed/grpcutil v0.0.0-20240123194739-2ea1e3d2d98b
 	github.com/bufbuild/protovalidate-go v0.8.2
@@ -31,7 +31,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.5.2 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
-	github.com/MicahParks/jwkset v0.7.0 // indirect
+	github.com/MicahParks/jwkset v0.8.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect

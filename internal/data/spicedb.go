@@ -29,16 +29,11 @@ type SpiceDbRepository struct {
 	healthClient   grpc_health_v1.HealthClient
 	schemaFilePath string
 	isInitialized  bool
+	consistency    *v1.Consistency
 }
 
 const (
 	relationPrefix = "t_"
-)
-
-var (
-	// Default consistency for read APIs is minimize_latency
-	// will attempt to minimize the latency of the API call by selecting data that is most likely exist in the cache.
-	consistency = &v1.Consistency{Requirement: &v1.Consistency_MinimizeLatency{MinimizeLatency: true}}
 )
 
 // NewSpiceDbRepository .
@@ -96,12 +91,15 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 		log.NewHelper(logger).Info("spicedb connection cleanup requested (nothing to clean up)")
 	}
 
+	// Default consistency for read APIs is minimize_latency
+	// will attempt to minimize the latency of the API call by selecting data that is most likely exist in the cache.
+	consistency := &v1.Consistency{Requirement: &v1.Consistency_MinimizeLatency{MinimizeLatency: true}}
 	if c.SpiceDb.FullyConsistent {
 		// will ensure that all data used is fully consistent with the latest data available within the SpiceDB datastore.
 		consistency = &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}}
 	}
 
-	return &SpiceDbRepository{client, healthClient, c.SpiceDb.SchemaFile, false}, cleanup, nil
+	return &SpiceDbRepository{client, healthClient, c.SpiceDb.SchemaFile, false, consistency}, cleanup, nil
 }
 
 func (s *SpiceDbRepository) initialize() error {
@@ -139,7 +137,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 	}
 
 	req := &v1.LookupSubjectsRequest{
-		Consistency: consistency,
+		Consistency: s.consistency,
 		Resource: &v1.ObjectReference{
 			ObjectType: kesselTypeToSpiceDBType(object.Type),
 			ObjectId:   object.Id,
@@ -206,7 +204,7 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 		}
 	}
 	client, err := s.client.LookupResources(ctx, &v1.LookupResourcesRequest{
-		Consistency:        consistency,
+		Consistency:        s.consistency,
 		ResourceObjectType: kesselTypeToSpiceDBType(resouce_type),
 		Permission:         relation,
 		Subject: &v1.SubjectReference{
@@ -360,7 +358,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 	}
 
 	req := &v1.ReadRelationshipsRequest{
-		Consistency:        consistency,
+		Consistency:        s.consistency,
 		RelationshipFilter: relationshipFilter,
 		OptionalLimit:      limit,
 		OptionalCursor:     cursor,
@@ -462,7 +460,7 @@ func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV1beta1.CheckRe
 		ObjectId:   check.GetResource().GetId(),
 	}
 	req := &v1.CheckPermissionRequest{
-		Consistency: consistency,
+		Consistency: s.consistency,
 		Resource:    resource,
 		Permission:  check.GetRelation(),
 		Subject:     subject,

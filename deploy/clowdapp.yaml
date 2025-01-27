@@ -13,6 +13,7 @@ objects:
         replicas: 1
         datastoreEngine: postgres
         datastoreBootstrapFiles: /etc/bootstrap/schema.yaml
+        image: ${SPICEDB_IMAGE}
       secretName: dev-spicedb-config
       patches:
       - kind: Deployment
@@ -86,3 +87,6 @@ parameters:
   - description: Image Tag
     name: IMAGE_TAG
     value: ${IMAGE_TAG}
+  - description: SpiceDB Image
+    name: SPICEDB_IMAGE
+    value: ghcr.io/authzed/spicedb:v1.31.0

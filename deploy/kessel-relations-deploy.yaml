@@ -12,6 +12,7 @@ objects:
         logLevel: ${SPICEDB_LOG_LEVEL}
         replicas: ${{SPICEDB_REPLICAS}}
         datastoreEngine: postgres
+        image: ${SPICEDB_IMAGE}
       secretName: spicedb-config
       patches:
       - kind: Job
@@ -148,6 +149,9 @@ parameters:
     name: IMAGE_TAG
     required: true
     value: latest
+  - description: SpiceDB Image
+    name: SPICEDB_IMAGE
+    value: ghcr.io/authzed/spicedb:v1.31.0
   - description: Number of pods for spiceDB service
     name: SPICEDB_REPLICAS
     value: '1'

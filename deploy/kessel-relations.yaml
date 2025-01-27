@@ -120,6 +120,7 @@ objects:
         logLevel: debug
         replicas: ${{SPICEDB_REPLICAS}}
         datastoreEngine: postgres
+        image: ${{SPICEDB_IMAGE}}
       secretName: dev-spicedb-config
       patches:
       - kind: Deployment
@@ -199,3 +200,6 @@ parameters:
   - description: Number of pods for relations service
     name: RELATIONS_REPLICAS
     value: '1'
+  - description: SpiceDB Image
+    name: SPICEDB_IMAGE
+    value: ghcr.io/authzed/spicedb:v1.31.0

@@ -35,7 +35,7 @@ const (
 	SpicedbRelationsBootstrapFile = ""
 	// FullyConsistent specifices the consistency mode used for our read API calls
 	// may experience different results between tests and manual probing if the values differ
-	FullyConsistent = true // Should probably be inline with our config file. (TODO: Can we make our tests grab the same value?)
+	FullyConsistent = false // Should probably be inline with our config file. (TODO: Can we make our tests grab the same value?)
 )
 
 // LocalSpiceDbContainer struct that holds pointers to the container, dockertest pool and exposes the port

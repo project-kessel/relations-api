@@ -95,6 +95,10 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: zookie.token
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -142,6 +146,10 @@ paths:
                     type: integer
                     format: uint32
                 - name: pagination.continuationToken
+                  in: query
+                  schema:
+                    type: string
+                - name: zookie.token
                   in: query
                   schema:
                     type: string
@@ -196,6 +204,10 @@ paths:
                     type: integer
                     format: uint32
                 - name: pagination.continuationToken
+                  in: query
+                  schema:
+                    type: string
+                - name: zookie.token
                   in: query
                   schema:
                     type: string
@@ -312,12 +324,16 @@ components:
                     type: string
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
+                zookie:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
         kessel.relations.v1beta1.CheckResponse:
             type: object
             properties:
                 allowed:
                     type: integer
                     format: enum
+                checkedAt:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
         kessel.relations.v1beta1.CreateTuplesRequest:
             type: object
             properties:
@@ -333,10 +349,14 @@ components:
                         $ref: '#/components/schemas/kessel.relations.v1beta1.Relationship'
         kessel.relations.v1beta1.CreateTuplesResponse:
             type: object
-            properties: {}
+            properties:
+                createdAt:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
         kessel.relations.v1beta1.DeleteTuplesResponse:
             type: object
-            properties: {}
+            properties:
+                deletedAt:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
         kessel.relations.v1beta1.ImportBulkTuplesRequest:
             type: object
             properties:
@@ -356,6 +376,8 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
                 pagination:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
+                lookedUpAt:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
         kessel.relations.v1beta1.LookupSubjectsResponse:
             type: object
             properties:
@@ -363,6 +385,8 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
                 pagination:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
+                lookedUpAt:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
         kessel.relations.v1beta1.ObjectReference:
             type: object
             properties:
@@ -384,6 +408,8 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.Relationship'
                 pagination:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
+                readAt:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
         kessel.relations.v1beta1.Relationship:
             type: object
             properties:
@@ -410,6 +436,12 @@ components:
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
             description: A reference to a Subject or, if a `relation` is provided, a Subject Set.
+        kessel.relations.v1beta1.Zookie:
+            type: object
+            properties:
+                token:
+                    type: string
+            description: The Zookie is used to provide consistency between write and read requests.
 tags:
     - name: KesselCheckService
     - name: KesselLookupService

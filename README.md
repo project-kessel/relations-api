@@ -70,7 +70,11 @@ wire
 
 ## Spicedb using docker/podman
 
-The latest [production ready schema](https://github.com/RedHatInsights/rbac-config/blob/master/configs/prod/schemas/schema.zed) is always pulled before running.
+The latest [production ready schema](https://github.com/RedHatInsights/rbac-config/blob/master/configs/prod/schemas/schema.zed) can be downloaded prior to running via 
+```
+curl -o deploy/schema.zed https://raw.githubusercontent.com/RedHatInsights/rbac-config/refs/heads/master/configs/prod/schemas/schema.zed
+```
+
 
 ### Run spicedb and postgresql db with docker/podman compose
 

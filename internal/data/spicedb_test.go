@@ -646,14 +646,13 @@ func TestSpiceDbRepository_CheckPermissionZookie(t *testing.T) {
 		},
 		Id: "test",
 	}
-	// zookie received from creating relationships.
-	createdZookie := relationshipResp.GetCreatedAt()
+	// no wait, immediately read after write.
 	// zed permission check rbac/workspace:test view_widget rbac/principal:bob --explain
 	check := apiV1beta1.CheckRequest{
 		Subject:  subject,
 		Relation: "view_widget",
 		Resource: resource,
-		Zookie:   createdZookie, // pass createdAt zookie
+		Zookie:   relationshipResp.GetCreatedAt(), // pass createdAt zookie
 	}
 	resp, err := spiceDbRepo.Check(ctx, &check)
 	if !assert.NoError(t, err) {
@@ -662,7 +661,7 @@ func TestSpiceDbRepository_CheckPermissionZookie(t *testing.T) {
 	//apiV1.CheckResponse_ALLOWED_TRUE
 	checkResponse := apiV1beta1.CheckResponse{
 		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
-		CheckedAt: createdZookie, // same zookie as created zookie.
+		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
 	}
 	assert.Equal(t, &checkResponse, resp)
 

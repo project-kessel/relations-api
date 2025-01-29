@@ -50,7 +50,7 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v1beta1.LookupSubject
 	subs, errs, err := s.repo.LookupSubjects(ctx, req.SubjectType, subjectRelation, req.Relation, &v1beta1.ObjectReference{
 		Type: req.Resource.Type,
 		Id:   req.Resource.Id,
-	}, limit, continuation)
+	}, limit, continuation, req.Zookie)
 
 	if err != nil {
 		return nil, nil, err
@@ -72,7 +72,7 @@ func (r *GetResourcesUsecase) Get(ctx context.Context, req *v1beta1.LookupResour
 			continuation = ContinuationToken(*req.Pagination.ContinuationToken)
 		}
 	}
-	resources, errs, err := r.repo.LookupResources(ctx, req.ResourceType, req.Relation, req.Subject, limit, continuation)
+	resources, errs, err := r.repo.LookupResources(ctx, req.ResourceType, req.Relation, req.Subject, limit, continuation, req.Zookie)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -25,11 +25,11 @@ import (
 
 // SpiceDbRepository .
 type SpiceDbRepository struct {
-	client         *authzed.Client
-	healthClient   grpc_health_v1.HealthClient
-	schemaFilePath string
-	isInitialized  bool
-	consistency    *v1.Consistency
+	client          *authzed.Client
+	healthClient    grpc_health_v1.HealthClient
+	schemaFilePath  string
+	isInitialized   bool
+	fullyConsistent bool
 }
 
 const (
@@ -91,15 +91,7 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 		log.NewHelper(logger).Info("spicedb connection cleanup requested (nothing to clean up)")
 	}
 
-	// Default consistency for read APIs is minimize_latency
-	// will attempt to minimize the latency of the API call by selecting data that is most likely exist in the cache.
-	consistency := &v1.Consistency{Requirement: &v1.Consistency_MinimizeLatency{MinimizeLatency: true}}
-	if c.SpiceDb.FullyConsistent {
-		// will ensure that all data used is fully consistent with the latest data available within the SpiceDB datastore.
-		consistency = &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}}
-	}
-
-	return &SpiceDbRepository{client, healthClient, c.SpiceDb.SchemaFile, false, consistency}, cleanup, nil
+	return &SpiceDbRepository{client, healthClient, c.SpiceDb.SchemaFile, false, c.SpiceDb.FullyConsistent}, cleanup, nil
 }
 
 func (s *SpiceDbRepository) initialize() error {
@@ -124,7 +116,7 @@ func (s *SpiceDbRepository) initialize() error {
 	return nil
 }
 
-func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *apiV1beta1.ObjectType, subject_relation, relation string, object *apiV1beta1.ObjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.SubjectResult, chan error, error) {
+func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *apiV1beta1.ObjectType, subject_relation, relation string, object *apiV1beta1.ObjectReference, limit uint32, continuation biz.ContinuationToken, zookie *apiV1beta1.Zookie) (chan *biz.SubjectResult, chan error, error) {
 	if err := s.initialize(); err != nil {
 		return nil, nil, err
 	}
@@ -137,7 +129,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 	}
 
 	req := &v1.LookupSubjectsRequest{
-		Consistency: s.consistency,
+		Consistency: s.determineConsistency(zookie),
 		Resource: &v1.ObjectReference{
 			ObjectType: kesselTypeToSpiceDBType(object.Type),
 			ObjectId:   object.Id,
@@ -185,6 +177,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 					},
 				},
 				Continuation: continuation,
+				Zookie:       &apiV1beta1.Zookie{Token: msg.GetLookedUpAt().GetToken()},
 			}
 		}
 	}()
@@ -192,7 +185,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 	return subjects, errs, nil
 }
 
-func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *apiV1beta1.ObjectType, relation string, subject *apiV1beta1.SubjectReference, limit uint32, continuation biz.ContinuationToken) (chan *biz.ResourceResult, chan error, error) {
+func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *apiV1beta1.ObjectType, relation string, subject *apiV1beta1.SubjectReference, limit uint32, continuation biz.ContinuationToken, zookie *apiV1beta1.Zookie) (chan *biz.ResourceResult, chan error, error) {
 	if err := s.initialize(); err != nil {
 		return nil, nil, err
 	}
@@ -204,7 +197,7 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 		}
 	}
 	client, err := s.client.LookupResources(ctx, &v1.LookupResourcesRequest{
-		Consistency:        s.consistency,
+		Consistency:        s.determineConsistency(zookie),
 		ResourceObjectType: kesselTypeToSpiceDBType(resouce_type),
 		Permission:         relation,
 		Subject: &v1.SubjectReference{
@@ -248,6 +241,7 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 					Id:   resId,
 				},
 				Continuation: continuation,
+				Zookie:       &apiV1beta1.Zookie{Token: msg.GetLookedUpAt().GetToken()},
 			}
 		}
 	}()
@@ -297,9 +291,9 @@ func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[a
 
 }
 
-func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics) error {
+func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics) (*apiV1beta1.CreateTuplesResponse, error) {
 	if err := s.initialize(); err != nil {
-		return err
+		return nil, err
 	}
 
 	var relationshipUpdates []*v1.RelationshipUpdate
@@ -322,17 +316,18 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 		})
 	}
 
-	_, err := s.client.WriteRelationships(ctx, &v1.WriteRelationshipsRequest{
+	resp, err := s.client.WriteRelationships(ctx, &v1.WriteRelationshipsRequest{
 		Updates: relationshipUpdates,
 	})
 
 	if err != nil {
-		return fmt.Errorf("error writing relationships to SpiceDB: %w", err)
+		return nil, fmt.Errorf("error writing relationships to SpiceDB: %w", err)
 	}
-	return nil
+
+	return &apiV1beta1.CreateTuplesResponse{CreatedAt: &apiV1beta1.Zookie{Token: resp.GetWrittenAt().GetToken()}}, nil
 }
 
-func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter, limit uint32, continuation biz.ContinuationToken) (chan *biz.RelationshipResult, chan error, error) {
+func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter, limit uint32, continuation biz.ContinuationToken, zookie *apiV1beta1.Zookie) (chan *biz.RelationshipResult, chan error, error) {
 	if err := s.initialize(); err != nil {
 		return nil, nil, err
 	}
@@ -358,7 +353,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 	}
 
 	req := &v1.ReadRelationshipsRequest{
-		Consistency:        s.consistency,
+		Consistency:        s.determineConsistency(zookie),
 		RelationshipFilter: relationshipFilter,
 		OptionalLimit:      limit,
 		OptionalCursor:     cursor,
@@ -407,6 +402,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 					},
 				},
 				Continuation: continuation,
+				Zookie:       &apiV1beta1.Zookie{Token: msg.ReadAt.GetToken()},
 			}
 		}
 	}()
@@ -414,9 +410,9 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 	return relationshipTuples, errs, nil
 }
 
-func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter) error {
+func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter) (*apiV1beta1.DeleteTuplesResponse, error) {
 	if err := s.initialize(); err != nil {
-		return err
+		return nil, err
 	}
 
 	if filter.GetRelation() != "" {
@@ -427,19 +423,19 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 	relationshipFilter, err := createSpiceDbRelationshipFilter(filter)
 
 	if err != nil {
-		return kerrors.BadRequest("SpiceDb request validation", err.Error()).WithCause(err)
+		return nil, kerrors.BadRequest("SpiceDb request validation", err.Error()).WithCause(err)
 	}
 
 	req := &v1.DeleteRelationshipsRequest{RelationshipFilter: relationshipFilter}
 
-	_, err = s.client.DeleteRelationships(ctx, req)
+	resp, err := s.client.DeleteRelationships(ctx, req)
 
 	// TODO: we have not specified an option in our API to allow partial deletions, so currently it's all or nothing
 	if err != nil {
-		return fmt.Errorf("error invoking DeleteRelationships in SpiceDB %w", err)
+		return nil, fmt.Errorf("error invoking DeleteRelationships in SpiceDB %w", err)
 	}
 
-	return nil
+	return &apiV1beta1.DeleteTuplesResponse{DeletedAt: &apiV1beta1.Zookie{Token: resp.GetDeletedAt().GetToken()}}, nil
 }
 
 func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV1beta1.CheckRequest) (*apiV1beta1.CheckResponse, error) {
@@ -460,7 +456,7 @@ func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV1beta1.CheckRe
 		ObjectId:   check.GetResource().GetId(),
 	}
 	req := &v1.CheckPermissionRequest{
-		Consistency: s.consistency,
+		Consistency: s.determineConsistency(check.Zookie),
 		Resource:    resource,
 		Permission:  check.GetRelation(),
 		Subject:     subject,
@@ -471,10 +467,16 @@ func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV1beta1.CheckRe
 	}
 
 	if checkResponse.Permissionship == v1.CheckPermissionResponse_PERMISSIONSHIP_HAS_PERMISSION {
-		return &apiV1beta1.CheckResponse{Allowed: apiV1beta1.CheckResponse_ALLOWED_TRUE}, nil
+		return &apiV1beta1.CheckResponse{
+			Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
+			CheckedAt: &apiV1beta1.Zookie{Token: checkResponse.GetCheckedAt().GetToken()},
+		}, nil
 	}
 
-	return &apiV1beta1.CheckResponse{Allowed: apiV1beta1.CheckResponse_ALLOWED_FALSE}, nil
+	return &apiV1beta1.CheckResponse{
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_FALSE,
+		CheckedAt: &apiV1beta1.Zookie{Token: checkResponse.GetCheckedAt().GetToken()},
+	}, nil
 }
 
 func (s *SpiceDbRepository) IsBackendAvailable() error {
@@ -620,4 +622,25 @@ func readFile(file string) (string, error) {
 	}
 
 	return string(bytes), nil
+}
+
+func (s *SpiceDbRepository) determineConsistency(zookie *apiV1beta1.Zookie) *v1.Consistency {
+	if s.fullyConsistent {
+		// will ensure that all data used is fully consistent with the latest data available within the SpiceDB datastore.
+		return &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}}
+	}
+
+	if zookie != nil {
+		return &v1.Consistency{
+			Requirement: &v1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: &v1.ZedToken{Token: zookie.GetToken()},
+			},
+		}
+	}
+	// Default consistency for read APIs is minimize_latency
+	return &v1.Consistency{
+		Requirement: &v1.Consistency_MinimizeLatency{
+			MinimizeLatency: true,
+		},
+	}
 }

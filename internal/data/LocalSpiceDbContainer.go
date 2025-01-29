@@ -209,7 +209,7 @@ func CheckForRelationship(client biz.ZanzibarRepository, subjectID string, subje
 			SubjectId:        &subjectID,
 			Relation:         subjectRelationRef,
 		},
-	}, 1, biz.ContinuationToken(""))
+	}, 1, biz.ContinuationToken(""), nil)
 
 	if err != nil {
 		panic(err)

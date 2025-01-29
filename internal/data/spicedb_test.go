@@ -61,7 +61,7 @@ func TestCreateRelationship(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -89,7 +89,7 @@ func TestCreateRelationshipWithSubjectRelation(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -141,10 +141,10 @@ func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.NoError(t, err)
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.Error(t, err)
 	assert.Equal(t, codes.AlreadyExists, status.Convert(err).Code())
 
@@ -170,12 +170,12 @@ func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.NoError(t, err)
 
 	touch = true
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -298,7 +298,7 @@ func TestDoesNotCreateRelationshipWithSlashInSubjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.Error(t, err)
 }
 
@@ -317,7 +317,7 @@ func TestDoesNotCreateRelationshipWithSlashInObjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.Error(t, err)
 }
 
@@ -336,7 +336,7 @@ func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.Error(t, err)
 	assert.Equal(t, codes.FailedPrecondition, status.Convert(err).Code())
 	assert.Contains(t, err.Error(),
@@ -358,7 +358,7 @@ func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.Error(t, err)
 	assert.Equal(t, codes.FailedPrecondition, status.Convert(err).Code())
 	assert.Contains(t, err.Error(),
@@ -386,7 +386,7 @@ func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T)
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	assert.Error(t, err)
 
@@ -399,7 +399,7 @@ func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T)
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	assert.Error(t, err)
 
@@ -412,7 +412,7 @@ func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T)
 			SubjectId:   pointerize("bob"),
 			SubjectType: pointerize("principal"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	assert.Error(t, err)
 
@@ -425,7 +425,7 @@ func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T)
 			SubjectId:        pointerize("bob"),
 			SubjectNamespace: pointerize("rbac"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	assert.Error(t, err)
 
@@ -439,7 +439,7 @@ func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T)
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	assert.NoError(t, err)
 
@@ -451,7 +451,7 @@ func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T)
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	assert.NoError(t, err)
 
@@ -463,7 +463,7 @@ func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T)
 		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId: pointerize("bob"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	assert.NoError(t, err)
 
@@ -473,7 +473,7 @@ func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T)
 		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId: pointerize("bob"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	assert.NoError(t, err)
 
@@ -484,7 +484,7 @@ func TestSupportedNsTypeTupleFilterCombinationsInReadRelationships(t *testing.T)
 		SubjectFilter: &apiV1beta1.SubjectFilter{
 			SubjectId: pointerize("bob"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	assert.NoError(t, err)
 }
@@ -503,7 +503,7 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
 	}
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -520,7 +520,7 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	if !assert.NoError(t, err) {
 		return
@@ -544,7 +544,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
 	}
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -561,7 +561,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	if !assert.NoError(t, err) {
 		return
@@ -570,7 +570,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 	readrels := spiceRelChanToSlice(readRelChan)
 	assert.Equal(t, 1, len(readrels))
 
-	err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+	_, err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:        pointerize("bob_club"),
 		ResourceNamespace: pointerize("rbac"),
 		ResourceType:      pointerize("group"),
@@ -598,7 +598,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	}, 0, "")
+	}, 0, "", nil)
 
 	if !assert.NoError(t, err) {
 		return
@@ -606,6 +606,65 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 
 	readrels = spiceRelChanToSlice(readRelChan)
 	assert.Equal(t, 0, len(readrels))
+
+}
+
+func TestSpiceDbRepository_CheckPermissionZookie(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "rb_test", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "granted", "rbac", "role", "rl1", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
+	}
+
+	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	subject := &apiV1beta1.SubjectReference{
+		Subject: &apiV1beta1.ObjectReference{
+			Type: &apiV1beta1.ObjectType{
+				Name: "principal", Namespace: "rbac",
+			},
+			Id: "bob",
+		},
+	}
+
+	resource := &apiV1beta1.ObjectReference{
+		Type: &apiV1beta1.ObjectType{
+			Name: "workspace", Namespace: "rbac",
+		},
+		Id: "test",
+	}
+	// zookie received from creating relationships.
+	createdZookie := relationshipResp.GetCreatedAt()
+	// zed permission check rbac/workspace:test view_widget rbac/principal:bob --explain
+	check := apiV1beta1.CheckRequest{
+		Subject:  subject,
+		Relation: "view_widget",
+		Resource: resource,
+		Zookie:   createdZookie, // pass createdAt zookie
+	}
+	resp, err := spiceDbRepo.Check(ctx, &check)
+	if !assert.NoError(t, err) {
+		return
+	}
+	//apiV1.CheckResponse_ALLOWED_TRUE
+	checkResponse := apiV1beta1.CheckResponse{
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		CheckedAt: createdZookie, // same zookie as created zookie.
+	}
+	assert.Equal(t, &checkResponse, resp)
 
 }
 
@@ -626,7 +685,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -659,13 +718,16 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		return
 	}
 	//apiV1.CheckResponse_ALLOWED_TRUE
+	dummyZookie := "AAAAAAAAHHHHH"
 	checkResponse := apiV1beta1.CheckResponse{
-		Allowed: apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		CheckedAt: &apiV1beta1.Zookie{Token: dummyZookie},
 	}
+	resp.CheckedAt = &apiV1beta1.Zookie{Token: dummyZookie}
 	assert.Equal(t, &checkResponse, resp)
 
 	//Remove // rbac/role_binding:rb_test#t_subject@rbac/principal:bob
-	err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+	_, err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
 		ResourceId:        pointerize("rb_test"),
 		ResourceNamespace: pointerize("rbac"),
 		ResourceType:      pointerize("role_binding"),
@@ -691,9 +753,12 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	dummyZookie = "AAAAAAAAHHHHH"
 	checkResponsev2 := apiV1beta1.CheckResponse{
-		Allowed: apiV1beta1.CheckResponse_ALLOWED_FALSE,
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_FALSE,
+		CheckedAt: &apiV1beta1.Zookie{Token: dummyZookie},
 	}
+	resp2.CheckedAt = &apiV1beta1.Zookie{Token: dummyZookie}
 	assert.Equal(t, &checkResponsev2, resp2)
 }
 
@@ -727,9 +792,12 @@ func runSpiceDBCheck(t *testing.T, ctx context.Context, spiceDbRepo *SpiceDbRepo
 	resp, err := spiceDbRepo.Check(ctx, &check)
 	assert.NoError(t, err)
 
+	dummyZookie := "AAAAAAAAHHHHH"
 	expectedResponse := apiV1beta1.CheckResponse{
-		Allowed: expectedAllowed,
+		Allowed:   expectedAllowed,
+		CheckedAt: &apiV1beta1.Zookie{Token: dummyZookie},
 	}
+	resp.CheckedAt = &apiV1beta1.Zookie{Token: dummyZookie}
 	assert.Equal(t, &expectedResponse, resp)
 }
 

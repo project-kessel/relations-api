@@ -190,7 +190,7 @@ func (l *LocalSpiceDbContainer) Close() {
 }
 
 // CheckForRelationship returns true if the given subject has the given relationship to the given resource, otherwise false
-func CheckForRelationship(client biz.ZanzibarRepository, subjectID string, subjectNamespace string, subjectType string, subjectRelationship string, relationship string, resourceNamespace string, resourceType string, resourceID string) bool {
+func CheckForRelationship(client biz.ZanzibarRepository, subjectID string, subjectNamespace string, subjectType string, subjectRelationship string, relationship string, resourceNamespace string, resourceType string, resourceID string, zookie *v1beta1.Zookie) bool {
 	ctx := context.TODO()
 
 	var subjectRelationRef *string = nil //Relation is optional
@@ -209,7 +209,7 @@ func CheckForRelationship(client biz.ZanzibarRepository, subjectID string, subje
 			SubjectId:        &subjectID,
 			Relation:         subjectRelationRef,
 		},
-	}, 1, biz.ContinuationToken(""), nil)
+	}, 1, biz.ContinuationToken(""), zookie)
 
 	if err != nil {
 		panic(err)

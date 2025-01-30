@@ -1083,8 +1083,13 @@ func TestSpiceDbRepository_NewEnemyProblem_Failure(t *testing.T) {
 		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
 		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
 	}
-	// we technically dont have access, but according to zookie revision we do!
-	assert.Equal(t, &checkResponse, resp) // we expect true even with removed access.
+
+	if spiceDbRepo.fullyConsistent { // new enemy problem doesn't apply if we're fully consistent.
+		checkResponse.Allowed = apiV1beta1.CheckResponse_ALLOWED_FALSE
+		assert.Equal(t, &checkResponse, resp)
+	} else { // we technically dont have access, but according to zookie revision we do!
+		assert.Equal(t, &checkResponse, resp) // we expect true even with removed access.
+	}
 
 	// zed permission check rbac/workspace:test user_grant rbac/principal:u2 --explain
 	resp, err = spiceDbRepo.Check(ctx, &u2Check)

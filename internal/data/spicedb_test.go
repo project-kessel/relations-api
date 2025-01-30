@@ -974,7 +974,7 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 	//apiV1.CheckResponse_ALLOWED_FALSE
 	checkResponse = apiV1beta1.CheckResponse{
 		Allowed:   apiV1beta1.CheckResponse_ALLOWED_FALSE,
-		CheckedAt: respDelete.GetDeletedAt(), // returned zookie may not be same as created zookie.
+		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
 	}
 	assert.Equal(t, &checkResponse, resp)
 
@@ -987,7 +987,7 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 	//apiV1.CheckResponse_ALLOWED_TRUE
 	checkResponse = apiV1beta1.CheckResponse{
 		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
-		CheckedAt: respDelete.GetDeletedAt(), // returned zookie may not be same as created zookie.
+		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
 	}
 	assert.Equal(t, &checkResponse, resp)
 }

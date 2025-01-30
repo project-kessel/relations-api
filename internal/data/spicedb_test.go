@@ -859,6 +859,246 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 	assert.Equal(t, &checkResponsev2, resp2)
 }
 
+func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "rb_test", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "granted", "rbac", "role", "rl1", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "u1", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "u2", ""),
+		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
+	}
+
+	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// u1
+	u1Check := apiV1beta1.CheckRequest{
+		Subject: &apiV1beta1.SubjectReference{
+			Subject: &apiV1beta1.ObjectReference{
+				Type: &apiV1beta1.ObjectType{
+					Name: "principal", Namespace: "rbac",
+				},
+				Id: "u1",
+			},
+		},
+		Relation: "view_widget",
+		Resource: &apiV1beta1.ObjectReference{
+			Type: &apiV1beta1.ObjectType{
+				Name: "workspace", Namespace: "rbac",
+			},
+			Id: "test",
+		},
+		Zookie: relationshipResp.GetCreatedAt(), // pass createdAt zookie
+	}
+
+	// no wait, immediately read after write.
+	// zed permission check rbac/workspace:test user_grant rbac/principal:u1 --explain
+	resp, err := spiceDbRepo.Check(ctx, &u1Check)
+	if !assert.NoError(t, err) {
+		return
+	}
+	//apiV1.CheckResponse_ALLOWED_TRUE
+	checkResponse := apiV1beta1.CheckResponse{
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+	}
+	assert.Equal(t, &checkResponse, resp)
+
+	// u2
+	u2Check := apiV1beta1.CheckRequest{
+		Subject: &apiV1beta1.SubjectReference{
+			Subject: &apiV1beta1.ObjectReference{
+				Type: &apiV1beta1.ObjectType{
+					Name: "principal", Namespace: "rbac",
+				},
+				Id: "u2",
+			},
+		},
+		Relation: "view_widget",
+		Resource: &apiV1beta1.ObjectReference{
+			Type: &apiV1beta1.ObjectType{
+				Name: "workspace", Namespace: "rbac",
+			},
+			Id: "test",
+		},
+		Zookie: relationshipResp.GetCreatedAt(), // pass createdAt zookie
+	}
+
+	// zed permission check rbac/workspace:test user_grant rbac/principal:u2 --explain
+	resp, err = spiceDbRepo.Check(ctx, &u2Check)
+	if !assert.NoError(t, err) {
+		return
+	}
+	//apiV1.CheckResponse_ALLOWED_TRUE
+	checkResponse = apiV1beta1.CheckResponse{
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+	}
+	assert.Equal(t, &checkResponse, resp)
+
+	// remove access from u1, keep access for u2.
+	respDelete, err := spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("rb_test"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("role_binding"),
+		Relation:          pointerize("subject"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:        pointerize("u1"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("principal"),
+		},
+	})
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// ensure u1 no longer has access, while u2 still does.
+
+	// zed permission check rbac/workspace:test user_grant rbac/principal:u1 --explain
+	u1Check.Zookie = respDelete.GetDeletedAt()
+	resp, err = spiceDbRepo.Check(ctx, &u1Check)
+	if !assert.NoError(t, err) {
+		return
+	}
+	//apiV1.CheckResponse_ALLOWED_FALSE
+	checkResponse = apiV1beta1.CheckResponse{
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_FALSE,
+		CheckedAt: respDelete.GetDeletedAt(), // returned zookie may not be same as created zookie.
+	}
+	assert.Equal(t, &checkResponse, resp)
+
+	// zed permission check rbac/workspace:test user_grant rbac/principal:u2 --explain
+	u2Check.Zookie = respDelete.GetDeletedAt()
+	resp, err = spiceDbRepo.Check(ctx, &u2Check)
+	if !assert.NoError(t, err) {
+		return
+	}
+	//apiV1.CheckResponse_ALLOWED_TRUE
+	checkResponse = apiV1beta1.CheckResponse{
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		CheckedAt: respDelete.GetDeletedAt(), // returned zookie may not be same as created zookie.
+	}
+	assert.Equal(t, &checkResponse, resp)
+}
+
+func TestSpiceDbRepository_NewEnemyProblem_Failure(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "rb_test", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "granted", "rbac", "role", "rl1", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "u1", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "u2", ""),
+		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
+	}
+
+	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// u1
+	u1Check := apiV1beta1.CheckRequest{
+		Subject: &apiV1beta1.SubjectReference{
+			Subject: &apiV1beta1.ObjectReference{
+				Type: &apiV1beta1.ObjectType{
+					Name: "principal", Namespace: "rbac",
+				},
+				Id: "u1",
+			},
+		},
+		Relation: "view_widget",
+		Resource: &apiV1beta1.ObjectReference{
+			Type: &apiV1beta1.ObjectType{
+				Name: "workspace", Namespace: "rbac",
+			},
+			Id: "test",
+		},
+		Zookie: relationshipResp.GetCreatedAt(), // pass createdAt zookie
+	}
+
+	// u2
+	u2Check := apiV1beta1.CheckRequest{
+		Subject: &apiV1beta1.SubjectReference{
+			Subject: &apiV1beta1.ObjectReference{
+				Type: &apiV1beta1.ObjectType{
+					Name: "principal", Namespace: "rbac",
+				},
+				Id: "u2",
+			},
+		},
+		Relation: "view_widget",
+		Resource: &apiV1beta1.ObjectReference{
+			Type: &apiV1beta1.ObjectType{
+				Name: "workspace", Namespace: "rbac",
+			},
+			Id: "test",
+		},
+		Zookie: relationshipResp.GetCreatedAt(), // pass createdAt zookie
+	}
+
+	// remove access from u1, keep access for u2.
+	_, err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("rb_test"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("role_binding"),
+		Relation:          pointerize("subject"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:        pointerize("u1"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("principal"),
+		},
+	})
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// u1 has access even though we removed access. u2 still has access.
+
+	// zed permission check rbac/workspace:test user_grant rbac/principal:u1 --explain
+	resp, err := spiceDbRepo.Check(ctx, &u1Check) // we're passing a zookie revision before deletion occurred.
+	if !assert.NoError(t, err) {
+		return
+	}
+	//apiV1.CheckResponse_ALLOWED_TRUE
+	checkResponse := apiV1beta1.CheckResponse{
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+	}
+	// we technically dont have access, but according to zookie revision we do!
+	assert.Equal(t, &checkResponse, resp) // we expect true even with removed access.
+
+	// zed permission check rbac/workspace:test user_grant rbac/principal:u2 --explain
+	resp, err = spiceDbRepo.Check(ctx, &u2Check)
+	if !assert.NoError(t, err) {
+		return
+	}
+	//apiV1.CheckResponse_ALLOWED_TRUE
+	checkResponse = apiV1beta1.CheckResponse{
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+	}
+	assert.Equal(t, &checkResponse, resp)
+}
+
 func pointerize(value string) *string { //Used to turn string literals into pointers
 	return &value
 }

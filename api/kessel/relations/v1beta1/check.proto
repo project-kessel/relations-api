@@ -33,7 +33,7 @@ message CheckRequest {
 	ObjectReference resource = 1 [(buf.validate.field).required = true];
 	string relation = 2 [(buf.validate.field).string.min_len = 1];
 	SubjectReference subject = 3 [(buf.validate.field).required = true];
-	Zookie zookie = 4;
+	Consistency consistency = 4;
 }
 
 message CheckResponse {
@@ -44,7 +44,7 @@ message CheckResponse {
 		// e.g.  ALLOWED_CONDITIONAL = 3;
 	}
 	Allowed allowed = 1;
-	Zookie checked_at = 2;
+	ConsistencyToken consistency_token = 2;
 }
 
 message CheckForUpdateRequest { // fully consistent
@@ -61,5 +61,5 @@ message CheckForUpdateResponse {
 		// e.g.  ALLOWED_CONDITIONAL = 3;
 	}
 	Allowed allowed = 1;
-	Zookie checked_at = 2;
+	ConsistencyToken consistency_token = 2;
 }

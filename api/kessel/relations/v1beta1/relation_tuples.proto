@@ -59,25 +59,25 @@ message CreateTuplesRequest {
 	repeated Relationship tuples = 2;
 }
 message CreateTuplesResponse {
-	Zookie created_at = 1;
+	ConsistencyToken consistency_token = 2;
 }
 
 message ReadTuplesRequest {
 	RelationTupleFilter filter = 1 [(buf.validate.field).required = true];
 	optional RequestPagination pagination = 2;
-	optional Zookie zookie = 3;
+	optional Consistency consistency = 3;
 }
 message ReadTuplesResponse {
 	Relationship tuple = 1;
 	ResponsePagination pagination = 2;
-	Zookie read_at = 3;
+	ConsistencyToken consistency_token = 3;
 }
 
 message DeleteTuplesRequest {
 	RelationTupleFilter filter = 1 [(buf.validate.field).required = true];
 }
 message DeleteTuplesResponse {
-	Zookie deleted_at = 1;
+	ConsistencyToken consistency_token = 2;
 }
 
 // RelationTupleFilter is used to filter tuples based on their resource, relation, and subject.

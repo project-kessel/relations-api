@@ -113,10 +113,22 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: zookie.token
+                - name: consistency.minimizeLatency
+                  in: query
+                  description: The service selects the fastest snapshot available.
+                  schema:
+                    type: boolean
+                - name: consistency.atLeastAsFresh.token
                   in: query
                   schema:
                     type: string
+                - name: consistency.fullyConsistent
+                  in: query
+                  description: |-
+                    All data used in the API call *must* be at the most recent
+                     snapshot available.
+                  schema:
+                    type: boolean
             responses:
                 "200":
                     description: OK
@@ -167,10 +179,22 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: zookie.token
+                - name: consistency.minimizeLatency
+                  in: query
+                  description: The service selects the fastest snapshot available.
+                  schema:
+                    type: boolean
+                - name: consistency.atLeastAsFresh.token
                   in: query
                   schema:
                     type: string
+                - name: consistency.fullyConsistent
+                  in: query
+                  description: |-
+                    All data used in the API call *must* be at the most recent
+                     snapshot available.
+                  schema:
+                    type: boolean
             responses:
                 "200":
                     description: OK
@@ -225,10 +249,22 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: zookie.token
+                - name: consistency.minimizeLatency
+                  in: query
+                  description: The service selects the fastest snapshot available.
+                  schema:
+                    type: boolean
+                - name: consistency.atLeastAsFresh.token
                   in: query
                   schema:
                     type: string
+                - name: consistency.fullyConsistent
+                  in: query
+                  description: |-
+                    All data used in the API call *must* be at the most recent
+                     snapshot available.
+                  schema:
+                    type: boolean
             responses:
                 "200":
                     description: OK
@@ -348,8 +384,8 @@ components:
                 allowed:
                     type: integer
                     format: enum
-                checkedAt:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.CheckRequest:
             type: object
             properties:
@@ -359,16 +395,37 @@ components:
                     type: string
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
-                zookie:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
+                consistency:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Consistency'
         kessel.relations.v1beta1.CheckResponse:
             type: object
             properties:
                 allowed:
                     type: integer
                     format: enum
-                checkedAt:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
+        kessel.relations.v1beta1.Consistency:
+            type: object
+            properties:
+                minimizeLatency:
+                    type: boolean
+                    description: The service selects the fastest snapshot available.
+                atLeastAsFresh:
+                    allOf:
+                        - $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
+                    description: "All data used in the API call must be *at least as fresh* \n as found in the ConsistencyToken. More recent data might be used\n if available or faster."
+                fullyConsistent:
+                    type: boolean
+                    description: |-
+                        All data used in the API call *must* be at the most recent
+                         snapshot available.
+        kessel.relations.v1beta1.ConsistencyToken:
+            type: object
+            properties:
+                token:
+                    type: string
+            description: The ConsistencyToken is used to provide consistency between write and read requests.
         kessel.relations.v1beta1.CreateTuplesRequest:
             type: object
             properties:
@@ -385,13 +442,13 @@ components:
         kessel.relations.v1beta1.CreateTuplesResponse:
             type: object
             properties:
-                createdAt:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.DeleteTuplesResponse:
             type: object
             properties:
-                deletedAt:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.ImportBulkTuplesRequest:
             type: object
             properties:
@@ -411,8 +468,8 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
                 pagination:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
-                lookedUpAt:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.LookupSubjectsResponse:
             type: object
             properties:
@@ -420,8 +477,8 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
                 pagination:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
-                lookedUpAt:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.ObjectReference:
             type: object
             properties:
@@ -443,8 +500,8 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.Relationship'
                 pagination:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
-                readAt:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.Relationship:
             type: object
             properties:
@@ -471,12 +528,6 @@ components:
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
             description: A reference to a Subject or, if a `relation` is provided, a Subject Set.
-        kessel.relations.v1beta1.Zookie:
-            type: object
-            properties:
-                token:
-                    type: string
-            description: The Zookie is used to provide consistency between write and read requests.
 tags:
     - name: KesselCheckService
     - name: KesselLookupService

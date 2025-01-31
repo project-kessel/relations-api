@@ -55,6 +55,8 @@ objects:
                       value: ${SPICEDB_DATASTORE_MIN_CONN_OPEN}
                     - name: SPICEDB_ENABLE_EXPERIMENTAL_WATCHABLE_SCHEMA_CACHE
                       value: ${SPICEDB_ENABLE_WATCHABLE_SCHEMA_CACHE}
+                    - name: SPICEDB_WRITE_RELATIONSHIPS_MAX_UPDATES_PER_CALL
+                      value: ${SPICEDB_WRITE_RELATIONSHIPS_MAX_UPDATES_PER_CALL}
                   volumeMounts:
                     - name: rds-tls
                       mountPath: /etc/tls/rds.pem
@@ -197,6 +199,9 @@ parameters:
   - description: Enable the experimental schema cache which makes use of the Watch API for automatic updates
     name: SPICEDB_ENABLE_WATCHABLE_SCHEMA_CACHE
     value: 'false'
+  - description: maximum number of updates allowed for WriteRelationships calls	
+    name: SPICEDB_WRITE_RELATIONSHIPS_MAX_UPDATES_PER_CALL
+    value: '1000'
   - description: SpiceDB log level - possible values ("trace", "debug", "info", "warn", "error")
     name: SPICEDB_LOG_LEVEL
     value: debug

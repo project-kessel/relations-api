@@ -21,7 +21,7 @@ func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 	spicedb, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	_, err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
 	assert.NoError(t, err)
 	container.WaitForQuantizationInterval()
 
@@ -39,13 +39,37 @@ func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 	assert.Empty(t, results)
 }
 
+func TestLookupService_LookupSubjects_NoResults_WithZookie(t *testing.T) {
+	t.Parallel()
+	ctx := context.TODO()
+	spicedb, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	resp, err := seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	assert.NoError(t, err)
+
+	service := createLookupService(spicedb)
+
+	responseCollector := NewLookup_SubjectsServerStub(ctx)
+	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
+		SubjectType: rbac_ns_type("principal"),
+		Relation:    "view",
+		Resource:    &v1beta1.ObjectReference{Type: rbac_ns_type("widget"), Id: "thing1"},
+		Zookie:      resp.GetCreatedAt(),
+	}, responseCollector)
+	assert.NoError(t, err)
+	results := responseCollector.GetResponses()
+
+	assert.Empty(t, results)
+}
+
 func TestLookupService_LookupResources_NoResults(t *testing.T) {
 	t.Parallel()
 	ctx := context.TODO()
 	spicedb, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	_, err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
 	assert.NoError(t, err)
 	container.WaitForQuantizationInterval()
 
@@ -66,15 +90,42 @@ func TestLookupService_LookupResources_NoResults(t *testing.T) {
 	assert.Empty(t, results)
 }
 
+func TestLookupService_LookupResources_NoResults_WithZookie(t *testing.T) {
+	t.Parallel()
+	ctx := context.TODO()
+	spicedb, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	resp, err := seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	assert.NoError(t, err)
+
+	service := createLookupService(spicedb)
+
+	responseCollector := NewLookup_ResourcesServerStub(ctx)
+	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
+		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"}},
+		Relation: "view_widget",
+		ResourceType: &v1beta1.ObjectType{
+			Name:      "workspace",
+			Namespace: "rbac",
+		},
+		Zookie: resp.GetCreatedAt(),
+	}, responseCollector)
+	assert.NoError(t, err)
+	results := responseCollector.GetResponses()
+
+	assert.Empty(t, results)
+}
+
 func TestLookupService_LookupSubjects_OneResult(t *testing.T) {
 	t.Parallel()
 	ctx := context.TODO()
 	spicedb, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	_, err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
 	assert.NoError(t, err)
-	err = seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u1")
+	_, err = seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u1")
 	assert.NoError(t, err)
 	container.WaitForQuantizationInterval()
 
@@ -92,13 +143,39 @@ func TestLookupService_LookupSubjects_OneResult(t *testing.T) {
 	assert.ElementsMatch(t, []string{"u1"}, ids)
 }
 
+func TestLookupService_LookupSubjects_OneResult_WithZookie(t *testing.T) {
+	t.Parallel()
+	ctx := context.TODO()
+	spicedb, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	_, err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	assert.NoError(t, err)
+	resp, err := seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u1")
+	assert.NoError(t, err)
+
+	service := createLookupService(spicedb)
+
+	responseCollector := NewLookup_SubjectsServerStub(ctx)
+	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
+		SubjectType: rbac_ns_type("principal"),
+		Relation:    "view",
+		Resource:    &v1beta1.ObjectReference{Type: rbac_ns_type("widget"), Id: "thing1"},
+		Zookie:      resp.GetCreatedAt(),
+	}, responseCollector)
+	assert.NoError(t, err)
+	ids := responseCollector.GetIDs()
+
+	assert.ElementsMatch(t, []string{"u1"}, ids)
+}
+
 func TestLookupService_LookupResources_OneResult(t *testing.T) {
 	t.Parallel()
 	ctx := context.TODO()
 	spicedb, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	_, err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
 	assert.NoError(t, err)
 	container.WaitForQuantizationInterval()
 
@@ -118,6 +195,32 @@ func TestLookupService_LookupResources_OneResult(t *testing.T) {
 
 	assert.ElementsMatch(t, []string{"thing1"}, ids)
 }
+func TestLookupService_LookupResources_OneResult_WithZookie(t *testing.T) {
+	t.Parallel()
+	ctx := context.TODO()
+	spicedb, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	resp, err := seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	assert.NoError(t, err)
+
+	service := createLookupService(spicedb)
+
+	responseCollector := NewLookup_ResourcesServerStub(ctx)
+	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
+		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"}},
+		Relation: "workspace",
+		ResourceType: &v1beta1.ObjectType{
+			Name:      "widget",
+			Namespace: "rbac",
+		},
+		Zookie: resp.GetCreatedAt(),
+	}, responseCollector)
+	assert.NoError(t, err)
+	ids := responseCollector.GetIDs()
+
+	assert.ElementsMatch(t, []string{"thing1"}, ids)
+}
 
 func TestLookupService_LookupResources_TwoResults(t *testing.T) {
 	t.Parallel()
@@ -125,9 +228,9 @@ func TestLookupService_LookupResources_TwoResults(t *testing.T) {
 	spicedb, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	_, err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
 	assert.NoError(t, err)
-	err = seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u1")
+	_, err = seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u1")
 	assert.NoError(t, err)
 	container.WaitForQuantizationInterval()
 
@@ -155,11 +258,11 @@ func TestLookupService_LookupSubjects_TwoResults(t *testing.T) {
 	spicedb, err := container.CreateSpiceDbRepository()
 	assert.NoError(t, err)
 
-	err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	_, err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
 	assert.NoError(t, err)
-	err = seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u1")
+	_, err = seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u1")
 	assert.NoError(t, err)
-	err = seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u2")
+	_, err = seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u2")
 	assert.NoError(t, err)
 	container.WaitForQuantizationInterval()
 
@@ -177,6 +280,46 @@ func TestLookupService_LookupSubjects_TwoResults(t *testing.T) {
 	assert.ElementsMatch(t, []string{"u1", "u2"}, ids)
 }
 
+func TestLookupService_LookupSubjectsMissingItems_WithWrongZookie(t *testing.T) {
+	t.Parallel()
+	ctx := context.TODO()
+	spicedb, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	resp1, err := seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	assert.NoError(t, err)
+	resp2, err := seedUserWithViewThingInDefaultWorkspace(ctx, spicedb, "u1")
+	assert.NoError(t, err)
+
+	service := createLookupService(spicedb)
+
+	// using first zookie resp1 we expect missing ids
+	responseCollector := NewLookup_SubjectsServerStub(ctx)
+	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
+		SubjectType: rbac_ns_type("principal"),
+		Relation:    "view",
+		Resource:    &v1beta1.ObjectReference{Type: rbac_ns_type("widget"), Id: "thing1"},
+		Zookie:      resp1.GetCreatedAt(),
+	}, responseCollector)
+	assert.NoError(t, err)
+	ids := responseCollector.GetIDs()
+
+	assert.ElementsMatch(t, []string{}, ids)
+
+	// using latest zookie resp2 we expect all ids!
+	responseCollector = NewLookup_SubjectsServerStub(ctx)
+	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
+		SubjectType: rbac_ns_type("principal"),
+		Relation:    "view",
+		Resource:    &v1beta1.ObjectReference{Type: rbac_ns_type("widget"), Id: "thing1"},
+		Zookie:      resp2.GetCreatedAt(),
+	}, responseCollector)
+	assert.NoError(t, err)
+	ids = responseCollector.GetIDs()
+
+	assert.ElementsMatch(t, []string{"u1"}, ids)
+}
+
 func TestLookupService_LookupResources_IgnoresSubjectRelation(t *testing.T) {
 	t.Parallel()
 	ctx := context.TODO()
@@ -184,7 +327,7 @@ func TestLookupService_LookupResources_IgnoresSubjectRelation(t *testing.T) {
 	assert.NoError(t, err)
 
 	memberRelation := "member"
-	err = spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
+	_, err = spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
 		{
 			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("role_binding"), Id: "rb1"},
 			Relation: "subject",
@@ -193,7 +336,7 @@ func TestLookupService_LookupResources_IgnoresSubjectRelation(t *testing.T) {
 	}, biz.TouchSemantics(true))
 	assert.NoError(t, err)
 
-	err = spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
+	_, err = spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
 		{
 			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("group"), Id: "g1"},
 			Relation: "member",
@@ -244,7 +387,7 @@ func createLookupService(spicedb *data.SpiceDbRepository) *LookupService {
 	)
 	return NewLookupService(logger, biz.NewGetSubjectsUseCase(spicedb), biz.NewGetResourcesUseCase(spicedb))
 }
-func seedWidgetInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepository, thing string) error {
+func seedWidgetInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepository, thing string) (*v1beta1.CreateTuplesResponse, error) {
 	return spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
 		{
 			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("widget"), Id: thing},
@@ -254,7 +397,7 @@ func seedWidgetInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepo
 	}, biz.TouchSemantics(true))
 }
 
-func seedUserWithViewThingInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepository, user string) error {
+func seedUserWithViewThingInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepository, user string) (*v1beta1.CreateTuplesResponse, error) {
 	return spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
 		{
 			Resource: &v1beta1.ObjectReference{Type: rbac_ns_type("role"), Id: "viewers"},

@@ -29,11 +29,13 @@ message LookupResourcesRequest {
     string relation = 2 [(buf.validate.field).string.min_len = 1];
     SubjectReference subject = 3 [(buf.validate.field).required = true];
     optional RequestPagination pagination = 4;
+    optional Zookie zookie = 5;
 }
 
 message LookupResourcesResponse {
     ObjectReference resource = 1;
     ResponsePagination pagination = 2;
+    Zookie looked_up_at = 3;
 }
 
 message LookupSubjectsRequest {
@@ -42,9 +44,11 @@ message LookupSubjectsRequest {
     ObjectType subject_type = 3 [(buf.validate.field).required = true];
     optional string subject_relation = 4;
     optional RequestPagination pagination = 5;
+    optional Zookie zookie = 6;
 }
 
 message LookupSubjectsResponse {
     SubjectReference subject = 1;
     ResponsePagination pagination = 2;
+    Zookie looked_up_at = 3;
 }

@@ -5,4 +5,4 @@ import (
 )
 
 // ProviderSet is biz providers.
-var ProviderSet = wire.NewSet(NewCreateRelationshipsUsecase, NewReadRelationshipsUsecase, NewDeleteRelationshipsUsecase, NewCheckUsecase, NewGetSubjectsUseCase, NewGetResourcesUseCase, NewIsBackendAvailableUsecase, NewImportBulkTuplesUsecase)
+var ProviderSet = wire.NewSet(NewCreateRelationshipsUsecase, NewReadRelationshipsUsecase, NewDeleteRelationshipsUsecase, NewCheckUsecase, NewCheckForUpdateUsecase, NewGetSubjectsUseCase, NewGetResourcesUseCase, NewIsBackendAvailableUsecase, NewImportBulkTuplesUsecase)

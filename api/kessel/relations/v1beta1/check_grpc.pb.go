@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	KesselCheckService_Check_FullMethodName = "/kessel.relations.v1beta1.KesselCheckService/Check"
+	KesselCheckService_Check_FullMethodName          = "/kessel.relations.v1beta1.KesselCheckService/Check"
+	KesselCheckService_CheckForUpdate_FullMethodName = "/kessel.relations.v1beta1.KesselCheckService/CheckForUpdate"
 )
 
 // KesselCheckServiceClient is the client API for KesselCheckService service.
@@ -29,6 +30,7 @@ type KesselCheckServiceClient interface {
 	// Checks for the existence of a single Relationship
 	// (a Relation between a Resource and a Subject or Subject Set).
 	Check(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error)
+	CheckForUpdate(ctx context.Context, in *CheckForUpdateRequest, opts ...grpc.CallOption) (*CheckForUpdateResponse, error)
 }
 
 type kesselCheckServiceClient struct {
@@ -49,6 +51,16 @@ func (c *kesselCheckServiceClient) Check(ctx context.Context, in *CheckRequest, 
 	return out, nil
 }
 
+func (c *kesselCheckServiceClient) CheckForUpdate(ctx context.Context, in *CheckForUpdateRequest, opts ...grpc.CallOption) (*CheckForUpdateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CheckForUpdateResponse)
+	err := c.cc.Invoke(ctx, KesselCheckService_CheckForUpdate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KesselCheckServiceServer is the server API for KesselCheckService service.
 // All implementations must embed UnimplementedKesselCheckServiceServer
 // for forward compatibility.
@@ -56,6 +68,7 @@ type KesselCheckServiceServer interface {
 	// Checks for the existence of a single Relationship
 	// (a Relation between a Resource and a Subject or Subject Set).
 	Check(context.Context, *CheckRequest) (*CheckResponse, error)
+	CheckForUpdate(context.Context, *CheckForUpdateRequest) (*CheckForUpdateResponse, error)
 	mustEmbedUnimplementedKesselCheckServiceServer()
 }
 
@@ -68,6 +81,9 @@ type UnimplementedKesselCheckServiceServer struct{}
 
 func (UnimplementedKesselCheckServiceServer) Check(context.Context, *CheckRequest) (*CheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
+}
+func (UnimplementedKesselCheckServiceServer) CheckForUpdate(context.Context, *CheckForUpdateRequest) (*CheckForUpdateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckForUpdate not implemented")
 }
 func (UnimplementedKesselCheckServiceServer) mustEmbedUnimplementedKesselCheckServiceServer() {}
 func (UnimplementedKesselCheckServiceServer) testEmbeddedByValue()                            {}
@@ -108,6 +124,24 @@ func _KesselCheckService_Check_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KesselCheckService_CheckForUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckForUpdateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KesselCheckServiceServer).CheckForUpdate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KesselCheckService_CheckForUpdate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KesselCheckServiceServer).CheckForUpdate(ctx, req.(*CheckForUpdateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KesselCheckService_ServiceDesc is the grpc.ServiceDesc for KesselCheckService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -118,6 +152,10 @@ var KesselCheckService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Check",
 			Handler:    _KesselCheckService_Check_Handler,
+		},
+		{
+			MethodName: "CheckForUpdate",
+			Handler:    _KesselCheckService_CheckForUpdate_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

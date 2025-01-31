@@ -765,6 +765,64 @@ func TestSpiceDbRepository_CheckPermission_WithZookie(t *testing.T) {
 
 }
 
+func TestSpiceDbRepository_CheckPermission_FullyConsistent(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "rb_test", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "granted", "rbac", "role", "rl1", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
+	}
+
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	subject := &apiV1beta1.SubjectReference{
+		Subject: &apiV1beta1.ObjectReference{
+			Type: &apiV1beta1.ObjectType{
+				Name: "principal", Namespace: "rbac",
+			},
+			Id: "bob",
+		},
+	}
+
+	resource := &apiV1beta1.ObjectReference{
+		Type: &apiV1beta1.ObjectType{
+			Name: "workspace", Namespace: "rbac",
+		},
+		Id: "test",
+	}
+	// no wait, immediately read after write.
+	// zed permission check rbac/workspace:test view_widget rbac/principal:bob --explain
+	check := apiV1beta1.CheckRequest{
+		Subject:         subject,
+		Relation:        "view_widget",
+		Resource:        resource,
+		FullyConsistent: true, // no need to pass zookie
+	}
+	resp, err := spiceDbRepo.Check(ctx, &check)
+	if !assert.NoError(t, err) {
+		return
+	}
+	//apiV1.CheckResponse_ALLOWED_TRUE
+	checkResponse := apiV1beta1.CheckResponse{
+		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+	}
+	assert.Equal(t, &checkResponse, resp)
+
+}
+
 func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 	t.Parallel()
 

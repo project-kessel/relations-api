@@ -27,6 +27,7 @@ message CheckRequest {
 	string relation = 2 [(buf.validate.field).string.min_len = 1];
 	SubjectReference subject = 3 [(buf.validate.field).required = true];
 	Zookie zookie = 4;
+	bool fully_consistent = 5; // defaults to false
 }
 
 message CheckResponse {

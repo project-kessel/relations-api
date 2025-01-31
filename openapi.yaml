@@ -326,6 +326,8 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
                 zookie:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
+                fullyConsistent:
+                    type: boolean
         kessel.relations.v1beta1.CheckResponse:
             type: object
             properties:

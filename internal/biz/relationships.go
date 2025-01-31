@@ -33,6 +33,7 @@ type RelationshipResult struct {
 
 type ZanzibarRepository interface {
 	Check(ctx context.Context, request *v1beta1.CheckRequest) (*v1beta1.CheckResponse, error)
+	CheckForUpdate(ctx context.Context, request *v1beta1.CheckForUpdateRequest) (*v1beta1.CheckForUpdateResponse, error)
 	CreateRelationships(context.Context, []*v1beta1.Relationship, TouchSemantics) (*v1beta1.CreateTuplesResponse, error)
 	ReadRelationships(ctx context.Context, filter *v1beta1.RelationTupleFilter, limit uint32, continuation ContinuationToken, zookie *v1beta1.Zookie) (chan *RelationshipResult, chan error, error)
 	DeleteRelationships(context.Context, *v1beta1.RelationTupleFilter) (*v1beta1.DeleteTuplesResponse, error)
@@ -53,6 +54,19 @@ func NewCheckUsecase(repo ZanzibarRepository, logger log.Logger) *CheckUsecase {
 
 func (rc *CheckUsecase) Check(ctx context.Context, check *v1beta1.CheckRequest) (*v1beta1.CheckResponse, error) {
 	return rc.repo.Check(ctx, check)
+}
+
+type CheckForUpdateUsecase struct {
+	repo ZanzibarRepository
+	log  *log.Helper
+}
+
+func NewCheckForUpdateUsecase(repo ZanzibarRepository, logger log.Logger) *CheckForUpdateUsecase {
+	return &CheckForUpdateUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
+func (rc *CheckForUpdateUsecase) CheckForUpdate(ctx context.Context, check *v1beta1.CheckForUpdateRequest) (*v1beta1.CheckForUpdateResponse, error) {
+	return rc.repo.CheckForUpdate(ctx, check)
 }
 
 type CreateRelationshipsUsecase struct {

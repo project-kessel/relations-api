@@ -20,6 +20,13 @@ service KesselCheckService {
 			body: "*"
 		};
 	};
+	
+	rpc CheckForUpdate (CheckForUpdateRequest) returns (CheckForUpdateResponse) {
+		option (google.api.http) = {
+			post: "/v1beta1/checkforupdate"
+			body: "*"
+		};
+	};
 }
 
 message CheckRequest {
@@ -27,7 +34,6 @@ message CheckRequest {
 	string relation = 2 [(buf.validate.field).string.min_len = 1];
 	SubjectReference subject = 3 [(buf.validate.field).required = true];
 	Zookie zookie = 4;
-	bool fully_consistent = 5; // defaults to false
 }
 
 message CheckResponse {
@@ -41,3 +47,19 @@ message CheckResponse {
 	Zookie checked_at = 2;
 }
 
+message CheckForUpdateRequest { // fully consistent
+	ObjectReference resource = 1 [(buf.validate.field).required = true];
+	string relation = 2 [(buf.validate.field).string.min_len = 1];
+	SubjectReference subject = 3 [(buf.validate.field).required = true];
+}
+
+message CheckForUpdateResponse {
+	enum Allowed {
+		ALLOWED_UNSPECIFIED = 0;
+		ALLOWED_TRUE = 1;
+		ALLOWED_FALSE = 2;
+		// e.g.  ALLOWED_CONDITIONAL = 3;
+	}
+	Allowed allowed = 1;
+	Zookie checked_at = 2;
+}

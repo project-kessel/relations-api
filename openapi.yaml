@@ -49,6 +49,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v1beta1.CheckResponse'
+    /v1beta1/checkforupdate:
+        post:
+            tags:
+                - KesselCheckService
+            operationId: KesselCheckService_CheckForUpdate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateResponse'
     /v1beta1/resources:
         get:
             tags:
@@ -315,6 +333,23 @@ components:
                 code:
                     type: integer
                     format: uint32
+        kessel.relations.v1beta1.CheckForUpdateRequest:
+            type: object
+            properties:
+                resource:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
+                relation:
+                    type: string
+                subject:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
+        kessel.relations.v1beta1.CheckForUpdateResponse:
+            type: object
+            properties:
+                allowed:
+                    type: integer
+                    format: enum
+                checkedAt:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
         kessel.relations.v1beta1.CheckRequest:
             type: object
             properties:
@@ -326,8 +361,6 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
                 zookie:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.Zookie'
-                fullyConsistent:
-                    type: boolean
         kessel.relations.v1beta1.CheckResponse:
             type: object
             properties:

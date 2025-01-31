@@ -13,14 +13,16 @@ import (
 
 type CheckService struct {
 	pb.UnimplementedKesselCheckServiceServer
-	check *biz.CheckUsecase
-	log   *log.Helper
+	check          *biz.CheckUsecase
+	checkForUpdate *biz.CheckForUpdateUsecase
+	log            *log.Helper
 }
 
-func NewCheckService(logger log.Logger, checkUseCase *biz.CheckUsecase) *CheckService {
+func NewCheckService(logger log.Logger, checkUseCase *biz.CheckUsecase, checkForUpdateUseCase *biz.CheckForUpdateUsecase) *CheckService {
 	return &CheckService{
-		check: checkUseCase,
-		log:   log.NewHelper(logger),
+		check:          checkUseCase,
+		checkForUpdate: checkForUpdateUseCase,
+		log:            log.NewHelper(logger),
 	}
 }
 
@@ -28,6 +30,14 @@ func (s *CheckService) Check(ctx context.Context, req *pb.CheckRequest) (*pb.Che
 	resp, err := s.check.Check(ctx, req)
 	if err != nil {
 		return resp, fmt.Errorf("failed to perform check: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *CheckService) CheckForUpdate(ctx context.Context, req *pb.CheckForUpdateRequest) (*pb.CheckForUpdateResponse, error) {
+	resp, err := s.checkForUpdate.CheckForUpdate(ctx, req)
+	if err != nil {
+		return resp, fmt.Errorf("failed to perform checkForUpdate: %w", err)
 	}
 	return resp, nil
 }

@@ -765,7 +765,7 @@ func TestSpiceDbRepository_CheckPermission_WithZookie(t *testing.T) {
 
 }
 
-func TestSpiceDbRepository_CheckPermission_FullyConsistent(t *testing.T) {
+func TestSpiceDbRepository_CheckForUpdatePermission(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -804,19 +804,18 @@ func TestSpiceDbRepository_CheckPermission_FullyConsistent(t *testing.T) {
 	}
 	// no wait, immediately read after write.
 	// zed permission check rbac/workspace:test view_widget rbac/principal:bob --explain
-	check := apiV1beta1.CheckRequest{
-		Subject:         subject,
-		Relation:        "view_widget",
-		Resource:        resource,
-		FullyConsistent: true, // no need to pass zookie
+	check := apiV1beta1.CheckForUpdateRequest{
+		Subject:  subject,
+		Relation: "view_widget",
+		Resource: resource,
 	}
-	resp, err := spiceDbRepo.Check(ctx, &check)
+	resp, err := spiceDbRepo.CheckForUpdate(ctx, &check)
 	if !assert.NoError(t, err) {
 		return
 	}
-	//apiV1.CheckResponse_ALLOWED_TRUE
-	checkResponse := apiV1beta1.CheckResponse{
-		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
+	//apiV1.CheckForUpdateResponse_ALLOWED_TRUE
+	checkResponse := apiV1beta1.CheckForUpdateResponse{
+		Allowed:   apiV1beta1.CheckForUpdateResponse_ALLOWED_TRUE,
 		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
 	}
 	assert.Equal(t, &checkResponse, resp)

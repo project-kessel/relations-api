@@ -129,7 +129,7 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 	}
 
 	req := &v1.LookupSubjectsRequest{
-		Consistency: s.determineConsistency(zookie, false),
+		Consistency: s.determineConsistency(zookie),
 		Resource: &v1.ObjectReference{
 			ObjectType: kesselTypeToSpiceDBType(object.Type),
 			ObjectId:   object.Id,
@@ -197,7 +197,7 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 		}
 	}
 	client, err := s.client.LookupResources(ctx, &v1.LookupResourcesRequest{
-		Consistency:        s.determineConsistency(zookie, false),
+		Consistency:        s.determineConsistency(zookie),
 		ResourceObjectType: kesselTypeToSpiceDBType(resouce_type),
 		Permission:         relation,
 		Subject: &v1.SubjectReference{
@@ -353,7 +353,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 	}
 
 	req := &v1.ReadRelationshipsRequest{
-		Consistency:        s.determineConsistency(zookie, false),
+		Consistency:        s.determineConsistency(zookie),
 		RelationshipFilter: relationshipFilter,
 		OptionalLimit:      limit,
 		OptionalCursor:     cursor,
@@ -456,7 +456,7 @@ func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV1beta1.CheckRe
 		ObjectId:   check.GetResource().GetId(),
 	}
 	req := &v1.CheckPermissionRequest{
-		Consistency: s.determineConsistency(check.Zookie, check.GetFullyConsistent()),
+		Consistency: s.determineConsistency(check.Zookie),
 		Resource:    resource,
 		Permission:  check.GetRelation(),
 		Subject:     subject,
@@ -475,6 +475,47 @@ func (s *SpiceDbRepository) Check(ctx context.Context, check *apiV1beta1.CheckRe
 
 	return &apiV1beta1.CheckResponse{
 		Allowed:   apiV1beta1.CheckResponse_ALLOWED_FALSE,
+		CheckedAt: &apiV1beta1.Zookie{Token: checkResponse.GetCheckedAt().GetToken()},
+	}, nil
+}
+
+func (s *SpiceDbRepository) CheckForUpdate(ctx context.Context, check *apiV1beta1.CheckForUpdateRequest) (*apiV1beta1.CheckForUpdateResponse, error) {
+	if err := s.initialize(); err != nil {
+		return nil, err
+	}
+
+	subject := &v1.SubjectReference{
+		Object: &v1.ObjectReference{
+			ObjectType: kesselTypeToSpiceDBType(check.GetSubject().GetSubject().Type),
+			ObjectId:   check.GetSubject().GetSubject().GetId(),
+		},
+		OptionalRelation: check.GetSubject().GetRelation(),
+	}
+
+	resource := &v1.ObjectReference{
+		ObjectType: kesselTypeToSpiceDBType(check.GetResource().GetType()),
+		ObjectId:   check.GetResource().GetId(),
+	}
+	req := &v1.CheckPermissionRequest{
+		Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
+		Resource:    resource,
+		Permission:  check.GetRelation(),
+		Subject:     subject,
+	}
+	checkResponse, err := s.client.CheckPermission(ctx, req)
+	if err != nil {
+		return &apiV1beta1.CheckForUpdateResponse{Allowed: apiV1beta1.CheckForUpdateResponse_ALLOWED_UNSPECIFIED}, fmt.Errorf("error invoking CheckPermission in SpiceDB: %w", err)
+	}
+
+	if checkResponse.Permissionship == v1.CheckPermissionResponse_PERMISSIONSHIP_HAS_PERMISSION {
+		return &apiV1beta1.CheckForUpdateResponse{
+			Allowed:   apiV1beta1.CheckForUpdateResponse_ALLOWED_TRUE,
+			CheckedAt: &apiV1beta1.Zookie{Token: checkResponse.GetCheckedAt().GetToken()},
+		}, nil
+	}
+
+	return &apiV1beta1.CheckForUpdateResponse{
+		Allowed:   apiV1beta1.CheckForUpdateResponse_ALLOWED_FALSE,
 		CheckedAt: &apiV1beta1.Zookie{Token: checkResponse.GetCheckedAt().GetToken()},
 	}, nil
 }
@@ -624,8 +665,8 @@ func readFile(file string) (string, error) {
 	return string(bytes), nil
 }
 
-func (s *SpiceDbRepository) determineConsistency(zookie *apiV1beta1.Zookie, fullyConsistent bool) *v1.Consistency {
-	if s.fullyConsistent || fullyConsistent {
+func (s *SpiceDbRepository) determineConsistency(zookie *apiV1beta1.Zookie) *v1.Consistency {
+	if s.fullyConsistent {
 		// will ensure that all data used is fully consistent with the latest data available within the SpiceDB datastore.
 		return &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}}
 	}

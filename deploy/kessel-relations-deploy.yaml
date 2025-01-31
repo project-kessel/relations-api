@@ -199,7 +199,7 @@ parameters:
   - description: Enable the experimental schema cache which makes use of the Watch API for automatic updates
     name: SPICEDB_ENABLE_WATCHABLE_SCHEMA_CACHE
     value: 'false'
-  - description: maximum number of updates allowed for WriteRelationships calls	
+  - description: maximum number of updates allowed for WriteRelationships calls
     name: SPICEDB_WRITE_RELATIONSHIPS_MAX_UPDATES_PER_CALL
     value: '1000'
   - description: SpiceDB log level - possible values ("trace", "debug", "info", "warn", "error")

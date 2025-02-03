@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func StreamValidationInterceptor(validator *protovalidate.Validator) grpc.StreamServerInterceptor {
+func StreamValidationInterceptor(validator protovalidate.Validator) grpc.StreamServerInterceptor {
 	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		wrapper := &requestValidatingWrapper{ServerStream: ss, Validator: validator}
 		return handler(srv, wrapper)
@@ -19,7 +19,7 @@ func StreamValidationInterceptor(validator *protovalidate.Validator) grpc.Stream
 
 type requestValidatingWrapper struct {
 	grpc.ServerStream
-	*protovalidate.Validator
+	protovalidate.Validator
 }
 
 func (w *requestValidatingWrapper) RecvMsg(m interface{}) error {
@@ -41,7 +41,7 @@ func (w *requestValidatingWrapper) SendMsg(m interface{}) error {
 	return w.ServerStream.SendMsg(m)
 }
 
-func ValidationMiddleware(validator *protovalidate.Validator) middleware.Middleware {
+func ValidationMiddleware(validator protovalidate.Validator) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if v, ok := req.(proto.Message); ok {

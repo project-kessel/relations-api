@@ -92,7 +92,7 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 
 }
 
-func TestRelationshipsService_CreateRelationships_WithZookie(t *testing.T) {
+func TestRelationshipsService_CreateRelationships_WithConsistencyToken(t *testing.T) {
 	t.Parallel()
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
@@ -119,7 +119,11 @@ func TestRelationshipsService_CreateRelationships_WithZookie(t *testing.T) {
 			SubjectType:      pointerize("principal"),
 		},
 	},
-		Zookie: resp.GetCreatedAt(),
+		Consistency: &v1beta1.Consistency{
+			Requirement: &v1beta1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: resp.GetConsistencyToken(),
+			},
+		},
 	}
 	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
 	err = relationshipsService.ReadTuples(readReq, collectingServer)
@@ -301,7 +305,7 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestRelationshipsService_DeleteRelationships_WithZookie(t *testing.T) {
+func TestRelationshipsService_DeleteRelationships_WithConsistencyToken(t *testing.T) {
 	t.Parallel()
 	err, relationshipsService := setup(t)
 	assert.NoError(t, err)
@@ -342,7 +346,11 @@ func TestRelationshipsService_DeleteRelationships_WithZookie(t *testing.T) {
 			SubjectType:      pointerize("principal"),
 		},
 	},
-		Zookie: resp.GetDeletedAt(),
+		Consistency: &v1beta1.Consistency{
+			Requirement: &v1beta1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: resp.GetConsistencyToken(),
+			},
+		},
 	}
 
 	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)

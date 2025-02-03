@@ -15,30 +15,30 @@ type TouchSemantics bool
 
 type ContinuationToken string
 type SubjectResult struct {
-	Subject      *v1beta1.SubjectReference
-	Continuation ContinuationToken
-	Zookie       *v1beta1.Zookie
+	Subject          *v1beta1.SubjectReference
+	Continuation     ContinuationToken
+	ConsistencyToken *v1beta1.ConsistencyToken
 }
 type ResourceResult struct {
-	Resource     *v1beta1.ObjectReference
-	Continuation ContinuationToken
-	Zookie       *v1beta1.Zookie
+	Resource         *v1beta1.ObjectReference
+	Continuation     ContinuationToken
+	ConsistencyToken *v1beta1.ConsistencyToken
 }
 
 type RelationshipResult struct {
-	Relationship *v1beta1.Relationship
-	Continuation ContinuationToken
-	Zookie       *v1beta1.Zookie
+	Relationship     *v1beta1.Relationship
+	Continuation     ContinuationToken
+	ConsistencyToken *v1beta1.ConsistencyToken
 }
 
 type ZanzibarRepository interface {
 	Check(ctx context.Context, request *v1beta1.CheckRequest) (*v1beta1.CheckResponse, error)
 	CheckForUpdate(ctx context.Context, request *v1beta1.CheckForUpdateRequest) (*v1beta1.CheckForUpdateResponse, error)
 	CreateRelationships(context.Context, []*v1beta1.Relationship, TouchSemantics) (*v1beta1.CreateTuplesResponse, error)
-	ReadRelationships(ctx context.Context, filter *v1beta1.RelationTupleFilter, limit uint32, continuation ContinuationToken, zookie *v1beta1.Zookie) (chan *RelationshipResult, chan error, error)
+	ReadRelationships(ctx context.Context, filter *v1beta1.RelationTupleFilter, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *RelationshipResult, chan error, error)
 	DeleteRelationships(context.Context, *v1beta1.RelationTupleFilter) (*v1beta1.DeleteTuplesResponse, error)
-	LookupSubjects(ctx context.Context, subjectType *v1beta1.ObjectType, subject_relation, relation string, resource *v1beta1.ObjectReference, limit uint32, continuation ContinuationToken, zookie *v1beta1.Zookie) (chan *SubjectResult, chan error, error)
-	LookupResources(ctx context.Context, resouce_type *v1beta1.ObjectType, relation string, subject *v1beta1.SubjectReference, limit uint32, continuation ContinuationToken, zookie *v1beta1.Zookie) (chan *ResourceResult, chan error, error)
+	LookupSubjects(ctx context.Context, subjectType *v1beta1.ObjectType, subject_relation, relation string, resource *v1beta1.ObjectReference, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *SubjectResult, chan error, error)
+	LookupResources(ctx context.Context, resouce_type *v1beta1.ObjectType, relation string, subject *v1beta1.SubjectReference, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *ResourceResult, chan error, error)
 	IsBackendAvailable() error
 	ImportBulkTuples(stream grpc.ClientStreamingServer[v1beta1.ImportBulkTuplesRequest, v1beta1.ImportBulkTuplesResponse]) error
 }
@@ -105,7 +105,7 @@ func (rc *ReadRelationshipsUsecase) ReadRelationships(ctx context.Context, req *
 		}
 	}
 
-	relationships, errs, err := rc.repo.ReadRelationships(ctx, req.Filter, limit, continuation, req.Zookie)
+	relationships, errs, err := rc.repo.ReadRelationships(ctx, req.Filter, limit, continuation, req.GetConsistency())
 
 	if err != nil {
 		return nil, nil, err

@@ -122,13 +122,6 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: consistency.fullyConsistent
-                  in: query
-                  description: |-
-                    All data used in the API call *must* be at the most recent
-                     snapshot available.
-                  schema:
-                    type: boolean
             responses:
                 "200":
                     description: OK
@@ -188,13 +181,6 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: consistency.fullyConsistent
-                  in: query
-                  description: |-
-                    All data used in the API call *must* be at the most recent
-                     snapshot available.
-                  schema:
-                    type: boolean
             responses:
                 "200":
                     description: OK
@@ -258,13 +244,6 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: consistency.fullyConsistent
-                  in: query
-                  description: |-
-                    All data used in the API call *must* be at the most recent
-                     snapshot available.
-                  schema:
-                    type: boolean
             responses:
                 "200":
                     description: OK
@@ -415,11 +394,6 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
                     description: "All data used in the API call must be *at least as fresh* \n as found in the ConsistencyToken. More recent data might be used\n if available or faster."
-                fullyConsistent:
-                    type: boolean
-                    description: |-
-                        All data used in the API call *must* be at the most recent
-                         snapshot available.
         kessel.relations.v1beta1.ConsistencyToken:
             type: object
             properties:

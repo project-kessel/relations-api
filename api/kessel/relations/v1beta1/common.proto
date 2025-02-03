@@ -62,10 +62,6 @@ message Consistency {
 		// as found in the ConsistencyToken. More recent data might be used
 		// if available or faster.
 		ConsistencyToken at_least_as_fresh = 2;
-		
-		// All data used in the API call *must* be at the most recent
-		// snapshot available.
-		bool fully_consistent = 3; 
 	}
 }
 

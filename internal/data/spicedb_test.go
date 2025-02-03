@@ -70,7 +70,7 @@ func TestCreateRelationship(t *testing.T) {
 	assert.True(t, exists)
 }
 
-func TestCreateRelationshipWithZookie(t *testing.T) {
+func TestCreateRelationshipWithConsistencyToken(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -89,7 +89,13 @@ func TestCreateRelationshipWithZookie(t *testing.T) {
 	resp, err := spiceDbRepo.CreateRelationships(ctx, rels, touch)
 	assert.NoError(t, err)
 
-	exists := CheckForRelationship(spiceDbRepo, "bob", "rbac", "principal", "", "member", "rbac", "group", "bob_club", resp.GetCreatedAt())
+	exists := CheckForRelationship(spiceDbRepo, "bob", "rbac", "principal", "", "member", "rbac", "group", "bob_club",
+		&apiV1beta1.Consistency{
+			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: resp.GetConsistencyToken(),
+			},
+		},
+	)
 	assert.True(t, exists)
 }
 
@@ -632,7 +638,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 
 }
 
-func TestWriteReadBackDeleteAndReadBackRelationships_WithZookie(t *testing.T) {
+func TestWriteReadBackDeleteAndReadBackRelationships_WithConsistencyToken(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -661,7 +667,11 @@ func TestWriteReadBackDeleteAndReadBackRelationships_WithZookie(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	}, 0, "", respCreate.GetCreatedAt())
+	}, 0, "", &apiV1beta1.Consistency{
+		Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+			AtLeastAsFresh: respCreate.GetConsistencyToken(),
+		},
+	})
 
 	if !assert.NoError(t, err) {
 		return
@@ -696,7 +706,11 @@ func TestWriteReadBackDeleteAndReadBackRelationships_WithZookie(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	}, 0, "", respDelete.GetDeletedAt())
+	}, 0, "", &apiV1beta1.Consistency{
+		Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+			AtLeastAsFresh: respDelete.GetConsistencyToken(),
+		},
+	})
 
 	if !assert.NoError(t, err) {
 		return
@@ -707,7 +721,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships_WithZookie(t *testing.T) {
 
 }
 
-func TestSpiceDbRepository_CheckPermission_WithZookie(t *testing.T) {
+func TestSpiceDbRepository_CheckPermission_WithConsistencyToken(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -750,7 +764,11 @@ func TestSpiceDbRepository_CheckPermission_WithZookie(t *testing.T) {
 		Subject:  subject,
 		Relation: "view_widget",
 		Resource: resource,
-		Zookie:   relationshipResp.GetCreatedAt(), // pass createdAt zookie
+		Consistency: &apiV1beta1.Consistency{
+			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: relationshipResp.GetConsistencyToken(), // pass createRelationship consistency token
+			},
+		},
 	}
 	resp, err := spiceDbRepo.Check(ctx, &check)
 	if !assert.NoError(t, err) {
@@ -758,8 +776,8 @@ func TestSpiceDbRepository_CheckPermission_WithZookie(t *testing.T) {
 	}
 	//apiV1.CheckResponse_ALLOWED_TRUE
 	checkResponse := apiV1beta1.CheckResponse{
-		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
-		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+		Allowed:          apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		ConsistencyToken: resp.GetConsistencyToken(), // returned consistency token may not be same as created consistency token.
 	}
 	assert.Equal(t, &checkResponse, resp)
 
@@ -815,8 +833,8 @@ func TestSpiceDbRepository_CheckForUpdatePermission(t *testing.T) {
 	}
 	//apiV1.CheckForUpdateResponse_ALLOWED_TRUE
 	checkResponse := apiV1beta1.CheckForUpdateResponse{
-		Allowed:   apiV1beta1.CheckForUpdateResponse_ALLOWED_TRUE,
-		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+		Allowed:          apiV1beta1.CheckForUpdateResponse_ALLOWED_TRUE,
+		ConsistencyToken: resp.GetConsistencyToken(), // returned ConsistencyToken may not be same as created ConsistencyToken.
 	}
 	assert.Equal(t, &checkResponse, resp)
 
@@ -872,12 +890,12 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		return
 	}
 	//apiV1.CheckResponse_ALLOWED_TRUE
-	dummyZookie := "AAAAAAAAHHHHH"
+	dummyConsistencyToken := "AAAAAAAAHHHHH"
 	checkResponse := apiV1beta1.CheckResponse{
-		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
-		CheckedAt: &apiV1beta1.Zookie{Token: dummyZookie},
+		Allowed:          apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		ConsistencyToken: &apiV1beta1.ConsistencyToken{Token: dummyConsistencyToken},
 	}
-	resp.CheckedAt = &apiV1beta1.Zookie{Token: dummyZookie}
+	resp.ConsistencyToken = &apiV1beta1.ConsistencyToken{Token: dummyConsistencyToken}
 	assert.Equal(t, &checkResponse, resp)
 
 	//Remove // rbac/role_binding:rb_test#t_subject@rbac/principal:bob
@@ -907,12 +925,12 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
-	dummyZookie = "AAAAAAAAHHHHH"
+	dummyConsistencyToken = "AAAAAAAAHHHHH"
 	checkResponsev2 := apiV1beta1.CheckResponse{
-		Allowed:   apiV1beta1.CheckResponse_ALLOWED_FALSE,
-		CheckedAt: &apiV1beta1.Zookie{Token: dummyZookie},
+		Allowed:          apiV1beta1.CheckResponse_ALLOWED_FALSE,
+		ConsistencyToken: &apiV1beta1.ConsistencyToken{Token: dummyConsistencyToken},
 	}
-	resp2.CheckedAt = &apiV1beta1.Zookie{Token: dummyZookie}
+	resp2.ConsistencyToken = &apiV1beta1.ConsistencyToken{Token: dummyConsistencyToken}
 	assert.Equal(t, &checkResponsev2, resp2)
 }
 
@@ -956,7 +974,11 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 			},
 			Id: "test",
 		},
-		Zookie: relationshipResp.GetCreatedAt(), // pass createdAt zookie
+		Consistency: &apiV1beta1.Consistency{
+			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: relationshipResp.GetConsistencyToken(), // pass createRelationship consistency token
+			},
+		},
 	}
 
 	// no wait, immediately read after write.
@@ -967,8 +989,8 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 	}
 	//apiV1.CheckResponse_ALLOWED_TRUE
 	checkResponse := apiV1beta1.CheckResponse{
-		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
-		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+		Allowed:          apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		ConsistencyToken: resp.GetConsistencyToken(), // returned ConsistencyToken may not be same as created ConsistencyToken.
 	}
 	assert.Equal(t, &checkResponse, resp)
 
@@ -989,7 +1011,11 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 			},
 			Id: "test",
 		},
-		Zookie: relationshipResp.GetCreatedAt(), // pass createdAt zookie
+		Consistency: &apiV1beta1.Consistency{
+			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: relationshipResp.GetConsistencyToken(), // pass createRelationship consistency token
+			},
+		},
 	}
 
 	// zed permission check rbac/workspace:test user_grant rbac/principal:u2 --explain
@@ -999,8 +1025,8 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 	}
 	//apiV1.CheckResponse_ALLOWED_TRUE
 	checkResponse = apiV1beta1.CheckResponse{
-		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
-		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+		Allowed:          apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		ConsistencyToken: resp.GetConsistencyToken(), // returned ConsistencyToken may not be same as created ConsistencyToken.
 	}
 	assert.Equal(t, &checkResponse, resp)
 
@@ -1023,143 +1049,162 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 	// ensure u1 no longer has access, while u2 still does.
 
 	// zed permission check rbac/workspace:test user_grant rbac/principal:u1 --explain
-	u1Check.Zookie = respDelete.GetDeletedAt()
+	u1Check.Consistency = &apiV1beta1.Consistency{
+		Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+			AtLeastAsFresh: respDelete.GetConsistencyToken(), // pass createRelationship consistency token
+		},
+	}
 	resp, err = spiceDbRepo.Check(ctx, &u1Check)
 	if !assert.NoError(t, err) {
 		return
 	}
 	//apiV1.CheckResponse_ALLOWED_FALSE
 	checkResponse = apiV1beta1.CheckResponse{
-		Allowed:   apiV1beta1.CheckResponse_ALLOWED_FALSE,
-		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+		Allowed:          apiV1beta1.CheckResponse_ALLOWED_FALSE,
+		ConsistencyToken: resp.GetConsistencyToken(), // returned ConsistencyToken may not be same as created ConsistencyToken.
 	}
 	assert.Equal(t, &checkResponse, resp)
 
 	// zed permission check rbac/workspace:test user_grant rbac/principal:u2 --explain
-	u2Check.Zookie = respDelete.GetDeletedAt()
+	u2Check.Consistency = &apiV1beta1.Consistency{
+		Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+			AtLeastAsFresh: respDelete.GetConsistencyToken(), // pass deleteRelationship consistency token
+		},
+	}
 	resp, err = spiceDbRepo.Check(ctx, &u2Check)
 	if !assert.NoError(t, err) {
 		return
 	}
 	//apiV1.CheckResponse_ALLOWED_TRUE
 	checkResponse = apiV1beta1.CheckResponse{
-		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
-		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
+		Allowed:          apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		ConsistencyToken: resp.GetConsistencyToken(), // returned ConsistencyToken may not be same as created ConsistencyToken.
 	}
 	assert.Equal(t, &checkResponse, resp)
 }
 
-func TestSpiceDbRepository_NewEnemyProblem_Failure(t *testing.T) {
-	t.Parallel()
+// Test is amibguous as consistency token may not be *strictly* used.
+// if a better revision is available and faster than it will be used, causing
+// race conditions for this test to failure
+// func TestSpiceDbRepository_NewEnemyProblem_Failure(t *testing.T) {
+// 	t.Parallel()
 
-	ctx := context.Background()
-	spiceDbRepo, err := container.CreateSpiceDbRepository()
-	if !assert.NoError(t, err) {
-		return
-	}
+// 	ctx := context.Background()
+// 	spiceDbRepo, err := container.CreateSpiceDbRepository()
+// 	if !assert.NoError(t, err) {
+// 		return
+// 	}
 
-	rels := []*apiV1beta1.Relationship{
-		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
-		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "rb_test", ""),
-		createRelationship("rbac", "role_binding", "rb_test", "granted", "rbac", "role", "rl1", ""),
-		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "u1", ""),
-		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "u2", ""),
-		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
-	}
+// 	rels := []*apiV1beta1.Relationship{
+// 		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
+// 		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "rb_test", ""),
+// 		createRelationship("rbac", "role_binding", "rb_test", "granted", "rbac", "role", "rl1", ""),
+// 		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "u1", ""),
+// 		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "u2", ""),
+// 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
+// 	}
 
-	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
-	if !assert.NoError(t, err) {
-		return
-	}
+// 	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+// 	if !assert.NoError(t, err) {
+// 		return
+// 	}
 
-	// u1
-	u1Check := apiV1beta1.CheckRequest{
-		Subject: &apiV1beta1.SubjectReference{
-			Subject: &apiV1beta1.ObjectReference{
-				Type: &apiV1beta1.ObjectType{
-					Name: "principal", Namespace: "rbac",
-				},
-				Id: "u1",
-			},
-		},
-		Relation: "view_widget",
-		Resource: &apiV1beta1.ObjectReference{
-			Type: &apiV1beta1.ObjectType{
-				Name: "workspace", Namespace: "rbac",
-			},
-			Id: "test",
-		},
-		Zookie: relationshipResp.GetCreatedAt(), // pass createdAt zookie
-	}
+// 	// u1
+// 	u1Check := apiV1beta1.CheckRequest{
+// 		Subject: &apiV1beta1.SubjectReference{
+// 			Subject: &apiV1beta1.ObjectReference{
+// 				Type: &apiV1beta1.ObjectType{
+// 					Name: "principal", Namespace: "rbac",
+// 				},
+// 				Id: "u1",
+// 			},
+// 		},
+// 		Relation: "view_widget",
+// 		Resource: &apiV1beta1.ObjectReference{
+// 			Type: &apiV1beta1.ObjectType{
+// 				Name: "workspace", Namespace: "rbac",
+// 			},
+// 			Id: "test",
+// 		},
+// 		Consistency: &apiV1beta1.Consistency{
+// 			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+// 				AtLeastAsFresh: relationshipResp.GetConsistencyToken(), // pass createRelationship consistency token
+// 			},
+// 		},
+// 	}
 
-	// u2
-	u2Check := apiV1beta1.CheckRequest{
-		Subject: &apiV1beta1.SubjectReference{
-			Subject: &apiV1beta1.ObjectReference{
-				Type: &apiV1beta1.ObjectType{
-					Name: "principal", Namespace: "rbac",
-				},
-				Id: "u2",
-			},
-		},
-		Relation: "view_widget",
-		Resource: &apiV1beta1.ObjectReference{
-			Type: &apiV1beta1.ObjectType{
-				Name: "workspace", Namespace: "rbac",
-			},
-			Id: "test",
-		},
-		Zookie: relationshipResp.GetCreatedAt(), // pass createdAt zookie
-	}
+// 	// u2
+// 	u2Check := apiV1beta1.CheckRequest{
+// 		Subject: &apiV1beta1.SubjectReference{
+// 			Subject: &apiV1beta1.ObjectReference{
+// 				Type: &apiV1beta1.ObjectType{
+// 					Name: "principal", Namespace: "rbac",
+// 				},
+// 				Id: "u2",
+// 			},
+// 		},
+// 		Relation: "view_widget",
+// 		Resource: &apiV1beta1.ObjectReference{
+// 			Type: &apiV1beta1.ObjectType{
+// 				Name: "workspace", Namespace: "rbac",
+// 			},
+// 			Id: "test",
+// 		},
+// 		Consistency: &apiV1beta1.Consistency{
+// 			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+// 				AtLeastAsFresh: relationshipResp.GetConsistencyToken(), // pass createRelationship consistency token
+// 			},
+// 		},
+// 	}
 
-	// remove access from u1, keep access for u2.
-	_, err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
-		ResourceId:        pointerize("rb_test"),
-		ResourceNamespace: pointerize("rbac"),
-		ResourceType:      pointerize("role_binding"),
-		Relation:          pointerize("subject"),
-		SubjectFilter: &apiV1beta1.SubjectFilter{
-			SubjectId:        pointerize("u1"),
-			SubjectNamespace: pointerize("rbac"),
-			SubjectType:      pointerize("principal"),
-		},
-	})
-	if !assert.NoError(t, err) {
-		return
-	}
+// 	// remove access from u1, keep access for u2.
+// 	_, err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+// 		ResourceId:        pointerize("rb_test"),
+// 		ResourceNamespace: pointerize("rbac"),
+// 		ResourceType:      pointerize("role_binding"),
+// 		Relation:          pointerize("subject"),
+// 		SubjectFilter: &apiV1beta1.SubjectFilter{
+// 			SubjectId:        pointerize("u1"),
+// 			SubjectNamespace: pointerize("rbac"),
+// 			SubjectType:      pointerize("principal"),
+// 		},
+// 	})
+// 	if !assert.NoError(t, err) {
+// 		return
+// 	}
 
-	// u1 has access even though we removed access. u2 still has access.
+// 	// u1 has access even though we removed access. u2 still has access.
 
-	// zed permission check rbac/workspace:test user_grant rbac/principal:u1 --explain
-	resp, err := spiceDbRepo.Check(ctx, &u1Check) // we're passing a zookie revision before deletion occurred.
-	if !assert.NoError(t, err) {
-		return
-	}
-	//apiV1.CheckResponse_ALLOWED_TRUE
-	checkResponse := apiV1beta1.CheckResponse{
-		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
-		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
-	}
+// 	// zed permission check rbac/workspace:test user_grant rbac/principal:u1 --explain
+// 	resp, err := spiceDbRepo.Check(ctx, &u1Check) // we're passing a ConsistencyToken revision before deletion occurred.
+// 	if !assert.NoError(t, err) {
+// 		return
+// 	}
+// 	//apiV1.CheckResponse_ALLOWED_TRUE
+// 	checkResponse := apiV1beta1.CheckResponse{
+// 		Allowed:          apiV1beta1.CheckResponse_ALLOWED_TRUE,
+// 		ConsistencyToken: resp.GetConsistencyToken(), // returned consistency token may not be same as created consistency token.
+// 	}
 
-	if spiceDbRepo.fullyConsistent { // new enemy problem doesn't apply if we're fully consistent.
-		checkResponse.Allowed = apiV1beta1.CheckResponse_ALLOWED_FALSE
-		assert.Equal(t, &checkResponse, resp)
-	} else { // we technically dont have access, but according to zookie revision we do!
-		assert.Equal(t, &checkResponse, resp) // we expect true even with removed access.
-	}
+// 	if spiceDbRepo.fullyConsistent { // new enemy problem doesn't apply if we're fully consistent.
+// 		checkResponse.Allowed = apiV1beta1.CheckResponse_ALLOWED_FALSE
+// 		assert.Equal(t, &checkResponse, resp)
+// 	} else { // we technically dont have access, but according to consistency token revision we do!
+// 		assert.Equal(t, &checkResponse, resp) // we expect true even with removed access.
+// 	}
 
-	// zed permission check rbac/workspace:test user_grant rbac/principal:u2 --explain
-	resp, err = spiceDbRepo.Check(ctx, &u2Check)
-	if !assert.NoError(t, err) {
-		return
-	}
-	//apiV1.CheckResponse_ALLOWED_TRUE
-	checkResponse = apiV1beta1.CheckResponse{
-		Allowed:   apiV1beta1.CheckResponse_ALLOWED_TRUE,
-		CheckedAt: resp.GetCheckedAt(), // returned zookie may not be same as created zookie.
-	}
-	assert.Equal(t, &checkResponse, resp)
-}
+// 	// zed permission check rbac/workspace:test user_grant rbac/principal:u2 --explain
+// 	resp, err = spiceDbRepo.Check(ctx, &u2Check)
+// 	if !assert.NoError(t, err) {
+// 		return
+// 	}
+// 	//apiV1.CheckResponse_ALLOWED_TRUE
+// 	checkResponse = apiV1beta1.CheckResponse{
+// 		Allowed:          apiV1beta1.CheckResponse_ALLOWED_TRUE,
+// 		ConsistencyToken: resp.GetConsistencyToken(), // returned consistency token may not be same as created consistency token.
+// 	}
+// 	assert.Equal(t, &checkResponse, resp)
+// }
 
 func pointerize(value string) *string { //Used to turn string literals into pointers
 	return &value
@@ -1191,12 +1236,12 @@ func runSpiceDBCheck(t *testing.T, ctx context.Context, spiceDbRepo *SpiceDbRepo
 	resp, err := spiceDbRepo.Check(ctx, &check)
 	assert.NoError(t, err)
 
-	dummyZookie := "AAAAAAAAHHHHH"
+	dummyConsistencyToken := "AAAAAAAAHHHHH"
 	expectedResponse := apiV1beta1.CheckResponse{
-		Allowed:   expectedAllowed,
-		CheckedAt: &apiV1beta1.Zookie{Token: dummyZookie},
+		Allowed:          expectedAllowed,
+		ConsistencyToken: &apiV1beta1.ConsistencyToken{Token: dummyConsistencyToken},
 	}
-	resp.CheckedAt = &apiV1beta1.Zookie{Token: dummyZookie}
+	resp.ConsistencyToken = &apiV1beta1.ConsistencyToken{Token: dummyConsistencyToken}
 	assert.Equal(t, &expectedResponse, resp)
 }
 

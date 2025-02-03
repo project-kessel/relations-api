@@ -38,7 +38,7 @@ func (s *RelationshipsService) CreateTuples(ctx context.Context, req *pb.CreateT
 		return nil, fmt.Errorf("error creating tuples: %w", err)
 	}
 
-	return &pb.CreateTuplesResponse{CreatedAt: resp.GetCreatedAt()}, nil
+	return &pb.CreateTuplesResponse{ConsistencyToken: resp.GetConsistencyToken()}, nil
 }
 
 func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.KesselTupleService_ReadTuplesServer) error {
@@ -52,9 +52,9 @@ func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.Kes
 
 	for rel := range relationships {
 		err = conn.Send(&pb.ReadTuplesResponse{
-			Tuple:      rel.Relationship,
-			Pagination: &pb.ResponsePagination{ContinuationToken: string(rel.Continuation)},
-			ReadAt:     rel.Zookie,
+			Tuple:            rel.Relationship,
+			Pagination:       &pb.ResponsePagination{ContinuationToken: string(rel.Continuation)},
+			ConsistencyToken: rel.ConsistencyToken,
 		})
 		if err != nil {
 			return fmt.Errorf("error sending retrieved tuple to the client: %w", err)
@@ -75,7 +75,7 @@ func (s *RelationshipsService) DeleteTuples(ctx context.Context, req *pb.DeleteT
 		return nil, fmt.Errorf("error deleting tuples: %w", err)
 	}
 
-	return &pb.DeleteTuplesResponse{DeletedAt: resp.GetDeletedAt()}, nil
+	return &pb.DeleteTuplesResponse{ConsistencyToken: resp.GetConsistencyToken()}, nil
 }
 
 func (s *RelationshipsService) ImportBulkTuples(stream grpc.ClientStreamingServer[pb.ImportBulkTuplesRequest, pb.ImportBulkTuplesResponse]) error {

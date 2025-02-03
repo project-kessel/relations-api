@@ -12,43 +12,43 @@ option java_multiple_files = true;
 option java_package = "org.project_kessel.api.relations.v1beta1";
 
 service KesselLookupService {
-    rpc LookupSubjects(LookupSubjectsRequest) returns (stream LookupSubjectsResponse) {
-        option (google.api.http) = {
-            get: "/v1beta1/subjects"
-        };
-    };
-    rpc LookupResources(LookupResourcesRequest) returns (stream LookupResourcesResponse) {
-        option (google.api.http) = {
-            get: "/v1beta1/resources"
-        };
-    };
+	rpc LookupSubjects(LookupSubjectsRequest) returns (stream LookupSubjectsResponse) {
+		option (google.api.http) = {
+			get: "/v1beta1/subjects"
+		};
+	};
+	rpc LookupResources(LookupResourcesRequest) returns (stream LookupResourcesResponse) {
+		option (google.api.http) = {
+			get: "/v1beta1/resources"
+		};
+	};
 }
 
 message LookupResourcesRequest {
-    ObjectType resource_type = 1 [(buf.validate.field).required = true];
-    string relation = 2 [(buf.validate.field).string.min_len = 1];
-    SubjectReference subject = 3 [(buf.validate.field).required = true];
-    optional RequestPagination pagination = 4;
-    optional Consistency consistency = 5;
+	ObjectType resource_type = 1 [(buf.validate.field).required = true];
+	string relation = 2 [(buf.validate.field).string.min_len = 1];
+	SubjectReference subject = 3 [(buf.validate.field).required = true];
+	optional RequestPagination pagination = 4;
+	optional Consistency consistency = 5;
 }
 
 message LookupResourcesResponse {
-    ObjectReference resource = 1;
-    ResponsePagination pagination = 2;
-    ConsistencyToken consistency_token = 3;
+	ObjectReference resource = 1;
+	ResponsePagination pagination = 2;
+	ConsistencyToken consistency_token = 3;
 }
 
 message LookupSubjectsRequest {
-    ObjectReference resource = 1 [(buf.validate.field).required = true];
-    string relation = 2 [(buf.validate.field).string.min_len = 1];
-    ObjectType subject_type = 3 [(buf.validate.field).required = true];
-    optional string subject_relation = 4;
-    optional RequestPagination pagination = 5;
-    optional Consistency consistency = 6;
+	ObjectReference resource = 1 [(buf.validate.field).required = true];
+	string relation = 2 [(buf.validate.field).string.min_len = 1];
+	ObjectType subject_type = 3 [(buf.validate.field).required = true];
+	optional string subject_relation = 4;
+	optional RequestPagination pagination = 5;
+	optional Consistency consistency = 6;
 }
 
 message LookupSubjectsResponse {
-    SubjectReference subject = 1;
-    ResponsePagination pagination = 2;
+	SubjectReference subject = 1;
+	ResponsePagination pagination = 2;
 	ConsistencyToken consistency_token = 3;
 }

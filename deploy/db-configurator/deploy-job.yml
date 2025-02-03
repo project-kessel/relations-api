@@ -1,0 +1,66 @@
+---
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: relations-api-db-configurator
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: relations-api-db-configurator
+  spec:
+    template:
+      spec:
+        # ensures the job is removed after 60 mins
+        ttlSecondsAfterFinished: 3600
+        restartPolicy: OnFailure
+        containers:
+          - name: relations-api-db-configurator
+            image: ${DB_CONFIGURATOR_IMAGE}:${DB_CONFIGURATOR_TAG}
+            env:
+              - name: DB_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: ${DB_SECRET_NAME}
+                    key: db.user
+                    optional: false
+              - name: DB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: ${DB_SECRET_NAME}
+                    key: db.password
+                    optional: false
+              - name: DB_HOST
+                valueFrom:
+                  secretKeyRef:
+                    name: ${DB_SECRET_NAME}
+                    key: db.host
+                    optional: false
+              - name: DB_PORT
+                valueFrom:
+                  secretKeyRef:
+                    name: ${DB_SECRET_NAME}
+                    key: db.port
+                    optional: false
+              - name: DB_NAME
+                valueFrom:
+                  secretKeyRef:
+                    name: ${DB_SECRET_NAME}
+                    key: db.name
+                    optional: false
+              - name: NESSUS_SCAN_USER_PW
+                valueFrom:
+                  secretKeyRef:
+                    name: nessus-scan-creds
+                    key: password
+                    optional: false
+parameters:
+- name: DB_SECRET_NAME
+  value: kessel-relations-spicedb
+  description: "Kessel Relations DB secret name"
+- name: DB_CONFIGURATOR_IMAGE
+  value: quay.io/app-sre/db-configurator
+  description: "Base image for the DB Configurator"
+- name: DB_CONFIGURATOR_TAG
+  value: "v0.1.0-e5989a8"
+  description: "Image Tag for DB Configurator"

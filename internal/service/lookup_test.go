@@ -238,6 +238,39 @@ func TestLookupService_LookupResources_OneResult_WithConsistencyToken(t *testing
 	assert.ElementsMatch(t, []string{"thing1"}, ids)
 }
 
+func TestLookupService_LookupResources_OneResult_MinimizeLatency(t *testing.T) {
+	t.Parallel()
+	ctx := context.TODO()
+	spicedb, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	_, err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	assert.NoError(t, err)
+	container.WaitForQuantizationInterval()
+
+	service := createLookupService(spicedb)
+
+	// Test with minimize_latency = True
+	responseCollector := NewLookup_ResourcesServerStub(ctx)
+	err = service.LookupResources(&v1beta1.LookupResourcesRequest{
+		Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"}},
+		Relation: "workspace",
+		ResourceType: &v1beta1.ObjectType{
+			Name:      "widget",
+			Namespace: "rbac",
+		},
+		Consistency: &v1beta1.Consistency{
+			Requirement: &v1beta1.Consistency_MinimizeLatency{
+				MinimizeLatency: true,
+			},
+		},
+	}, responseCollector)
+	assert.NoError(t, err)
+	ids := responseCollector.GetIDs()
+
+	assert.ElementsMatch(t, []string{"thing1"}, ids)
+}
+
 func TestLookupService_LookupResources_TwoResults(t *testing.T) {
 	t.Parallel()
 	ctx := context.TODO()
@@ -296,9 +329,9 @@ func TestLookupService_LookupSubjects_TwoResults(t *testing.T) {
 	assert.ElementsMatch(t, []string{"u1", "u2"}, ids)
 }
 
-// Test is amibguous as consistency token may not be *strictly* used.
+// Test is ambiguous as consistency token may not be *strictly* used.
 // if a better revision is available and faster than it will be used, causing
-// race conditions for this test to failure
+// race conditions for this test to fail
 // func TestLookupService_LookupSubjectsMissingItems_WithWrongConsistencyToken(t *testing.T) {
 // 	t.Parallel()
 // 	ctx := context.TODO()

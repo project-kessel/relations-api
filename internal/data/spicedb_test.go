@@ -1083,9 +1083,9 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 	assert.Equal(t, &checkResponse, resp)
 }
 
-// Test is amibguous as consistency token may not be *strictly* used.
+// Test is ambiguous as consistency token may not be *strictly* used.
 // if a better revision is available and faster than it will be used, causing
-// race conditions for this test to failure
+// race conditions for this test to fail
 // func TestSpiceDbRepository_NewEnemyProblem_Failure(t *testing.T) {
 // 	t.Parallel()
 
@@ -1205,6 +1205,89 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 // 	}
 // 	assert.Equal(t, &checkResponse, resp)
 // }
+
+func TestSpiceDbRepository_CheckPermission_MinimizeLatency(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "rb_test", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "granted", "rbac", "role", "rl1", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
+	}
+
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	container.WaitForQuantizationInterval()
+
+	subject := &apiV1beta1.SubjectReference{
+		Subject: &apiV1beta1.ObjectReference{
+			Type: &apiV1beta1.ObjectType{
+				Name: "principal", Namespace: "rbac",
+			},
+			Id: "bob",
+		},
+	}
+
+	resource := &apiV1beta1.ObjectReference{
+		Type: &apiV1beta1.ObjectType{
+			Name: "workspace", Namespace: "rbac",
+		},
+		Id: "test",
+	}
+
+	// Test with minimize_latency = True.
+
+	// zed permission check rbac/workspace:test view_widget rbac/principal:bob --explain
+	check := apiV1beta1.CheckRequest{
+		Subject:  subject,
+		Relation: "view_widget",
+		Resource: resource,
+		Consistency: &apiV1beta1.Consistency{
+			Requirement: &apiV1beta1.Consistency_MinimizeLatency{
+				MinimizeLatency: true,
+			},
+		},
+	}
+	resp, err := spiceDbRepo.Check(ctx, &check)
+	if !assert.NoError(t, err) {
+		return
+	}
+	//apiV1.CheckResponse_ALLOWED_TRUE
+	dummyConsistencyToken := "AAAAAAAAHHHHH"
+	checkResponse := apiV1beta1.CheckResponse{
+		Allowed:          apiV1beta1.CheckResponse_ALLOWED_TRUE,
+		ConsistencyToken: &apiV1beta1.ConsistencyToken{Token: dummyConsistencyToken},
+	}
+	resp.ConsistencyToken = &apiV1beta1.ConsistencyToken{Token: dummyConsistencyToken}
+	assert.Equal(t, &checkResponse, resp)
+
+	//Remove // rbac/role_binding:rb_test#t_subject@rbac/principal:bob
+	_, err = spiceDbRepo.DeleteRelationships(ctx, &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("rb_test"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("role_binding"),
+		Relation:          pointerize("subject"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("principal"),
+		},
+	})
+	if !assert.NoError(t, err) {
+		return
+	}
+}
 
 func pointerize(value string) *string { //Used to turn string literals into pointers
 	return &value

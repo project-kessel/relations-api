@@ -143,6 +143,59 @@ func TestRelationshipsService_CreateRelationships_WithConsistencyToken(t *testin
 	}
 }
 
+func TestRelationshipsService_CreateRelationships_MinimizeLatency(t *testing.T) {
+	t.Parallel()
+	err, relationshipsService := setup(t)
+	assert.NoError(t, err)
+	ctx := context.Background()
+	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
+
+	req := &v1beta1.CreateTuplesRequest{
+		Tuples: []*v1beta1.Relationship{
+			expected,
+		},
+	}
+	reqCopy := proto.Clone(req)
+	_, err = relationshipsService.CreateTuples(ctx, reqCopy.(*v1beta1.CreateTuplesRequest))
+	assert.NoError(t, err)
+
+	container.WaitForQuantizationInterval()
+
+	readReq := &v1beta1.ReadTuplesRequest{Filter: &v1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("bob_club"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
+		SubjectFilter: &v1beta1.SubjectFilter{
+			SubjectId:        pointerize("bob"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("principal"),
+		},
+	},
+		Consistency: &v1beta1.Consistency{
+			Requirement: &v1beta1.Consistency_MinimizeLatency{
+				MinimizeLatency: true,
+			},
+		},
+	}
+	collectingServer := NewRelationships_ReadRelationshipsServerStub(ctx)
+	err = relationshipsService.ReadTuples(readReq, collectingServer)
+	if err != nil {
+		t.FailNow()
+	}
+	responseRelationships := collectingServer.responses
+
+	for _, resp := range responseRelationships {
+		assert.Equal(t, expected.Resource.Id, resp.Tuple.Resource.Id)
+		assert.Equal(t, expected.Resource.Type.Namespace, resp.Tuple.Resource.Type.Namespace)
+		assert.Equal(t, expected.Resource.Type.Name, resp.Tuple.Resource.Type.Name)
+		assert.Equal(t, expected.Subject.Subject.Id, resp.Tuple.Subject.Subject.Id)
+		assert.Equal(t, expected.Subject.Subject.Type.Namespace, resp.Tuple.Subject.Subject.Type.Namespace)
+		assert.Equal(t, expected.Subject.Subject.Type.Name, resp.Tuple.Subject.Subject.Type.Name)
+		assert.Equal(t, expected.Relation, resp.Tuple.Relation)
+	}
+}
+
 func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 	t.Parallel()
 	err, relationshipsService := setup(t)

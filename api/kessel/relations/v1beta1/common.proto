@@ -50,13 +50,14 @@ message ObjectType {
 	string name = 2 [(buf.validate.field).string.min_len = 1];
 }
 
-
+// Defines how a request is handled by the service.
 message Consistency {
 	oneof requirement {
 		option (buf.validate.oneof).required = true;
 
 		// The service selects the fastest snapshot available.
-		bool minimize_latency = 1;
+		// *Must* be set true if used.
+		bool minimize_latency = 1 [(buf.validate.field).bool.const = true];
 		
 		// All data used in the API call must be *at least as fresh* 
 		// as found in the ConsistencyToken. More recent data might be used

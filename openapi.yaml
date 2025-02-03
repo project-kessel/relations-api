@@ -115,7 +115,9 @@ paths:
                     type: string
                 - name: consistency.minimizeLatency
                   in: query
-                  description: The service selects the fastest snapshot available.
+                  description: |-
+                    The service selects the fastest snapshot available.
+                     *Must* be set true if used.
                   schema:
                     type: boolean
                 - name: consistency.atLeastAsFresh.token
@@ -174,7 +176,9 @@ paths:
                     type: string
                 - name: consistency.minimizeLatency
                   in: query
-                  description: The service selects the fastest snapshot available.
+                  description: |-
+                    The service selects the fastest snapshot available.
+                     *Must* be set true if used.
                   schema:
                     type: boolean
                 - name: consistency.atLeastAsFresh.token
@@ -237,7 +241,9 @@ paths:
                     type: string
                 - name: consistency.minimizeLatency
                   in: query
-                  description: The service selects the fastest snapshot available.
+                  description: |-
+                    The service selects the fastest snapshot available.
+                     *Must* be set true if used.
                   schema:
                     type: boolean
                 - name: consistency.atLeastAsFresh.token
@@ -389,11 +395,14 @@ components:
             properties:
                 minimizeLatency:
                     type: boolean
-                    description: The service selects the fastest snapshot available.
+                    description: |-
+                        The service selects the fastest snapshot available.
+                         *Must* be set true if used.
                 atLeastAsFresh:
                     allOf:
                         - $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
                     description: "All data used in the API call must be *at least as fresh* \n as found in the ConsistencyToken. More recent data might be used\n if available or faster."
+            description: Defines how a request is handled by the service.
         kessel.relations.v1beta1.ConsistencyToken:
             type: object
             properties:

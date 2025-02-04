@@ -20,12 +20,20 @@ service KesselCheckService {
 			body: "*"
 		};
 	};
+	
+	rpc CheckForUpdate (CheckForUpdateRequest) returns (CheckForUpdateResponse) {
+		option (google.api.http) = {
+			post: "/v1beta1/checkforupdate"
+			body: "*"
+		};
+	};
 }
 
 message CheckRequest {
 	ObjectReference resource = 1 [(buf.validate.field).required = true];
 	string relation = 2 [(buf.validate.field).string.min_len = 1];
 	SubjectReference subject = 3 [(buf.validate.field).required = true];
+	Consistency consistency = 4;
 }
 
 message CheckResponse {
@@ -36,5 +44,22 @@ message CheckResponse {
 		// e.g.  ALLOWED_CONDITIONAL = 3;
 	}
 	Allowed allowed = 1;
+	ConsistencyToken consistency_token = 2;
 }
 
+message CheckForUpdateRequest { // fully consistent
+	ObjectReference resource = 1 [(buf.validate.field).required = true];
+	string relation = 2 [(buf.validate.field).string.min_len = 1];
+	SubjectReference subject = 3 [(buf.validate.field).required = true];
+}
+
+message CheckForUpdateResponse {
+	enum Allowed {
+		ALLOWED_UNSPECIFIED = 0;
+		ALLOWED_TRUE = 1;
+		ALLOWED_FALSE = 2;
+		// e.g.  ALLOWED_CONDITIONAL = 3;
+	}
+	Allowed allowed = 1;
+	ConsistencyToken consistency_token = 2;
+}

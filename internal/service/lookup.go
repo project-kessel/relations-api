@@ -35,8 +35,9 @@ func (s *LookupService) LookupSubjects(req *pb.LookupSubjectsRequest, conn pb.Ke
 
 	for sub := range subs {
 		err = conn.Send(&pb.LookupSubjectsResponse{
-			Subject:    sub.Subject,
-			Pagination: &pb.ResponsePagination{ContinuationToken: string(sub.Continuation)},
+			Subject:          sub.Subject,
+			Pagination:       &pb.ResponsePagination{ContinuationToken: string(sub.Continuation)},
+			ConsistencyToken: sub.ConsistencyToken,
 		})
 		if err != nil {
 			return fmt.Errorf("error sending retrieved subject to the client: %w", err)
@@ -61,8 +62,9 @@ func (s *LookupService) LookupResources(req *pb.LookupResourcesRequest, conn pb.
 	}
 	for re := range res {
 		err = conn.Send(&pb.LookupResourcesResponse{
-			Resource:   re.Resource,
-			Pagination: &pb.ResponsePagination{ContinuationToken: string(re.Continuation)},
+			Resource:         re.Resource,
+			Pagination:       &pb.ResponsePagination{ContinuationToken: string(re.Continuation)},
+			ConsistencyToken: re.ConsistencyToken,
 		})
 		if err != nil {
 			return fmt.Errorf("error sending retrieved resource to the client: %w", err)

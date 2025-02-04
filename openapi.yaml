@@ -49,6 +49,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v1beta1.CheckResponse'
+    /v1beta1/checkforupdate:
+        post:
+            tags:
+                - KesselCheckService
+            operationId: KesselCheckService_CheckForUpdate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateResponse'
     /v1beta1/resources:
         get:
             tags:
@@ -92,6 +110,17 @@ paths:
                     type: integer
                     format: uint32
                 - name: pagination.continuationToken
+                  in: query
+                  schema:
+                    type: string
+                - name: consistency.minimizeLatency
+                  in: query
+                  description: |-
+                    The service selects the fastest snapshot available.
+                     *Must* be set true if used.
+                  schema:
+                    type: boolean
+                - name: consistency.atLeastAsFresh.token
                   in: query
                   schema:
                     type: string
@@ -142,6 +171,17 @@ paths:
                     type: integer
                     format: uint32
                 - name: pagination.continuationToken
+                  in: query
+                  schema:
+                    type: string
+                - name: consistency.minimizeLatency
+                  in: query
+                  description: |-
+                    The service selects the fastest snapshot available.
+                     *Must* be set true if used.
+                  schema:
+                    type: boolean
+                - name: consistency.atLeastAsFresh.token
                   in: query
                   schema:
                     type: string
@@ -196,6 +236,17 @@ paths:
                     type: integer
                     format: uint32
                 - name: pagination.continuationToken
+                  in: query
+                  schema:
+                    type: string
+                - name: consistency.minimizeLatency
+                  in: query
+                  description: |-
+                    The service selects the fastest snapshot available.
+                     *Must* be set true if used.
+                  schema:
+                    type: boolean
+                - name: consistency.atLeastAsFresh.token
                   in: query
                   schema:
                     type: string
@@ -303,6 +354,23 @@ components:
                 code:
                     type: integer
                     format: uint32
+        kessel.relations.v1beta1.CheckForUpdateRequest:
+            type: object
+            properties:
+                resource:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
+                relation:
+                    type: string
+                subject:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
+        kessel.relations.v1beta1.CheckForUpdateResponse:
+            type: object
+            properties:
+                allowed:
+                    type: integer
+                    format: enum
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.CheckRequest:
             type: object
             properties:
@@ -312,12 +380,35 @@ components:
                     type: string
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
+                consistency:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Consistency'
         kessel.relations.v1beta1.CheckResponse:
             type: object
             properties:
                 allowed:
                     type: integer
                     format: enum
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
+        kessel.relations.v1beta1.Consistency:
+            type: object
+            properties:
+                minimizeLatency:
+                    type: boolean
+                    description: |-
+                        The service selects the fastest snapshot available.
+                         *Must* be set true if used.
+                atLeastAsFresh:
+                    allOf:
+                        - $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
+                    description: "All data used in the API call must be *at least as fresh* \n as found in the ConsistencyToken. More recent data might be used\n if available or faster."
+            description: Defines how a request is handled by the service.
+        kessel.relations.v1beta1.ConsistencyToken:
+            type: object
+            properties:
+                token:
+                    type: string
+            description: The ConsistencyToken is used to provide consistency between write and read requests.
         kessel.relations.v1beta1.CreateTuplesRequest:
             type: object
             properties:
@@ -333,10 +424,14 @@ components:
                         $ref: '#/components/schemas/kessel.relations.v1beta1.Relationship'
         kessel.relations.v1beta1.CreateTuplesResponse:
             type: object
-            properties: {}
+            properties:
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.DeleteTuplesResponse:
             type: object
-            properties: {}
+            properties:
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.ImportBulkTuplesRequest:
             type: object
             properties:
@@ -356,6 +451,8 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
                 pagination:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.LookupSubjectsResponse:
             type: object
             properties:
@@ -363,6 +460,8 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
                 pagination:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.ObjectReference:
             type: object
             properties:
@@ -384,6 +483,8 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.Relationship'
                 pagination:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ResponsePagination'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.Relationship:
             type: object
             properties:

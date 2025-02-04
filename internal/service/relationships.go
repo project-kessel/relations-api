@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+
 	"google.golang.org/grpc"
 
 	"github.com/project-kessel/relations-api/internal/biz"
@@ -32,12 +33,12 @@ func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelatio
 }
 
 func (s *RelationshipsService) CreateTuples(ctx context.Context, req *pb.CreateTuplesRequest) (*pb.CreateTuplesResponse, error) {
-	err := s.createUsecase.CreateRelationships(ctx, req.Tuples, req.GetUpsert()) //The generated .GetUpsert() defaults to false
+	resp, err := s.createUsecase.CreateRelationships(ctx, req.Tuples, req.GetUpsert()) //The generated .GetUpsert() defaults to false
 	if err != nil {
 		return nil, fmt.Errorf("error creating tuples: %w", err)
 	}
 
-	return &pb.CreateTuplesResponse{}, nil
+	return &pb.CreateTuplesResponse{ConsistencyToken: resp.GetConsistencyToken()}, nil
 }
 
 func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.KesselTupleService_ReadTuplesServer) error {
@@ -51,8 +52,9 @@ func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.Kes
 
 	for rel := range relationships {
 		err = conn.Send(&pb.ReadTuplesResponse{
-			Tuple:      rel.Relationship,
-			Pagination: &pb.ResponsePagination{ContinuationToken: string(rel.Continuation)},
+			Tuple:            rel.Relationship,
+			Pagination:       &pb.ResponsePagination{ContinuationToken: string(rel.Continuation)},
+			ConsistencyToken: rel.ConsistencyToken,
 		})
 		if err != nil {
 			return fmt.Errorf("error sending retrieved tuple to the client: %w", err)
@@ -68,12 +70,12 @@ func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.Kes
 }
 
 func (s *RelationshipsService) DeleteTuples(ctx context.Context, req *pb.DeleteTuplesRequest) (*pb.DeleteTuplesResponse, error) {
-	err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter)
+	resp, err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter)
 	if err != nil {
 		return nil, fmt.Errorf("error deleting tuples: %w", err)
 	}
 
-	return &pb.DeleteTuplesResponse{}, nil
+	return &pb.DeleteTuplesResponse{ConsistencyToken: resp.GetConsistencyToken()}, nil
 }
 
 func (s *RelationshipsService) ImportBulkTuples(stream grpc.ClientStreamingServer[pb.ImportBulkTuplesRequest, pb.ImportBulkTuplesResponse]) error {

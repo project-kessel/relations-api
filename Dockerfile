@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1736404155 AS builder
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1738643652 AS builder
 
 ARG TARGETARCH
 USER root
@@ -15,7 +15,7 @@ RUN make build
 # adds fips-detect tool for FIPS validation -- likely not needed long term
 RUN mkdir /tmp/go && GOPATH=/tmp/go GOCACHE=/tmp/go go install github.com/acardace/fips-detect@latest
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1736404155
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1738643652
 
 # installs RHEL fork of go to be able to validate with go tools for FIPS -- likely not needed long term
 RUN microdnf install -y go-toolset

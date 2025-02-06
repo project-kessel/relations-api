@@ -1,5 +1,8 @@
 set -exv
 
+# check for podman or docker
+source ./spicedb/check_docker_podman.sh
+
 if [[ -z "$IMAGE" ]]; then
     IMAGE="quay.io/cloudservices/kessel-relations"
 fi
@@ -32,15 +35,15 @@ trap job_cleanup EXIT ERR SIGINT SIGTERM
 DOCKER_CONF="$TMP_JOB_DIR/.docker"
 
 mkdir -p "$DOCKER_CONF"
-docker --config="$DOCKER_CONF" login -u="$QUAY_USER" -p="$QUAY_TOKEN" quay.io
-docker --config="$DOCKER_CONF" login -u="$RH_REGISTRY_USER" -p="$RH_REGISTRY_TOKEN" registry.redhat.io
-docker --config="$DOCKER_CONF" build --build-arg GIT_COMMIT=$GIT_COMMIT --no-cache -t "${IMAGE}:${IMAGE_TAG}" . -f ./Dockerfile
+$DOCKER --config="$DOCKER_CONF" login -u="$QUAY_USER" -p="$QUAY_TOKEN" quay.io
+$DOCKER --config="$DOCKER_CONF" login -u="$RH_REGISTRY_USER" -p="$RH_REGISTRY_TOKEN" registry.redhat.io
+$DOCKER --config="$DOCKER_CONF" build --build-arg GIT_COMMIT=$GIT_COMMIT --no-cache -t "${IMAGE}:${IMAGE_TAG}" . -f ./Dockerfile
 
 if [[ "$GIT_BRANCH" == "origin/security-compliance" ]]; then
-    docker --config="$DOCKER_CONF" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:${SECURITY_COMPLIANCE_TAG}"
-    docker --config="$DOCKER_CONF" push "${IMAGE}:${SECURITY_COMPLIANCE_TAG}"
+    $DOCKER --config="$DOCKER_CONF" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:${SECURITY_COMPLIANCE_TAG}"
+    $DOCKER --config="$DOCKER_CONF" push "${IMAGE}:${SECURITY_COMPLIANCE_TAG}"
 else
-    docker --config="$DOCKER_CONF" push "${IMAGE}:${IMAGE_TAG}"
-    docker --config="$DOCKER_CONF" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:latest"
-    docker --config="$DOCKER_CONF" push "${IMAGE}:latest"
+    $DOCKER --config="$DOCKER_CONF" push "${IMAGE}:${IMAGE_TAG}"
+    $DOCKER --config="$DOCKER_CONF" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:latest"
+    $DOCKER --config="$DOCKER_CONF" push "${IMAGE}:latest"
 fi

@@ -44,6 +44,22 @@ go build -o ./bin/ ./...
 ./bin/server -conf ./configs
 ```
 
+### Build Container Images
+
+By default, the quay repository is `quay.io/cloudservices/kessel-relations`. If you wish to use another for testing, set IMAGE value first
+```shell
+export IMAGE=your-quay-repo # if desired
+make docker-build-push
+```
+
+### Build Container Images (macOS)
+This is an alternative to the above command for macOS users, but should work for any arch
+```shell
+export QUAY_REPO_RELATIONS=your-quay-repo # required
+podman login quay.io # required, this target assumes you are already logged in
+make build-push-minimal
+```
+
 ### Generate other auxiliary files by Makefile
 
 ```
@@ -70,11 +86,12 @@ wire
 
 ## Spicedb using docker/podman
 
-The latest [production ready schema](https://github.com/RedHatInsights/rbac-config/blob/master/configs/prod/schemas/schema.zed) can be downloaded prior to running via 
+The latest [production ready schema](https://github.com/RedHatInsights/rbac-config/blob/master/configs/prod/schemas/schema.zed) can be downloaded prior to running via
 ```
 curl -o deploy/schema.zed https://raw.githubusercontent.com/RedHatInsights/rbac-config/refs/heads/master/configs/prod/schemas/schema.zed
 ```
 
+> Note: The `podman-compose` provider struggles with compose files that leverage `depends_on` as it can't always properly handle the dependency graphs. You can fix this issue on Linux by installing the `docker-compose-plugin` or by also having `docker-compose` installed. When installed, podman uses the `docker-compose` provider by default instead. The benefit of the `docker-compose-plugin` is that it doesn't require the full Docker setup or docker daemon!
 
 ### Run spicedb and postgresql db with docker/podman compose
 

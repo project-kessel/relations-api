@@ -2629,7 +2629,7 @@ data:
               "text": "crcs02ue1-prometheus",
               "value": "PDD8BE47D10408F45"
             },
-            "description": "Choose between the production (crcp01ue1-prometheus) or stage (crcs02ue1-prometheus) environments",
+            "description": "Choose between the production, stage, or Govcloud environments",
             "hide": 0,
             "includeAll": false,
             "label": "Datasource",
@@ -2639,7 +2639,7 @@ data:
             "query": "prometheus",
             "queryValue": "",
             "refresh": 1,
-            "regex": "/(crcp01ue1-prometheus)|(crcs02ue1-prometheus)|(insights-perf-prometheus)/",
+            "regex": "/(crcp01ue1-prometheus)|(crcfrp01ugw1-prometheus)|(crcs02ue1-prometheus)|(crcfrs01ugw1-prometheus)|(insights-perf-prometheus)/",
             "skipUrlSync": false,
             "type": "datasource"
           }
@@ -2653,7 +2653,7 @@ data:
       "timezone": "browser",
       "title": "Kessel - Relations API",
       "uid": "ddxs3i6o0xpmoe",
-      "version": 5,
+      "version": 6,
       "weekStart": ""
     }
 kind: ConfigMap

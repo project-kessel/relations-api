@@ -738,7 +738,7 @@ data:
             "query": "prometheus",
             "queryValue": "",
             "refresh": 1,
-            "regex": "/(crcp01ue1-prometheus)|(crcs02ue1-prometheus)/",
+            "regex": "/(crcp01ue1-prometheus)|(crcfrp01ugw1-prometheus)|(crcs02ue1-prometheus)|(crcfrs01ugw1-prometheus)/",
             "skipUrlSync": false,
             "type": "datasource"
           }
@@ -752,7 +752,7 @@ data:
       "timezone": "browser",
       "title": "Kessel  - Relations API data sync",
       "uid": "ce3ty1vy1gpvkd",
-      "version": 4,
+      "version": 5,
       "weekStart": ""
     }
 kind: ConfigMap

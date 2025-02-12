@@ -1,0 +1,76 @@
+services:
+  relations-api:
+    image: "quay.io/cloudservices/kessel-relations:latest"
+    environment:
+      - "SPICEDB_PRESHARED=${SPICEDB_GRPC_PRESHARED_KEY}"
+      - "SPICEDB_SCHEMA_FILE=/schema_file"
+      # - "SPICEDB_PRESHARED_FILE=/run/secrets/spicedb_pre_shared"
+      - "SPICEDB_ENDPOINT=spicedb:50051"
+    build:
+      dockerfile: Dockerfile
+    profiles: ["relations-api"]
+    secrets:
+      - spicedb_pre_shared
+    configs:
+      - schema_file
+    restart: "always"
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    networks:
+      - kessel
+
+  spicedb:
+    image: "authzed/spicedb"
+    command: "serve"
+    restart: "always"
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+      - "50051:50051"
+    environment:
+      - "SPICEDB_GRPC_PRESHARED_KEY=${SPICEDB_GRPC_PRESHARED_KEY}"
+      - "SPICEDB_DATASTORE_ENGINE=postgres"
+      - "SPICEDB_DATASTORE_CONN_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5433/spicedb?sslmode=disable"
+    depends_on:
+      - "migrate"
+    networks:
+      - kessel
+
+  migrate:
+    image: "authzed/spicedb"
+    command: "migrate head"
+    restart: "on-failure"
+    environment:
+      - "SPICEDB_DATASTORE_ENGINE=postgres"
+      - "SPICEDB_DATASTORE_CONN_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5433/spicedb?sslmode=disable"
+    depends_on:
+      - "database"
+    networks:
+      - kessel
+
+  database:
+    image: "postgres"
+    command: -c track_commit_timestamp=on -p 5433
+    ports:
+      - "5433:5433"
+    environment:
+      - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+      - "POSTGRES_DB=${POSTGRES_DBNAME}"
+    networks:
+      - kessel
+
+configs:
+  spicedb_pre_shared:
+    environment: "SPICEDB_GRPC_PRESHARED_KEY"
+  schema_file:
+    file: deploy/schema.zed
+
+secrets:
+  spicedb_pre_shared:
+    file: ./.secrets/local-spicedb-secret
+
+networks:
+  kessel:
+    name: kessel
+    external: true

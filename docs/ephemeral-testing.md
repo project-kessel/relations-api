@@ -5,6 +5,7 @@ You'll need:
 1) Bonfire
 2) Podman/Docker
 3) Credentials to login to Quay.io (can be your personal credentials or a [Robot Account](https://docs.quay.io/glossary/robot-accounts.html) if desired)
+4) A public Quay repo to push your image to
 
 **tl;dr**
 1) Make your changes
@@ -65,11 +66,24 @@ In the output you'll see where bonfire detects your settings for this app and co
 
 ## Building Container images for testing
 
-Building your own container image to test with is easy, you just need a public quay repo to push to and consume from
+Building your own container image to test with is easy, you just need a **public** quay repo to push to and consume from. These images are designed to be consumed in a cluster.
+
+> Note: If your Quay repo is not public, the cluster will not be able to pull the image. By default, when you push an image to Quay for the first time, it will create the repo for you, but it is set to private by default. This can be changed by navigating to the repo in Quay --> Settings --> Repository Visibility --> Make Public
+
+> Another Note: The process is slightly different for Mac to encompass those using ARM laptops. Using the `build-push-minimal` make target ensures the image is built for Linux/AMD64 to ensure it can run on clusters but may not be ideal for running locally for those on ARM systems.
+
 
 **To build the image on Linux:**
 1) Set the image repo for where the image should be pushed to: `export IMAGE=quay.io/my-repo/relations-api`
-2) Set your  Quay.io credentials so your container engine can login to push: `export QUAY_USER=your-username; export QUAY_TOKEN=your-password`
+2) Set your  Quay.io credentials so your container engine can login to push:
+
+```shell
+export QUAY_USER=your-quay-username
+export QUAY_TOKEN=your-quay-password
+export RH_REGISTRY_USER=your-redhat-registry-user
+export RH_REGISTRY_TOKEN=your-redhat-registry-token
+```
+
 3) Build and push the image: `make docker-build-push`
 
 **On Mac:**

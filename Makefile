@@ -113,6 +113,11 @@ spicedb-up:
 	./spicedb/start-spicedb.sh
 .PHONY: spicedb-up
 
+# uses alternative postgres port to avoid conflicts
+spicedb-alt-up:
+	./spicedb/start-spicedb-alt-port.sh
+.PHONY: spicedb-alt-up
+
 relations-api-up:
 	./spicedb/start-relations-api.sh
 .PHONY: relations-api-up

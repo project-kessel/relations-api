@@ -14,6 +14,8 @@ You'll need:
 export IMAGE=quay.io/your-quay-repo/kessel-relations-api
 export QUAY_USER=your-quay-username
 export QUAY_TOKEN=your-quay-password
+export RH_REGISTRY_USER=your-redhat-registry-user
+export RH_REGISTRY_TOKEN=your-redhat-registry-token
 make docker-build-push`
 ```
 

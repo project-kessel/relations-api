@@ -14,11 +14,25 @@ You'll need:
 export IMAGE=quay.io/your-quay-repo/kessel-relations-api
 export QUAY_USER=your-quay-username
 export QUAY_TOKEN=your-quay-password
+export RH_REGISTRY_USER=your-redhat-registry-user
+export RH_REGISTRY_TOKEN=your-redhat-registry-token
 make docker-build-push`
 ```
 
-3) Update Bonfire local config for your custom image
-4) Deploy to ephemeral with Bonfire
+3) Update Bonfire CLI
+
+See https://github.com/RedHatInsights/bonfire?tab=readme-ov-file#installing-locally for installing bonfire.
+
+To update from the last time:
+```shell
+VENV_DIR=~/bonfire_venv
+. $VENV_DIR/bin/activate
+pip install --upgrade pip
+pip install --upgrade crc-bonfire
+```
+
+4) Update Bonfire local config for your custom image
+5) Deploy to ephemeral with Bonfire
 
 
 ## Setting up a local config for Bonfire

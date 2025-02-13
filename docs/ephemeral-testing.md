@@ -10,14 +10,7 @@ You'll need:
 1) Make your changes
 2) Build and push you changes in a container image:
 
-```shell
-export IMAGE=quay.io/your-quay-repo/kessel-relations-api
-export QUAY_USER=your-quay-username
-export QUAY_TOKEN=your-quay-password
-export RH_REGISTRY_USER=your-redhat-registry-user
-export RH_REGISTRY_TOKEN=your-redhat-registry-token
-make docker-build-push`
-```
+See "Building Container images for testing", below
 
 3) Update Bonfire CLI
 
@@ -31,8 +24,13 @@ pip install --upgrade pip
 pip install --upgrade crc-bonfire
 ```
 
-4) Update Bonfire local config for your custom image
-5) Deploy to ephemeral with Bonfire
+4) Update Bonfire local config for your custom image (see below)
+5) Deploy to ephemeral with Bonfire:
+
+Login to ephemeral in a terminal and connect with the VPN, then run:
+```shell
+bonfire deploy kessel -C kessel-relations --local-config-method merge
+```
 
 
 ## Setting up a local config for Bonfire
@@ -68,9 +66,17 @@ In the output you'll see where bonfire detects your settings for this app and co
 Building your own container image to test with is easy, you just need a public quay repo to push to and consume from
 
 **To build the image on Linux:**
-1) Set the image repo for where the image should be pushed to: `export IMAGE=quay.io/my-repo/relations-api`
-2) Set your  Quay.io credentials so your container engine can login to push: `export QUAY_USER=your-username; export QUAY_TOKEN=your-password`
-3) Build and push the image: `make docker-build-push`
+Set the image repo for where the image should be pushed to, the quay.io credentials so your container engine can login
+to push and build and push the image:
+
+```shell
+export IMAGE=quay.io/your-quay-repo/kessel-relations-api
+export QUAY_USER=your-quay-username
+export QUAY_TOKEN=your-quay-password
+export RH_REGISTRY_USER=your-redhat-registry-user
+export RH_REGISTRY_TOKEN=your-redhat-registry-token
+make docker-build-push`
+```
 
 **On Mac:**
 1) Set the image repo for where the image should be pushed to: `export QUAY_REPO_RELATIONS=your-quay-repo`

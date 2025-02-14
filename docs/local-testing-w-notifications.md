@@ -1,45 +1,96 @@
 # Running Notifications + Relations + Inventory using Local Built Binaries
 
+This process goes through running Notifications, Inventory API and Relations API locally using built binaries. Since there are database dependencies involved, podman/docker are leveraged to handle running databases.
+
+## Prerequisites
+
+You'll need the following tools:
+* Docker/Podman
+* make
+* git
+* [Maven](https://maven.apache.org/install.html)
+
+You'll also need the following repos cloned to your system:
+* [Relations API](https://github.com/project-kessel/relations-api)
+* [Inventory API](https://github.com/project-kessel/inventory-api)
+* [Notifications Backend](https://github.com/RedHatInsights/notifications-backend)
+
 ### Running Relations:
+
+1) Change to the Relations API code path: `cd /path/to/relations-api`
+
+2) Start up SpiceDB
+
 ```shell
 # Start up SpiceDB Alt -- uses a different postgres port to avoid conflicts with notifications
 make spicedb-alt-up
-
-# Start relations
-make run
 ```
 
-### Running Inventory:
-The process to run Inventory locally can be found in Inventory API's [README](https://github.com/project-kessel/inventory-api?tab=readme-ov-file#kessel-inventory--kessel-relations-using-built-binaries)
+3) Build and Run Relations API: `make run`
 
-By default, Inventory will leverage a SQLite database and create a local db file called `inventory.db`. If you wish to use postgres, you'll need a postgres database running and the config file used in the above doc would need to be updated. An example of configuring Inventory API for postgres can be found [HERE](https://github.com/project-kessel/inventory-api/blob/b19bc4cef8570b8e34f85336067a0b48f9dcf910/inventory-api-compose.yaml#L19)
+When done, SpiceDB and Postgres should be running in Podman/Docker, and Relations will be running in your locally attached to your terminal
+
+### Running Inventory:
+1) Change to the Inventory API code path: `cd /path/to/inventory-api`
+
+2) Build the Inventory API binary: `make local-build`
+
+3) Create and setup the database:
+
+```shell
+# default DB is SQLite, removing the file ensures a new database is created each time
+rm ./inventory.db
+make migrate
+```
+
+4) Run Inventory API:
+
+```shell
+# The config provided assumes Relations is running locally on ports 8000/9000
+# so Inventory is set to use ports 8081/9081 instead to not conflict
+./bin/inventory-api serve --config config/inventory-w-relations.yaml
+```
 
 ### Running Notifications
 
-> NOTE: During the clean and install step tests are run that may not work if you do not have Docker -- YMMV
+1) Change to the Notifications Backend code path: `cd /path/to/notifications-backend`
+2) Create the notifications DB using Podman/Docker
 
 ```shell
-# Spin up the Notifications DB
-podman run --name notifications_db --detach -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=notifications -p 5432:5432 docker.io/postgres:latest -c log_statement=all
+podman/docker run --name notifications_db --detach -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=notifications -p 5432:5432 docker.io/postgres:latest -c log_statement=all
+```
 
-# Clean, Compile, Test, and Install
-./mvnw clean install
+3) Use Maven to Clean, Compile, Test, and Install
 
-# OR to skip tests (takes about 15 mins)
-./mvnw clean install -Dmaven.test.skip
+```shell
+cd common
+mvn clean install
+cd ..
+./mvnw install
 
-# Run the Notifications Service
+# OR to skip tests (they take about 15 mins)
+./mvnw install -Dmaven.test.skip
+```
+
+4) Run the Notifications Service
+
+```shell
+# If you are not running one of the below kessel services, you can set the enabled flags for that service to false below
 ./mvnw clean quarkus:dev -Dnotifications.use-default-template=true -Dnotifications.kessel-inventory.enabled=true -Dnotifications.kessel-relations.enabled=true -pl :notifications-backend
 ```
 
+
 ### Cleanup!
+
+1) Shutdown Notifications: enter `q` in the running window to shut it down
+
+2) Kill inventory and relations: `ctrl+c` or use whatever fun killing technique you like!
+
+3) Teardown SpiceDB:
+
 ```shell
-# To kill notifications, enter `q` in the running window to shut it down
-# To kill inventory and relations, use whatever fun killing technique you like!
-
-# Teardown SpiceDB
+cd /path/to/relations-api
 make spicedb-down
-
-# Teardown Notifications DB
-podman stop notifications_db && podman rm notifications_db
 ```
+
+4) Teardown Notifications DB: `podman/docker stop notifications_db && podman/docker rm notifications_db`

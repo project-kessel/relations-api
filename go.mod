@@ -1,6 +1,8 @@
 module github.com/project-kessel/relations-api
 
-go 1.22.7
+go 1.23.0
+
+toolchain go1.23.6
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.5-20250219170025-d39267d9df8f.1
@@ -21,7 +23,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.34.0
 	go.opentelemetry.io/otel/trace v1.34.0
 	go.uber.org/automaxprocs v1.6.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250212204824-5a70512c5d8b
+	google.golang.org/genproto/googleapis/api v0.0.0-20250227231956-55c901821b1e
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.5
 )
@@ -87,7 +89,7 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250124145028-65684f501c47 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250219182151-9fdb1cabc7b2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

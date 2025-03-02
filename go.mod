@@ -1,12 +1,14 @@
 module github.com/project-kessel/relations-api
 
-go 1.22.7
+go 1.23.0
+
+toolchain go1.23.6
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.5-20250219170025-d39267d9df8f.1
 	github.com/MicahParks/keyfunc/v3 v3.3.10
 	github.com/authzed/authzed-go v1.3.0
-	github.com/authzed/grpcutil v0.0.0-20240123194739-2ea1e3d2d98b
+	github.com/authzed/grpcutil v0.0.0-20250221190651-1985b19b35b8
 	github.com/bufbuild/protovalidate-go v0.9.2
 	github.com/go-kratos/kratos/v2 v2.8.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
@@ -82,12 +84,12 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // indirect
-	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250124145028-65684f501c47 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250219182151-9fdb1cabc7b2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

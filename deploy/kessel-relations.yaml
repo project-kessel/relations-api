@@ -137,6 +137,11 @@ objects:
                     limits:
                       memory: "256Mi"
                       cpu: "100m"
+                  env:
+                    - name: SPICEDB_DATASTORE_REVISION_QUANTIZATION_INTERVAL
+                      value: ${SPICEDB_QUANTIZATION_INTERVAL}
+                    - name: SPICEDB_DATASTORE_REVISION_QUANTIZATION_MAX_STALENESS_PERCENT
+                      value: ${SPICEDB_QUANTIZATION_STALENESS_PERCENT}
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:
@@ -203,3 +208,9 @@ parameters:
   - description: SpiceDB Image
     name: SPICEDB_IMAGE
     value: quay.io/redhat-services-prod/project-kessel-tenant/kessel-relations/spicedb:latest
+  - description: SpiceDB quantization interval in seconds
+    name: SPICEDB_QUANTIZATION_INTERVAL
+    value: '10s'
+  - description: SpiceDB quantization max staleness percent (float)
+    name: SPICEDB_QUANTIZATION_STALENESS_PERCENT
+    value: '1.0'

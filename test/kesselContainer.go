@@ -246,7 +246,7 @@ func (l *LocalKesselContainer) Close() {
 	l.spicedbContainer.Close()
 	defer func() {
 		if err := l.kccontainer.Close(); err != nil {
-			log.Errorf("error closing kessel container: %v", err)
+			log.NewHelper(l.logger).Errorf("error closing kessel container: %w", err)
 		}
 	}()
 

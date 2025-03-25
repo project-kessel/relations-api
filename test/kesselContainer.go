@@ -181,7 +181,12 @@ func checkKeycloakHealth(baseURL string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Errorf("error closing response: %v", err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
@@ -209,7 +214,12 @@ func GetJWTToken(baseURL, username, password string) (*TokenResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Errorf("error closing response: %v", err)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -234,7 +244,12 @@ func (l *LocalKesselContainer) Close() {
 		log.NewHelper(l.logger).Error("Could not purge Kessel Container from test. Please delete manually.")
 	}
 	l.spicedbContainer.Close()
-	l.kccontainer.Close()
+	defer func() {
+		if err := l.kccontainer.Close(); err != nil {
+			log.Errorf("error closing kessel container: %v", err)
+		}
+	}()
+
 	if err := l.pool.Client.RemoveNetwork(l.network); err != nil {
 		log.Fatalf("Could not remove network: %s", err)
 	}

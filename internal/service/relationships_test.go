@@ -45,7 +45,7 @@ func TestMain(m *testing.M) {
 
 func TestRelationshipsService_CreateRelationships(t *testing.T) {
 	t.Parallel()
-	err, relationshipsService := setup(t)
+	relationshipsService, err := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
 	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
@@ -94,7 +94,7 @@ func TestRelationshipsService_CreateRelationships(t *testing.T) {
 
 func TestRelationshipsService_CreateRelationships_WithConsistencyToken(t *testing.T) {
 	t.Parallel()
-	err, relationshipsService := setup(t)
+	relationshipsService, err := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
 	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
@@ -145,7 +145,7 @@ func TestRelationshipsService_CreateRelationships_WithConsistencyToken(t *testin
 
 func TestRelationshipsService_CreateRelationships_MinimizeLatency(t *testing.T) {
 	t.Parallel()
-	err, relationshipsService := setup(t)
+	relationshipsService, err := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
 	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
@@ -198,7 +198,7 @@ func TestRelationshipsService_CreateRelationships_MinimizeLatency(t *testing.T) 
 
 func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 	t.Parallel()
-	err, relationshipsService := setup(t)
+	relationshipsService, err := setup(t)
 	assert.NoError(t, err)
 
 	ctx := context.Background()
@@ -251,7 +251,7 @@ func TestRelationshipsService_CreateRelationshipsWithTouchFalse(t *testing.T) {
 // nil tuples in CreateRelationshipsRequest should be equivalent to an empty list of tuples (and not error)
 func TestRelationshipsService_CreateRelationshipsWithNilRelationshipsSlice(t *testing.T) {
 	t.Parallel()
-	err, relationshipsService := setup(t)
+	relationshipsService, err := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
 
@@ -264,7 +264,7 @@ func TestRelationshipsService_CreateRelationshipsWithNilRelationshipsSlice(t *te
 
 func TestRelationshipsService_CreateRelationshipsWithBadSubjectType(t *testing.T) {
 	t.Parallel()
-	err, relationshipsService := setup(t)
+	relationshipsService, err := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
 	badSubjectType := rbac_ns_type("not_a_user")
@@ -283,7 +283,7 @@ func TestRelationshipsService_CreateRelationshipsWithBadSubjectType(t *testing.T
 
 func TestRelationshipsService_CreateRelationshipsWithBadObjectType(t *testing.T) {
 	t.Parallel()
-	err, relationshipsService := setup(t)
+	relationshipsService, err := setup(t)
 	assert.NoError(t, err)
 	ctx := context.Background()
 	badObjectType := rbac_ns_type("not_an_object")
@@ -302,7 +302,7 @@ func TestRelationshipsService_CreateRelationshipsWithBadObjectType(t *testing.T)
 
 func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 	t.Parallel()
-	err, relationshipsService := setup(t)
+	relationshipsService, err := setup(t)
 	assert.NoError(t, err)
 
 	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
@@ -360,7 +360,7 @@ func TestRelationshipsService_DeleteRelationships(t *testing.T) {
 
 func TestRelationshipsService_DeleteRelationships_WithConsistencyToken(t *testing.T) {
 	t.Parallel()
-	err, relationshipsService := setup(t)
+	relationshipsService, err := setup(t)
 	assert.NoError(t, err)
 
 	expected := createRelationship(rbac_ns_type("group"), "bob_club", "member", rbac_ns_type("principal"), "bob", "")
@@ -417,7 +417,7 @@ func TestRelationshipsService_DeleteRelationships_WithConsistencyToken(t *testin
 	assert.NoError(t, err)
 }
 
-func setup(t *testing.T) (error, *RelationshipsService) {
+func setup(t *testing.T) (*RelationshipsService, error) {
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
@@ -432,7 +432,7 @@ func setup(t *testing.T) (error, *RelationshipsService) {
 	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
 	importBulkUsecase := biz.NewImportBulkTuplesUsecase(spiceDbRepository, logger)
 	relationshipsService := NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase, importBulkUsecase)
-	return err, relationshipsService
+	return relationshipsService, err
 }
 
 func TestRelationshipsService_ReadRelationships(t *testing.T) {

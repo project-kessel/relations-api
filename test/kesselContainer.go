@@ -244,11 +244,9 @@ func (l *LocalKesselContainer) Close() {
 		log.NewHelper(l.logger).Error("Could not purge Kessel Container from test. Please delete manually.")
 	}
 	l.spicedbContainer.Close()
-	defer func() {
-		if err := l.kccontainer.Close(); err != nil {
-			log.NewHelper(l.logger).Errorf("error closing kessel container: %w", err)
-		}
-	}()
+	if err := l.kccontainer.Close(); err != nil {
+		log.NewHelper(l.logger).Errorf("error closing kessel container: %w", err)
+	}
 
 	if err := l.pool.Client.RemoveNetwork(l.network); err != nil {
 		log.Fatalf("Could not remove network: %s", err)

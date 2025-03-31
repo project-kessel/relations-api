@@ -197,7 +197,7 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 		}
 	}
 	client, err := s.client.LookupResources(ctx, &v1.LookupResourcesRequest{
-		Consistency:        s.determineConsistency(consistency),
+		Consistency:        &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
 		ResourceObjectType: kesselTypeToSpiceDBType(resouce_type),
 		Permission:         relation,
 		Subject: &v1.SubjectReference{
@@ -666,11 +666,6 @@ func readFile(file string) (string, error) {
 }
 
 func (s *SpiceDbRepository) determineConsistency(consistency *apiV1beta1.Consistency) *v1.Consistency {
-	if s.fullyConsistent {
-		// will ensure that all data used is fully consistent with the latest data available within the SpiceDB datastore.
-		return &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}}
-	}
-
 	if consistency.GetAtLeastAsFresh() != nil {
 		return &v1.Consistency{
 			Requirement: &v1.Consistency_AtLeastAsFresh{
@@ -685,6 +680,11 @@ func (s *SpiceDbRepository) determineConsistency(consistency *apiV1beta1.Consist
 				MinimizeLatency: true,
 			},
 		}
+	}
+
+	if s.fullyConsistent {
+		// will ensure that all data used is fully consistent with the latest data available within the SpiceDB datastore.
+		return &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}}
 	}
 
 	// Default consistency for read APIs is minimize_latency

@@ -197,7 +197,7 @@ func (s *SpiceDbRepository) LookupResources(ctx context.Context, resouce_type *a
 		}
 	}
 	client, err := s.client.LookupResources(ctx, &v1.LookupResourcesRequest{
-		Consistency:        &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
+		Consistency:        s.determineConsistency(consistency),
 		ResourceObjectType: kesselTypeToSpiceDBType(resouce_type),
 		Permission:         relation,
 		Subject: &v1.SubjectReference{

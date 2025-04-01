@@ -415,7 +415,7 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 		return nil, err
 	}
 
-	if filter.GetRelation() != "" {
+	if filter.GetRelation() != "" && filter.GetResourceType() != "" {
 		tempRelation := addRelationPrefix(filter.GetRelation(), relationPrefix)
 		filter.Relation = &tempRelation
 	}

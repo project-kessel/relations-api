@@ -2,8 +2,6 @@ module github.com/project-kessel/relations-api
 
 go 1.22.7
 
-toolchain go1.24.1
-
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250307204501-0409229c3780.1
 	github.com/MicahParks/keyfunc/v3 v3.3.10

@@ -29,7 +29,7 @@ type SpiceDbRepository struct {
 	healthClient    grpc_health_v1.HealthClient
 	schemaFilePath  string
 	isInitialized   bool
-	fullyConsistent bool
+	fullyConsistent bool //TODO: rename flag to smth like fullyConsistentAsDefault
 }
 
 const (
@@ -682,6 +682,10 @@ func (s *SpiceDbRepository) determineConsistency(consistency *apiV1beta1.Consist
 		}
 	}
 
+	// This flag will effectively change the default consistency behaviour
+	// depending on config setting. If no consistency object is sent in a request
+	// the default will either be fullyConsistent if set true or minimize_latency if false.
+	//TODO: rename fullyConsistent flag to smth like fullyConsistentAsDefault
 	if s.fullyConsistent {
 		// will ensure that all data used is fully consistent with the latest data available within the SpiceDB datastore.
 		return &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}}

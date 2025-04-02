@@ -164,7 +164,11 @@ func (l *LocalSpiceDbContainer) CreateSpiceDbRepository() (*SpiceDbRepository, e
 		return nil, err
 	}
 
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			log.NewHelper(l.logger).Errorf("error removing temporary directory: %w", err)
+		}
+	}()
 
 	spiceDbConf := &conf.Data_SpiceDb{
 		UseTLS:          false,

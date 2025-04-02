@@ -29,7 +29,7 @@ func (w *requestValidatingWrapper) RecvMsg(m interface{}) error {
 	}
 
 	if v, ok := m.(proto.Message); ok {
-		if err = w.Validator.Validate(v); err != nil {
+		if err = w.Validate(v); err != nil {
 			return errors.BadRequest("VALIDATOR", err.Error()).WithCause(err)
 		}
 	}

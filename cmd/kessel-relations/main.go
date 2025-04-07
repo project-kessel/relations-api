@@ -61,7 +61,11 @@ func main() {
 			file.NewSource(flagconf),
 		),
 	)
-	defer c.Close()
+	defer func() {
+		if err := c.Close(); err != nil {
+			panic(fmt.Errorf("error closing config: %w", err))
+		}
+	}()
 
 	if err := c.Load(); err != nil {
 		panic(fmt.Errorf("error loading configuration: %w", err))

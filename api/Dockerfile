@@ -2,12 +2,7 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1742914212 AS builder
 
 ARG TARGETARCH
 USER root
-RUN microdnf install -y tar gzip unzip
-
-# install platform specific go version
-RUN curl -O -J  https://dl.google.com/go/go1.22.7.linux-${TARGETARCH}.tar.gz
-RUN tar -C /usr/local -xzf go1.22.7.linux-${TARGETARCH}.tar.gz
-RUN ln -s /usr/local/go/bin/go /usr/local/bin/go
+RUN microdnf install -y tar gzip unzip go-toolset
 
 # Install protoc plugins
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest

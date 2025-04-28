@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1742914212 AS builder
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1745845495 AS builder
 
 ARG TARGETARCH
 USER root
@@ -12,7 +12,7 @@ ENV CGO_ENABLED 1
 RUN go mod vendor
 RUN make build
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1742914212
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1745845495
 
 # installs RHEL fork of go to be able to validate with go tools for FIPS -- likely not needed long term
 RUN microdnf install -y go-toolset

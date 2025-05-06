@@ -176,7 +176,7 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": true,
-                  "expr": "(\n    sum(rate(server_requests_code_total{job=\"kessel-relations-api\", code!=\"200\"}[10m]))\n+\n    sum(rate(server_requests_code_total{ job=\"kessel-relations-api\", code=\"200\"}[10m]))\n)\n /\nsum(rate(server_requests_seconds_bucket_seconds_count{job=\"kessel-relations-api\"}[10m]))",
+                  "expr": "(\n    sum(rate(server_requests_code_total{job=\"kessel-relations-api\", code=\"0\"}[10m]))\n+\n    sum(rate(server_requests_code_total{ job=\"kessel-relations-api\", code=\"200\"}[10m]))\n)\n /\nsum(rate(server_requests_seconds_bucket_seconds_count{job=\"kessel-relations-api\"}[10m]))",
                   "instant": false,
                   "legendFormat": "",
                   "range": true,
@@ -2653,7 +2653,7 @@ data:
       "timezone": "browser",
       "title": "Kessel - Relations API",
       "uid": "ddxs3i6o0xpmoe",
-      "version": 6,
+      "version": 7,
       "weekStart": ""
     }
 kind: ConfigMap

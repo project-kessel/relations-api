@@ -11,8 +11,8 @@ services:
     profiles: ["relations-api"]
     secrets:
       - spicedb_pre_shared
-    configs:
-      - schema_file
+    volumes:
+      - ./deploy/schema.zed:/schema_file:ro,z
     restart: "always"
     ports:
       - "8000:8000"
@@ -63,8 +63,6 @@ services:
 configs:
   spicedb_pre_shared:
     environment: "SPICEDB_GRPC_PRESHARED_KEY"
-  schema_file:
-    file: deploy/schema.zed
 
 secrets:
   spicedb_pre_shared:

@@ -532,7 +532,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-migration-pr-component
+    serviceAccountName: build-pipeline-relations-api
   workspaces:
   - name: workspace
     volumeClaimTemplate:

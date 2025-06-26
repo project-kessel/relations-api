@@ -24,7 +24,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, health *service.HealthService, check *service.CheckService, subjects *service.LookupService, meter metric.Meter, logger log.Logger) (*http.Server, error) {
+func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, health *service.HealthService, check *service.CheckService, subjects *service.LookupService, fencing *service.FencingService, meter metric.Meter, logger log.Logger) (*http.Server, error) {
 	requests, err := metrics.DefaultRequestsCounter(meter, metrics.DefaultServerRequestsCounterName)
 	if err != nil {
 		return nil, err
@@ -87,6 +87,7 @@ func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, 
 	v1beta1.RegisterKesselTupleServiceHTTPServer(srv, relationships)
 	v1beta1.RegisterKesselCheckServiceHTTPServer(srv, check)
 	h.RegisterKesselRelationsHealthServiceHTTPServer(srv, health)
+	v1beta1.RegisterKesselFencingServiceHTTPServer(srv, fencing)
 	return srv, nil
 }
 

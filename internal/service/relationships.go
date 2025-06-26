@@ -33,7 +33,7 @@ func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelatio
 }
 
 func (s *RelationshipsService) CreateTuples(ctx context.Context, req *pb.CreateTuplesRequest) (*pb.CreateTuplesResponse, error) {
-	resp, err := s.createUsecase.CreateRelationships(ctx, req.Tuples, req.GetUpsert()) //The generated .GetUpsert() defaults to false
+	resp, err := s.createUsecase.CreateRelationships(ctx, req.Tuples, req.GetUpsert(), req.GetFencingCheck()) //The generated .GetUpsert() defaults to false
 	if err != nil {
 		return nil, fmt.Errorf("error creating tuples: %w", err)
 	}
@@ -70,7 +70,7 @@ func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.Kes
 }
 
 func (s *RelationshipsService) DeleteTuples(ctx context.Context, req *pb.DeleteTuplesRequest) (*pb.DeleteTuplesResponse, error) {
-	resp, err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter)
+	resp, err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter, req.GetFencingCheck())
 	if err != nil {
 		return nil, fmt.Errorf("error deleting tuples: %w", err)
 	}

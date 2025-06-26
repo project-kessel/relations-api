@@ -291,7 +291,43 @@ func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[a
 
 }
 
-func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics) (*apiV1beta1.CreateTuplesResponse, error) {
+func (s *SpiceDbRepository) ExperimentalWrite(ctx context.Context, updates []*biz.ExperimentalWrite) (*apiV1beta1.CreateTuplesResponse, error) {
+	if err := s.initialize(); err != nil {
+		return nil, err
+	}
+
+	relUpdates := []*v1.RelationshipUpdate{}
+	for _, update := range updates {
+		var operation v1.RelationshipUpdate_Operation
+		switch update.Operation {
+		case biz.OperationCreate:
+			operation = v1.RelationshipUpdate_OPERATION_CREATE
+		case biz.OperationTouch:
+			operation = v1.RelationshipUpdate_OPERATION_TOUCH
+		case biz.OperationDelete:
+			operation = v1.RelationshipUpdate_OPERATION_DELETE
+		default:
+			return nil, fmt.Errorf("invalid operation: %v", update.Operation)
+		}
+		update.Relationship.Relation = addRelationPrefix(update.Relationship.Relation, relationPrefix)
+		relUpdates = append(relUpdates, &v1.RelationshipUpdate{
+			Operation:    operation,
+			Relationship: createSpiceDbRelationship(update.Relationship),
+		})
+	}
+
+	resp, err := s.client.WriteRelationships(ctx, &v1.WriteRelationshipsRequest{
+		Updates: relUpdates,
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("error writing relationships to SpiceDB: %w", err)
+	}
+
+	return &apiV1beta1.CreateTuplesResponse{ConsistencyToken: &apiV1beta1.ConsistencyToken{Token: resp.GetWrittenAt().GetToken()}}, nil
+}
+
+func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics, fencing *apiV1beta1.FencingCheck) (*apiV1beta1.CreateTuplesResponse, error) {
 	if err := s.initialize(); err != nil {
 		return nil, err
 	}
@@ -316,9 +352,28 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 		})
 	}
 
-	resp, err := s.client.WriteRelationships(ctx, &v1.WriteRelationshipsRequest{
+	req := &v1.WriteRelationshipsRequest{
 		Updates: relationshipUpdates,
-	})
+	}
+
+	if fencing != nil {
+		req.OptionalPreconditions = []*v1.Precondition{
+			{
+				Operation: v1.Precondition_OPERATION_MUST_MATCH,
+				Filter: &v1.RelationshipFilter{
+					ResourceType:       "lock",
+					OptionalResourceId: fencing.GetIdentifier(),
+					OptionalRelation:   "version",
+					OptionalSubjectFilter: &v1.SubjectFilter{
+						SubjectType:       "lockversion",
+						OptionalSubjectId: fencing.GetToken(),
+					},
+				},
+			},
+		}
+	}
+
+	resp, err := s.client.WriteRelationships(ctx, req)
 
 	if err != nil {
 		return nil, fmt.Errorf("error writing relationships to SpiceDB: %w", err)
@@ -410,7 +465,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 	return relationshipTuples, errs, nil
 }
 
-func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter) (*apiV1beta1.DeleteTuplesResponse, error) {
+func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter, fencing *apiV1beta1.FencingCheck) (*apiV1beta1.DeleteTuplesResponse, error) {
 	if err := s.initialize(); err != nil {
 		return nil, err
 	}
@@ -427,6 +482,23 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 	}
 
 	req := &v1.DeleteRelationshipsRequest{RelationshipFilter: relationshipFilter}
+
+	if fencing != nil {
+		req.OptionalPreconditions = []*v1.Precondition{
+			{
+				Operation: v1.Precondition_OPERATION_MUST_MATCH,
+				Filter: &v1.RelationshipFilter{
+					ResourceType:       "lock",
+					OptionalResourceId: fencing.GetIdentifier(),
+					OptionalRelation:   "version",
+					OptionalSubjectFilter: &v1.SubjectFilter{
+						SubjectType:       "lockversion",
+						OptionalSubjectId: fencing.GetToken(),
+					},
+				},
+			},
+		}
+	}
 
 	resp, err := s.client.DeleteRelationships(ctx, req)
 

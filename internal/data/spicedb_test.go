@@ -61,7 +61,7 @@ func TestCreateRelationship(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -86,7 +86,7 @@ func TestCreateRelationshipWithConsistencyToken(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	resp, err := spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	resp, err := spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
 	exists := CheckForRelationship(spiceDbRepo, "bob", "rbac", "principal", "", "member", "rbac", "group", "bob_club",
@@ -118,7 +118,7 @@ func TestCreateRelationshipWithSubjectRelation(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -170,10 +170,10 @@ func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.Error(t, err)
 	assert.Equal(t, codes.AlreadyExists, status.Convert(err).Code())
 
@@ -199,12 +199,12 @@ func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
 	touch = true
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -327,7 +327,7 @@ func TestDoesNotCreateRelationshipWithSlashInSubjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.Error(t, err)
 }
 
@@ -346,7 +346,7 @@ func TestDoesNotCreateRelationshipWithSlashInObjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.Error(t, err)
 }
 
@@ -365,7 +365,7 @@ func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.Error(t, err)
 	assert.Equal(t, codes.FailedPrecondition, status.Convert(err).Code())
 	assert.Contains(t, err.Error(),
@@ -387,7 +387,7 @@ func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.Error(t, err)
 	assert.Equal(t, codes.FailedPrecondition, status.Convert(err).Code())
 	assert.Contains(t, err.Error(),
@@ -532,7 +532,7 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
 	}
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -573,7 +573,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
 	}
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -609,7 +609,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	})
+	}, nil)
 
 	if !assert.NoError(t, err) {
 		return
@@ -652,7 +652,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships_WithConsistencyToken(t *tes
 		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
 	}
 
-	respCreate, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	respCreate, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -690,7 +690,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships_WithConsistencyToken(t *tes
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	})
+	}, nil)
 
 	if !assert.NoError(t, err) {
 		return
@@ -738,7 +738,7 @@ func TestSpiceDbRepository_CheckPermission_WithConsistencyToken(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -800,7 +800,7 @@ func TestSpiceDbRepository_CheckForUpdatePermission(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -857,7 +857,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -909,7 +909,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	})
+	}, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -952,7 +952,7 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1041,7 +1041,7 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	})
+	}, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1223,7 +1223,7 @@ func TestSpiceDbRepository_CheckPermission_MinimizeLatency(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1283,7 +1283,7 @@ func TestSpiceDbRepository_CheckPermission_MinimizeLatency(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	})
+	}, nil)
 	if !assert.NoError(t, err) {
 		return
 	}

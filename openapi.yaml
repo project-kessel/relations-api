@@ -30,6 +30,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v1.GetReadyzResponse'
+    /v1beta1/acquirelock:
+        post:
+            tags:
+                - KesselFencingService
+            operationId: KesselFencingService_AcquireLock
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.AcquireLockRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.AcquireLockResponse'
     /v1beta1/check:
         post:
             tags:
@@ -311,6 +329,14 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: fencingCheck.identifier
+                  in: query
+                  schema:
+                    type: string
+                - name: fencingCheck.token
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -354,6 +380,16 @@ components:
                 code:
                     type: integer
                     format: uint32
+        kessel.relations.v1beta1.AcquireLockRequest:
+            type: object
+            properties:
+                identifier:
+                    type: string
+        kessel.relations.v1beta1.AcquireLockResponse:
+            type: object
+            properties:
+                newLock:
+                    type: string
         kessel.relations.v1beta1.CheckForUpdateRequest:
             type: object
             properties:
@@ -422,6 +458,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/kessel.relations.v1beta1.Relationship'
+                fencingCheck:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.FencingCheck'
         kessel.relations.v1beta1.CreateTuplesResponse:
             type: object
             properties:
@@ -432,6 +470,13 @@ components:
             properties:
                 consistencyToken:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
+        kessel.relations.v1beta1.FencingCheck:
+            type: object
+            properties:
+                identifier:
+                    type: string
+                token:
+                    type: string
         kessel.relations.v1beta1.ImportBulkTuplesRequest:
             type: object
             properties:
@@ -513,6 +558,7 @@ components:
             description: A reference to a Subject or, if a `relation` is provided, a Subject Set.
 tags:
     - name: KesselCheckService
+    - name: KesselFencingService
     - name: KesselLookupService
     - name: KesselRelationsHealthService
     - name: KesselTupleService

@@ -4,6 +4,7 @@ package kessel.relations.v1beta1;
 
 import "google/api/annotations.proto";
 import "kessel/relations/v1beta1/common.proto";
+import "kessel/relations/v1beta1/fencing.proto";
 import "buf/validate/validate.proto";
 
 option go_package = "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1";
@@ -57,6 +58,7 @@ message CreateTuplesRequest {
 	// Defaults to `false`.
 	bool upsert = 1;
 	repeated Relationship tuples = 2;
+	optional FencingCheck fencing_check = 3;
 }
 message CreateTuplesResponse {
 	ConsistencyToken consistency_token = 2;
@@ -75,6 +77,7 @@ message ReadTuplesResponse {
 
 message DeleteTuplesRequest {
 	RelationTupleFilter filter = 1 [(buf.validate.field).required = true];
+	optional FencingCheck fencing_check = 2;
 }
 message DeleteTuplesResponse {
 	ConsistencyToken consistency_token = 2;

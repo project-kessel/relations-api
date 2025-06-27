@@ -26,7 +26,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, health *service.HealthService, check *service.CheckService, subjects *service.LookupService, fencing *service.FencingService, meter metric.Meter, logger log.Logger) (*grpc.Server, error) {
+func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, health *service.HealthService, check *service.CheckService, subjects *service.LookupService, meter metric.Meter, logger log.Logger) (*grpc.Server, error) {
 	requests, err := metrics.DefaultRequestsCounter(meter, metrics.DefaultServerRequestsCounterName)
 	if err != nil {
 		return nil, err
@@ -99,6 +99,5 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 	v1beta1.RegisterKesselCheckServiceServer(srv, check)
 	h.RegisterKesselRelationsHealthServiceServer(srv, health)
 	v1beta1.RegisterKesselLookupServiceServer(srv, subjects)
-	v1beta1.RegisterKesselFencingServiceServer(srv, fencing)
 	return srv, nil
 }

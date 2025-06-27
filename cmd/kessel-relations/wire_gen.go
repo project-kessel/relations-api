@@ -32,7 +32,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	readRelationshipsUsecase := biz.NewReadRelationshipsUsecase(spiceDbRepository, logger)
 	deleteRelationshipsUsecase := biz.NewDeleteRelationshipsUsecase(spiceDbRepository, logger)
 	importBulkTuplesUsecase := biz.NewImportBulkTuplesUsecase(spiceDbRepository, logger)
-	relationshipsService := service.NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase, importBulkTuplesUsecase)
+	acquireLockUsecase := biz.NewAcquireLockUsecase(spiceDbRepository, logger)
+	relationshipsService := service.NewRelationshipsService(logger, createRelationshipsUsecase, readRelationshipsUsecase, deleteRelationshipsUsecase, importBulkTuplesUsecase, acquireLockUsecase)
 	isBackendAvaliableUsecase := biz.NewIsBackendAvailableUsecase(spiceDbRepository)
 	healthService := service.NewHealthService(isBackendAvaliableUsecase)
 	checkUsecase := biz.NewCheckUsecase(spiceDbRepository, logger)
@@ -41,8 +42,6 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	getSubjectsUsecase := biz.NewGetSubjectsUseCase(spiceDbRepository)
 	getResourcesUsecase := biz.NewGetResourcesUseCase(spiceDbRepository)
 	lookupService := service.NewLookupService(logger, getSubjectsUsecase, getResourcesUsecase)
-	acquireLockUsecase := biz.NewAcquireLockUsecase(spiceDbRepository)
-	fencingService := service.NewFencingService(logger, acquireLockUsecase)
 	meterProvider, err := server.NewMeterProvider(confServer)
 	if err != nil {
 		cleanup()
@@ -53,12 +52,12 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 		cleanup()
 		return nil, nil, err
 	}
-	grpcServer, err := server.NewGRPCServer(confServer, relationshipsService, healthService, checkService, lookupService, fencingService, meter, logger)
+	grpcServer, err := server.NewGRPCServer(confServer, relationshipsService, healthService, checkService, lookupService, meter, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	httpServer, err := server.NewHTTPServer(confServer, relationshipsService, healthService, checkService, lookupService, fencingService, meter, logger)
+	httpServer, err := server.NewHTTPServer(confServer, relationshipsService, healthService, checkService, lookupService, meter, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

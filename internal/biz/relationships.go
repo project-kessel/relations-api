@@ -41,7 +41,7 @@ type ZanzibarRepository interface {
 	LookupResources(ctx context.Context, resouce_type *v1beta1.ObjectType, relation string, subject *v1beta1.SubjectReference, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *ResourceResult, chan error, error)
 	IsBackendAvailable() error
 	ImportBulkTuples(stream grpc.ClientStreamingServer[v1beta1.ImportBulkTuplesRequest, v1beta1.ImportBulkTuplesResponse]) error
-	AcquireLock(ctx context.Context, identifier string, existingLock string) (string, error)
+	AcquireLock(ctx context.Context, identifier string, existingLock string) (*v1beta1.AcquireLockResponse, error)
 }
 
 type CheckUsecase struct {
@@ -139,4 +139,17 @@ func NewImportBulkTuplesUsecase(repo ZanzibarRepository, logger log.Logger) *Imp
 
 func (rc *ImportBulkTuplesUsecase) ImportBulkTuples(client grpc.ClientStreamingServer[v1beta1.ImportBulkTuplesRequest, v1beta1.ImportBulkTuplesResponse]) error {
 	return rc.repo.ImportBulkTuples(client)
+}
+
+type AcquireLockUsecase struct {
+	repo ZanzibarRepository
+	log  *log.Helper
+}
+
+func NewAcquireLockUsecase(repo ZanzibarRepository, logger log.Logger) *AcquireLockUsecase {
+	return &AcquireLockUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
+func (rc *AcquireLockUsecase) AcquireLock(ctx context.Context, req *v1beta1.AcquireLockRequest) (*v1beta1.AcquireLockResponse, error) {
+	return rc.repo.AcquireLock(ctx, req.Identifier, req.GetExistingToken())
 }

@@ -15,20 +15,22 @@ import (
 
 type RelationshipsService struct {
 	pb.UnimplementedKesselTupleServiceServer
-	createUsecase     *biz.CreateRelationshipsUsecase
-	readUsecase       *biz.ReadRelationshipsUsecase
-	deleteUsecase     *biz.DeleteRelationshipsUsecase
-	importBulkUsecase *biz.ImportBulkTuplesUsecase
-	log               *log.Helper
+	createUsecase      *biz.CreateRelationshipsUsecase
+	readUsecase        *biz.ReadRelationshipsUsecase
+	deleteUsecase      *biz.DeleteRelationshipsUsecase
+	importBulkUsecase  *biz.ImportBulkTuplesUsecase
+	acquireLockUsecase *biz.AcquireLockUsecase
+	log                *log.Helper
 }
 
-func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelationshipsUsecase, readUsecase *biz.ReadRelationshipsUsecase, deleteUsecase *biz.DeleteRelationshipsUsecase, importBulkUsecase *biz.ImportBulkTuplesUsecase) *RelationshipsService {
+func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelationshipsUsecase, readUsecase *biz.ReadRelationshipsUsecase, deleteUsecase *biz.DeleteRelationshipsUsecase, importBulkUsecase *biz.ImportBulkTuplesUsecase, acquireLockUsecase *biz.AcquireLockUsecase) *RelationshipsService {
 	return &RelationshipsService{
-		log:               log.NewHelper(logger),
-		createUsecase:     createUseCase,
-		readUsecase:       readUsecase,
-		deleteUsecase:     deleteUsecase,
-		importBulkUsecase: importBulkUsecase,
+		log:                log.NewHelper(logger),
+		createUsecase:      createUseCase,
+		readUsecase:        readUsecase,
+		deleteUsecase:      deleteUsecase,
+		importBulkUsecase:  importBulkUsecase,
+		acquireLockUsecase: acquireLockUsecase,
 	}
 }
 
@@ -84,4 +86,12 @@ func (s *RelationshipsService) ImportBulkTuples(stream grpc.ClientStreamingServe
 		return fmt.Errorf("error import bulk tuples: %w", err)
 	}
 	return nil
+}
+
+func (s *RelationshipsService) AcquireLock(ctx context.Context, req *pb.AcquireLockRequest) (*pb.AcquireLockResponse, error) {
+	resp, err := s.acquireLockUsecase.AcquireLock(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("error acquiring lock: %w", err)
+	}
+	return resp, nil
 }

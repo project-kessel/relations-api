@@ -583,9 +583,9 @@ func (s *SpiceDbRepository) IsBackendAvailable() error {
 	return fmt.Errorf("error connecting to backend")
 }
 
-func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, existingFencingToken string) (string, error) {
+func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, existingFencingToken string) (*apiV1beta1.AcquireLockResponse, error) {
 	if err := s.initialize(); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	newFencingToken := uuid.New().String()
@@ -598,12 +598,12 @@ func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, 
 		},
 	})
 	if err != nil {
-		return "", fmt.Errorf("error invoking ReadRelationships in SpiceDB: %w", err)
+		return nil, fmt.Errorf("error invoking ReadRelationships in SpiceDB: %w", err)
 	}
 
 	existingLock, err := readClient.Recv()
 	if err != nil && !errors.Is(err, io.EOF) {
-		return "", fmt.Errorf("error reading existing lock: %w", err)
+		return nil, fmt.Errorf("error reading existing lock: %w", err)
 	}
 
 	var updates []*v1.RelationshipUpdate
@@ -612,7 +612,7 @@ func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, 
 	if existingLock != nil && existingLock.Relationship != nil {
 
 		if existingFencingToken != "" && existingLock.Relationship.Subject.Object.ObjectId != existingFencingToken {
-			return "", fmt.Errorf("existing lock does not match fencing token")
+			return nil, fmt.Errorf("existing lock does not match fencing token")
 		}
 
 		updates = append(updates, &v1.RelationshipUpdate{
@@ -656,10 +656,10 @@ func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, 
 		OptionalPreconditions: preconditions,
 	})
 	if err != nil {
-		return "", fmt.Errorf("error writing relationships to SpiceDB: %w", err)
+		return nil, fmt.Errorf("error writing relationships to SpiceDB: %w", err)
 	}
 
-	return newFencingToken, nil
+	return &apiV1beta1.AcquireLockResponse{NewToken: newFencingToken}, nil
 }
 
 func createSpiceDbRelationshipFilter(filter *apiV1beta1.RelationTupleFilter) (*v1.RelationshipFilter, error) {

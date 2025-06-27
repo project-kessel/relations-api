@@ -434,6 +434,154 @@ func (x *DeleteTuplesResponse) GetConsistencyToken() *ConsistencyToken {
 	return nil
 }
 
+type AcquireLockRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Identifier    string                 `protobuf:"bytes,1,opt,name=identifier,proto3" json:"identifier,omitempty"`
+	ExistingToken *string                `protobuf:"bytes,2,opt,name=existing_token,json=existingToken,proto3,oneof" json:"existing_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AcquireLockRequest) Reset() {
+	*x = AcquireLockRequest{}
+	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcquireLockRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcquireLockRequest) ProtoMessage() {}
+
+func (x *AcquireLockRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcquireLockRequest.ProtoReflect.Descriptor instead.
+func (*AcquireLockRequest) Descriptor() ([]byte, []int) {
+	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *AcquireLockRequest) GetIdentifier() string {
+	if x != nil {
+		return x.Identifier
+	}
+	return ""
+}
+
+func (x *AcquireLockRequest) GetExistingToken() string {
+	if x != nil && x.ExistingToken != nil {
+		return *x.ExistingToken
+	}
+	return ""
+}
+
+type AcquireLockResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NewToken      string                 `protobuf:"bytes,1,opt,name=new_token,json=newToken,proto3" json:"new_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AcquireLockResponse) Reset() {
+	*x = AcquireLockResponse{}
+	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcquireLockResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcquireLockResponse) ProtoMessage() {}
+
+func (x *AcquireLockResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcquireLockResponse.ProtoReflect.Descriptor instead.
+func (*AcquireLockResponse) Descriptor() ([]byte, []int) {
+	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *AcquireLockResponse) GetNewToken() string {
+	if x != nil {
+		return x.NewToken
+	}
+	return ""
+}
+
+type FencingCheck struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Identifier    string                 `protobuf:"bytes,1,opt,name=identifier,proto3" json:"identifier,omitempty"`
+	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FencingCheck) Reset() {
+	*x = FencingCheck{}
+	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FencingCheck) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FencingCheck) ProtoMessage() {}
+
+func (x *FencingCheck) ProtoReflect() protoreflect.Message {
+	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FencingCheck.ProtoReflect.Descriptor instead.
+func (*FencingCheck) Descriptor() ([]byte, []int) {
+	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *FencingCheck) GetIdentifier() string {
+	if x != nil {
+		return x.Identifier
+	}
+	return ""
+}
+
+func (x *FencingCheck) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
 // RelationTupleFilter is used to filter tuples based on their resource, relation, and subject.
 // All fields are optional but capabilities may vary based on the chosen store and its indexes.
 // At least one field must be provided.
@@ -450,7 +598,7 @@ type RelationTupleFilter struct {
 
 func (x *RelationTupleFilter) Reset() {
 	*x = RelationTupleFilter{}
-	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[8]
+	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -462,7 +610,7 @@ func (x *RelationTupleFilter) String() string {
 func (*RelationTupleFilter) ProtoMessage() {}
 
 func (x *RelationTupleFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[8]
+	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -475,7 +623,7 @@ func (x *RelationTupleFilter) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RelationTupleFilter.ProtoReflect.Descriptor instead.
 func (*RelationTupleFilter) Descriptor() ([]byte, []int) {
-	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP(), []int{8}
+	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *RelationTupleFilter) GetResourceNamespace() string {
@@ -525,7 +673,7 @@ type SubjectFilter struct {
 
 func (x *SubjectFilter) Reset() {
 	*x = SubjectFilter{}
-	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[9]
+	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -537,7 +685,7 @@ func (x *SubjectFilter) String() string {
 func (*SubjectFilter) ProtoMessage() {}
 
 func (x *SubjectFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[9]
+	mi := &file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -550,7 +698,7 @@ func (x *SubjectFilter) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubjectFilter.ProtoReflect.Descriptor instead.
 func (*SubjectFilter) Descriptor() ([]byte, []int) {
-	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP(), []int{9}
+	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SubjectFilter) GetSubjectNamespace() string {
@@ -585,7 +733,7 @@ var File_kessel_relations_v1beta1_relation_tuples_proto protoreflect.FileDescrip
 
 const file_kessel_relations_v1beta1_relation_tuples_proto_rawDesc = "" +
 	"\n" +
-	".kessel/relations/v1beta1/relation_tuples.proto\x12\x18kessel.relations.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a%kessel/relations/v1beta1/common.proto\x1a&kessel/relations/v1beta1/fencing.proto\x1a\x1bbuf/validate/validate.proto\"c\n" +
+	".kessel/relations/v1beta1/relation_tuples.proto\x12\x18kessel.relations.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a%kessel/relations/v1beta1/common.proto\x1a\x1bbuf/validate/validate.proto\"c\n" +
 	"\x17ImportBulkTuplesRequest\x12H\n" +
 	"\x06tuples\x18\x01 \x03(\v2&.kessel.relations.v1beta1.RelationshipB\b\xbaH\x05\x92\x01\x02\b\x01R\x06tuples\"=\n" +
 	"\x18ImportBulkTuplesResponse\x12!\n" +
@@ -616,7 +764,20 @@ const file_kessel_relations_v1beta1_relation_tuples_proto_rawDesc = "" +
 	"\rfencing_check\x18\x02 \x01(\v2&.kessel.relations.v1beta1.FencingCheckH\x00R\ffencingCheck\x88\x01\x01B\x10\n" +
 	"\x0e_fencing_check\"o\n" +
 	"\x14DeleteTuplesResponse\x12W\n" +
-	"\x11consistency_token\x18\x02 \x01(\v2*.kessel.relations.v1beta1.ConsistencyTokenR\x10consistencyToken\"\xe8\x02\n" +
+	"\x11consistency_token\x18\x02 \x01(\v2*.kessel.relations.v1beta1.ConsistencyTokenR\x10consistencyToken\"{\n" +
+	"\x12AcquireLockRequest\x12&\n" +
+	"\n" +
+	"identifier\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\n" +
+	"identifier\x12*\n" +
+	"\x0eexisting_token\x18\x02 \x01(\tH\x00R\rexistingToken\x88\x01\x01B\x11\n" +
+	"\x0f_existing_token\"2\n" +
+	"\x13AcquireLockResponse\x12\x1b\n" +
+	"\tnew_token\x18\x01 \x01(\tR\bnewToken\"T\n" +
+	"\fFencingCheck\x12&\n" +
+	"\n" +
+	"identifier\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\n" +
+	"identifier\x12\x1c\n" +
+	"\x05token\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x05token\"\xe8\x02\n" +
 	"\x13RelationTupleFilter\x122\n" +
 	"\x12resource_namespace\x18\x01 \x01(\tH\x00R\x11resourceNamespace\x88\x01\x01\x12(\n" +
 	"\rresource_type\x18\x02 \x01(\tH\x01R\fresourceType\x88\x01\x01\x12$\n" +
@@ -638,13 +799,14 @@ const file_kessel_relations_v1beta1_relation_tuples_proto_rawDesc = "" +
 	"\x12_subject_namespaceB\x0f\n" +
 	"\r_subject_typeB\r\n" +
 	"\v_subject_idB\v\n" +
-	"\t_relation2\xd3\x04\n" +
+	"\t_relation2\xe1\x05\n" +
 	"\x12KesselTupleService\x12\x89\x01\n" +
 	"\fCreateTuples\x12-.kessel.relations.v1beta1.CreateTuplesRequest\x1a..kessel.relations.v1beta1.CreateTuplesResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1beta1/tuples\x12\x82\x01\n" +
 	"\n" +
 	"ReadTuples\x12+.kessel.relations.v1beta1.ReadTuplesRequest\x1a,.kessel.relations.v1beta1.ReadTuplesResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1beta1/tuples0\x01\x12\x86\x01\n" +
 	"\fDeleteTuples\x12-.kessel.relations.v1beta1.DeleteTuplesRequest\x1a..kessel.relations.v1beta1.DeleteTuplesResponse\"\x17\x82\xd3\xe4\x93\x02\x11*\x0f/v1beta1/tuples\x12\xa2\x01\n" +
-	"\x10ImportBulkTuples\x121.kessel.relations.v1beta1.ImportBulkTuplesRequest\x1a2.kessel.relations.v1beta1.ImportBulkTuplesResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/v1beta1/tuples/bulkimport(\x01Br\n" +
+	"\x10ImportBulkTuples\x121.kessel.relations.v1beta1.ImportBulkTuplesRequest\x1a2.kessel.relations.v1beta1.ImportBulkTuplesResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/v1beta1/tuples/bulkimport(\x01\x12\x8b\x01\n" +
+	"\vAcquireLock\x12,.kessel.relations.v1beta1.AcquireLockRequest\x1a-.kessel.relations.v1beta1.AcquireLockResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/v1beta1/acquirelockBr\n" +
 	"(org.project_kessel.api.relations.v1beta1P\x01ZDgithub.com/project-kessel/relations-api/api/kessel/relations/v1beta1b\x06proto3"
 
 var (
@@ -659,7 +821,7 @@ func file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP() []byte {
 	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescData
 }
 
-var file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_kessel_relations_v1beta1_relation_tuples_proto_goTypes = []any{
 	(*ImportBulkTuplesRequest)(nil),  // 0: kessel.relations.v1beta1.ImportBulkTuplesRequest
 	(*ImportBulkTuplesResponse)(nil), // 1: kessel.relations.v1beta1.ImportBulkTuplesResponse
@@ -669,40 +831,44 @@ var file_kessel_relations_v1beta1_relation_tuples_proto_goTypes = []any{
 	(*ReadTuplesResponse)(nil),       // 5: kessel.relations.v1beta1.ReadTuplesResponse
 	(*DeleteTuplesRequest)(nil),      // 6: kessel.relations.v1beta1.DeleteTuplesRequest
 	(*DeleteTuplesResponse)(nil),     // 7: kessel.relations.v1beta1.DeleteTuplesResponse
-	(*RelationTupleFilter)(nil),      // 8: kessel.relations.v1beta1.RelationTupleFilter
-	(*SubjectFilter)(nil),            // 9: kessel.relations.v1beta1.SubjectFilter
-	(*Relationship)(nil),             // 10: kessel.relations.v1beta1.Relationship
-	(*FencingCheck)(nil),             // 11: kessel.relations.v1beta1.FencingCheck
-	(*ConsistencyToken)(nil),         // 12: kessel.relations.v1beta1.ConsistencyToken
-	(*RequestPagination)(nil),        // 13: kessel.relations.v1beta1.RequestPagination
-	(*Consistency)(nil),              // 14: kessel.relations.v1beta1.Consistency
-	(*ResponsePagination)(nil),       // 15: kessel.relations.v1beta1.ResponsePagination
+	(*AcquireLockRequest)(nil),       // 8: kessel.relations.v1beta1.AcquireLockRequest
+	(*AcquireLockResponse)(nil),      // 9: kessel.relations.v1beta1.AcquireLockResponse
+	(*FencingCheck)(nil),             // 10: kessel.relations.v1beta1.FencingCheck
+	(*RelationTupleFilter)(nil),      // 11: kessel.relations.v1beta1.RelationTupleFilter
+	(*SubjectFilter)(nil),            // 12: kessel.relations.v1beta1.SubjectFilter
+	(*Relationship)(nil),             // 13: kessel.relations.v1beta1.Relationship
+	(*ConsistencyToken)(nil),         // 14: kessel.relations.v1beta1.ConsistencyToken
+	(*RequestPagination)(nil),        // 15: kessel.relations.v1beta1.RequestPagination
+	(*Consistency)(nil),              // 16: kessel.relations.v1beta1.Consistency
+	(*ResponsePagination)(nil),       // 17: kessel.relations.v1beta1.ResponsePagination
 }
 var file_kessel_relations_v1beta1_relation_tuples_proto_depIdxs = []int32{
-	10, // 0: kessel.relations.v1beta1.ImportBulkTuplesRequest.tuples:type_name -> kessel.relations.v1beta1.Relationship
-	10, // 1: kessel.relations.v1beta1.CreateTuplesRequest.tuples:type_name -> kessel.relations.v1beta1.Relationship
-	11, // 2: kessel.relations.v1beta1.CreateTuplesRequest.fencing_check:type_name -> kessel.relations.v1beta1.FencingCheck
-	12, // 3: kessel.relations.v1beta1.CreateTuplesResponse.consistency_token:type_name -> kessel.relations.v1beta1.ConsistencyToken
-	8,  // 4: kessel.relations.v1beta1.ReadTuplesRequest.filter:type_name -> kessel.relations.v1beta1.RelationTupleFilter
-	13, // 5: kessel.relations.v1beta1.ReadTuplesRequest.pagination:type_name -> kessel.relations.v1beta1.RequestPagination
-	14, // 6: kessel.relations.v1beta1.ReadTuplesRequest.consistency:type_name -> kessel.relations.v1beta1.Consistency
-	10, // 7: kessel.relations.v1beta1.ReadTuplesResponse.tuple:type_name -> kessel.relations.v1beta1.Relationship
-	15, // 8: kessel.relations.v1beta1.ReadTuplesResponse.pagination:type_name -> kessel.relations.v1beta1.ResponsePagination
-	12, // 9: kessel.relations.v1beta1.ReadTuplesResponse.consistency_token:type_name -> kessel.relations.v1beta1.ConsistencyToken
-	8,  // 10: kessel.relations.v1beta1.DeleteTuplesRequest.filter:type_name -> kessel.relations.v1beta1.RelationTupleFilter
-	11, // 11: kessel.relations.v1beta1.DeleteTuplesRequest.fencing_check:type_name -> kessel.relations.v1beta1.FencingCheck
-	12, // 12: kessel.relations.v1beta1.DeleteTuplesResponse.consistency_token:type_name -> kessel.relations.v1beta1.ConsistencyToken
-	9,  // 13: kessel.relations.v1beta1.RelationTupleFilter.subject_filter:type_name -> kessel.relations.v1beta1.SubjectFilter
+	13, // 0: kessel.relations.v1beta1.ImportBulkTuplesRequest.tuples:type_name -> kessel.relations.v1beta1.Relationship
+	13, // 1: kessel.relations.v1beta1.CreateTuplesRequest.tuples:type_name -> kessel.relations.v1beta1.Relationship
+	10, // 2: kessel.relations.v1beta1.CreateTuplesRequest.fencing_check:type_name -> kessel.relations.v1beta1.FencingCheck
+	14, // 3: kessel.relations.v1beta1.CreateTuplesResponse.consistency_token:type_name -> kessel.relations.v1beta1.ConsistencyToken
+	11, // 4: kessel.relations.v1beta1.ReadTuplesRequest.filter:type_name -> kessel.relations.v1beta1.RelationTupleFilter
+	15, // 5: kessel.relations.v1beta1.ReadTuplesRequest.pagination:type_name -> kessel.relations.v1beta1.RequestPagination
+	16, // 6: kessel.relations.v1beta1.ReadTuplesRequest.consistency:type_name -> kessel.relations.v1beta1.Consistency
+	13, // 7: kessel.relations.v1beta1.ReadTuplesResponse.tuple:type_name -> kessel.relations.v1beta1.Relationship
+	17, // 8: kessel.relations.v1beta1.ReadTuplesResponse.pagination:type_name -> kessel.relations.v1beta1.ResponsePagination
+	14, // 9: kessel.relations.v1beta1.ReadTuplesResponse.consistency_token:type_name -> kessel.relations.v1beta1.ConsistencyToken
+	11, // 10: kessel.relations.v1beta1.DeleteTuplesRequest.filter:type_name -> kessel.relations.v1beta1.RelationTupleFilter
+	10, // 11: kessel.relations.v1beta1.DeleteTuplesRequest.fencing_check:type_name -> kessel.relations.v1beta1.FencingCheck
+	14, // 12: kessel.relations.v1beta1.DeleteTuplesResponse.consistency_token:type_name -> kessel.relations.v1beta1.ConsistencyToken
+	12, // 13: kessel.relations.v1beta1.RelationTupleFilter.subject_filter:type_name -> kessel.relations.v1beta1.SubjectFilter
 	2,  // 14: kessel.relations.v1beta1.KesselTupleService.CreateTuples:input_type -> kessel.relations.v1beta1.CreateTuplesRequest
 	4,  // 15: kessel.relations.v1beta1.KesselTupleService.ReadTuples:input_type -> kessel.relations.v1beta1.ReadTuplesRequest
 	6,  // 16: kessel.relations.v1beta1.KesselTupleService.DeleteTuples:input_type -> kessel.relations.v1beta1.DeleteTuplesRequest
 	0,  // 17: kessel.relations.v1beta1.KesselTupleService.ImportBulkTuples:input_type -> kessel.relations.v1beta1.ImportBulkTuplesRequest
-	3,  // 18: kessel.relations.v1beta1.KesselTupleService.CreateTuples:output_type -> kessel.relations.v1beta1.CreateTuplesResponse
-	5,  // 19: kessel.relations.v1beta1.KesselTupleService.ReadTuples:output_type -> kessel.relations.v1beta1.ReadTuplesResponse
-	7,  // 20: kessel.relations.v1beta1.KesselTupleService.DeleteTuples:output_type -> kessel.relations.v1beta1.DeleteTuplesResponse
-	1,  // 21: kessel.relations.v1beta1.KesselTupleService.ImportBulkTuples:output_type -> kessel.relations.v1beta1.ImportBulkTuplesResponse
-	18, // [18:22] is the sub-list for method output_type
-	14, // [14:18] is the sub-list for method input_type
+	8,  // 18: kessel.relations.v1beta1.KesselTupleService.AcquireLock:input_type -> kessel.relations.v1beta1.AcquireLockRequest
+	3,  // 19: kessel.relations.v1beta1.KesselTupleService.CreateTuples:output_type -> kessel.relations.v1beta1.CreateTuplesResponse
+	5,  // 20: kessel.relations.v1beta1.KesselTupleService.ReadTuples:output_type -> kessel.relations.v1beta1.ReadTuplesResponse
+	7,  // 21: kessel.relations.v1beta1.KesselTupleService.DeleteTuples:output_type -> kessel.relations.v1beta1.DeleteTuplesResponse
+	1,  // 22: kessel.relations.v1beta1.KesselTupleService.ImportBulkTuples:output_type -> kessel.relations.v1beta1.ImportBulkTuplesResponse
+	9,  // 23: kessel.relations.v1beta1.KesselTupleService.AcquireLock:output_type -> kessel.relations.v1beta1.AcquireLockResponse
+	19, // [19:24] is the sub-list for method output_type
+	14, // [14:19] is the sub-list for method input_type
 	14, // [14:14] is the sub-list for extension type_name
 	14, // [14:14] is the sub-list for extension extendee
 	0,  // [0:14] is the sub-list for field type_name
@@ -714,19 +880,19 @@ func file_kessel_relations_v1beta1_relation_tuples_proto_init() {
 		return
 	}
 	file_kessel_relations_v1beta1_common_proto_init()
-	file_kessel_relations_v1beta1_fencing_proto_init()
 	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[2].OneofWrappers = []any{}
 	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[4].OneofWrappers = []any{}
 	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[6].OneofWrappers = []any{}
 	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[8].OneofWrappers = []any{}
-	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[9].OneofWrappers = []any{}
+	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[11].OneofWrappers = []any{}
+	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[12].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_kessel_relations_v1beta1_relation_tuples_proto_rawDesc), len(file_kessel_relations_v1beta1_relation_tuples_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

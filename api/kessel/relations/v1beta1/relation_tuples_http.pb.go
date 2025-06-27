@@ -19,10 +19,12 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationKesselTupleServiceAcquireLock = "/kessel.relations.v1beta1.KesselTupleService/AcquireLock"
 const OperationKesselTupleServiceCreateTuples = "/kessel.relations.v1beta1.KesselTupleService/CreateTuples"
 const OperationKesselTupleServiceDeleteTuples = "/kessel.relations.v1beta1.KesselTupleService/DeleteTuples"
 
 type KesselTupleServiceHTTPServer interface {
+	AcquireLock(context.Context, *AcquireLockRequest) (*AcquireLockResponse, error)
 	CreateTuples(context.Context, *CreateTuplesRequest) (*CreateTuplesResponse, error)
 	DeleteTuples(context.Context, *DeleteTuplesRequest) (*DeleteTuplesResponse, error)
 }
@@ -31,6 +33,7 @@ func RegisterKesselTupleServiceHTTPServer(s *http.Server, srv KesselTupleService
 	r := s.Route("/")
 	r.POST("/v1beta1/tuples", _KesselTupleService_CreateTuples0_HTTP_Handler(srv))
 	r.DELETE("/v1beta1/tuples", _KesselTupleService_DeleteTuples0_HTTP_Handler(srv))
+	r.POST("/v1beta1/acquirelock", _KesselTupleService_AcquireLock0_HTTP_Handler(srv))
 }
 
 func _KesselTupleService_CreateTuples0_HTTP_Handler(srv KesselTupleServiceHTTPServer) func(ctx http.Context) error {
@@ -74,7 +77,30 @@ func _KesselTupleService_DeleteTuples0_HTTP_Handler(srv KesselTupleServiceHTTPSe
 	}
 }
 
+func _KesselTupleService_AcquireLock0_HTTP_Handler(srv KesselTupleServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AcquireLockRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationKesselTupleServiceAcquireLock)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AcquireLock(ctx, req.(*AcquireLockRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AcquireLockResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type KesselTupleServiceHTTPClient interface {
+	AcquireLock(ctx context.Context, req *AcquireLockRequest, opts ...http.CallOption) (rsp *AcquireLockResponse, err error)
 	CreateTuples(ctx context.Context, req *CreateTuplesRequest, opts ...http.CallOption) (rsp *CreateTuplesResponse, err error)
 	DeleteTuples(ctx context.Context, req *DeleteTuplesRequest, opts ...http.CallOption) (rsp *DeleteTuplesResponse, err error)
 }
@@ -85,6 +111,19 @@ type KesselTupleServiceHTTPClientImpl struct {
 
 func NewKesselTupleServiceHTTPClient(client *http.Client) KesselTupleServiceHTTPClient {
 	return &KesselTupleServiceHTTPClientImpl{client}
+}
+
+func (c *KesselTupleServiceHTTPClientImpl) AcquireLock(ctx context.Context, in *AcquireLockRequest, opts ...http.CallOption) (*AcquireLockResponse, error) {
+	var out AcquireLockResponse
+	pattern := "/v1beta1/acquirelock"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationKesselTupleServiceAcquireLock))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *KesselTupleServiceHTTPClientImpl) CreateTuples(ctx context.Context, in *CreateTuplesRequest, opts ...http.CallOption) (*CreateTuplesResponse, error) {

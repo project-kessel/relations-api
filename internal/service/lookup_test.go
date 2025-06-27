@@ -393,7 +393,7 @@ func TestLookupService_LookupResources_IgnoresSubjectRelation(t *testing.T) {
 			Relation: "subject",
 			Subject:  &v1beta1.SubjectReference{Relation: &memberRelation, Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("group"), Id: "g1"}},
 		},
-	}, biz.TouchSemantics(true))
+	}, biz.TouchSemantics(true), nil)
 	assert.NoError(t, err)
 
 	_, err = spicedb.CreateRelationships(ctx, []*v1beta1.Relationship{
@@ -402,7 +402,7 @@ func TestLookupService_LookupResources_IgnoresSubjectRelation(t *testing.T) {
 			Relation: "member",
 			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("principal"), Id: "p1"}},
 		},
-	}, biz.TouchSemantics(true))
+	}, biz.TouchSemantics(true), nil)
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -454,7 +454,7 @@ func seedWidgetInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepo
 			Relation: "workspace",
 			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("workspace"), Id: "default"}},
 		},
-	}, biz.TouchSemantics(true))
+	}, biz.TouchSemantics(true), nil)
 }
 
 func seedUserWithViewThingInDefaultWorkspace(ctx context.Context, spicedb *data.SpiceDbRepository, user string) (*v1beta1.CreateTuplesResponse, error) {
@@ -484,7 +484,7 @@ func seedUserWithViewThingInDefaultWorkspace(ctx context.Context, spicedb *data.
 			Relation: "user_grant",
 			Subject:  &v1beta1.SubjectReference{Subject: &v1beta1.ObjectReference{Type: rbac_ns_type("role_binding"), Id: "default_viewers"}},
 		},
-	}, biz.TouchSemantics(true))
+	}, biz.TouchSemantics(true), nil)
 }
 
 func NewLookup_SubjectsServerStub(ctx context.Context) *Lookup_SubjectsServerStub {

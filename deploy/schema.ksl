@@ -42,3 +42,9 @@ internal extension add_permission(name) {
         internal relation ${name}: user_grant.${name} or parent.${name}
     }
 }
+
+public type lock {
+    relation version: [ExactlyOne lockversion]
+}
+
+public type lockversion {}

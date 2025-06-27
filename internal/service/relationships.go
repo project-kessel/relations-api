@@ -15,25 +15,27 @@ import (
 
 type RelationshipsService struct {
 	pb.UnimplementedKesselTupleServiceServer
-	createUsecase     *biz.CreateRelationshipsUsecase
-	readUsecase       *biz.ReadRelationshipsUsecase
-	deleteUsecase     *biz.DeleteRelationshipsUsecase
-	importBulkUsecase *biz.ImportBulkTuplesUsecase
-	log               *log.Helper
+	createUsecase      *biz.CreateRelationshipsUsecase
+	readUsecase        *biz.ReadRelationshipsUsecase
+	deleteUsecase      *biz.DeleteRelationshipsUsecase
+	importBulkUsecase  *biz.ImportBulkTuplesUsecase
+	acquireLockUsecase *biz.AcquireLockUsecase
+	log                *log.Helper
 }
 
-func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelationshipsUsecase, readUsecase *biz.ReadRelationshipsUsecase, deleteUsecase *biz.DeleteRelationshipsUsecase, importBulkUsecase *biz.ImportBulkTuplesUsecase) *RelationshipsService {
+func NewRelationshipsService(logger log.Logger, createUseCase *biz.CreateRelationshipsUsecase, readUsecase *biz.ReadRelationshipsUsecase, deleteUsecase *biz.DeleteRelationshipsUsecase, importBulkUsecase *biz.ImportBulkTuplesUsecase, acquireLockUsecase *biz.AcquireLockUsecase) *RelationshipsService {
 	return &RelationshipsService{
-		log:               log.NewHelper(logger),
-		createUsecase:     createUseCase,
-		readUsecase:       readUsecase,
-		deleteUsecase:     deleteUsecase,
-		importBulkUsecase: importBulkUsecase,
+		log:                log.NewHelper(logger),
+		createUsecase:      createUseCase,
+		readUsecase:        readUsecase,
+		deleteUsecase:      deleteUsecase,
+		importBulkUsecase:  importBulkUsecase,
+		acquireLockUsecase: acquireLockUsecase,
 	}
 }
 
 func (s *RelationshipsService) CreateTuples(ctx context.Context, req *pb.CreateTuplesRequest) (*pb.CreateTuplesResponse, error) {
-	resp, err := s.createUsecase.CreateRelationships(ctx, req.Tuples, req.GetUpsert()) //The generated .GetUpsert() defaults to false
+	resp, err := s.createUsecase.CreateRelationships(ctx, req.Tuples, req.GetUpsert(), req.GetFencingCheck()) //The generated .GetUpsert() defaults to false
 	if err != nil {
 		return nil, fmt.Errorf("error creating tuples: %w", err)
 	}
@@ -70,7 +72,7 @@ func (s *RelationshipsService) ReadTuples(req *pb.ReadTuplesRequest, conn pb.Kes
 }
 
 func (s *RelationshipsService) DeleteTuples(ctx context.Context, req *pb.DeleteTuplesRequest) (*pb.DeleteTuplesResponse, error) {
-	resp, err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter)
+	resp, err := s.deleteUsecase.DeleteRelationships(ctx, req.Filter, req.GetFencingCheck())
 	if err != nil {
 		return nil, fmt.Errorf("error deleting tuples: %w", err)
 	}
@@ -84,4 +86,12 @@ func (s *RelationshipsService) ImportBulkTuples(stream grpc.ClientStreamingServe
 		return fmt.Errorf("error import bulk tuples: %w", err)
 	}
 	return nil
+}
+
+func (s *RelationshipsService) AcquireLock(ctx context.Context, req *pb.AcquireLockRequest) (*pb.AcquireLockResponse, error) {
+	resp, err := s.acquireLockUsecase.AcquireLock(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("error acquiring lock: %w", err)
+	}
+	return resp, nil
 }

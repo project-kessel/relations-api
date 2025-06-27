@@ -31,19 +31,6 @@ type RelationshipResult struct {
 	ConsistencyToken *v1beta1.ConsistencyToken
 }
 
-type WriteOperationType int
-
-const (
-	OperationCreate WriteOperationType = iota
-	OperationTouch
-	OperationDelete
-)
-
-type ExperimentalWrite struct {
-	Operation    WriteOperationType
-	Relationship *v1beta1.Relationship
-}
-
 type ZanzibarRepository interface {
 	Check(ctx context.Context, request *v1beta1.CheckRequest) (*v1beta1.CheckResponse, error)
 	CheckForUpdate(ctx context.Context, request *v1beta1.CheckForUpdateRequest) (*v1beta1.CheckForUpdateResponse, error)
@@ -54,7 +41,7 @@ type ZanzibarRepository interface {
 	LookupResources(ctx context.Context, resouce_type *v1beta1.ObjectType, relation string, subject *v1beta1.SubjectReference, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *ResourceResult, chan error, error)
 	IsBackendAvailable() error
 	ImportBulkTuples(stream grpc.ClientStreamingServer[v1beta1.ImportBulkTuplesRequest, v1beta1.ImportBulkTuplesResponse]) error
-	ExperimentalWrite(ctx context.Context, updates []*ExperimentalWrite) (*v1beta1.CreateTuplesResponse, error)
+	AcquireLock(ctx context.Context, identifier string, existingLock string) (string, error)
 }
 
 type CheckUsecase struct {

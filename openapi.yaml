@@ -385,10 +385,12 @@ components:
             properties:
                 identifier:
                     type: string
+                existingToken:
+                    type: string
         kessel.relations.v1beta1.AcquireLockResponse:
             type: object
             properties:
-                newLock:
+                newToken:
                     type: string
         kessel.relations.v1beta1.CheckForUpdateRequest:
             type: object

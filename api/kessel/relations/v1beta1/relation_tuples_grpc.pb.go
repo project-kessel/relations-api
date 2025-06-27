@@ -23,6 +23,7 @@ const (
 	KesselTupleService_ReadTuples_FullMethodName       = "/kessel.relations.v1beta1.KesselTupleService/ReadTuples"
 	KesselTupleService_DeleteTuples_FullMethodName     = "/kessel.relations.v1beta1.KesselTupleService/DeleteTuples"
 	KesselTupleService_ImportBulkTuples_FullMethodName = "/kessel.relations.v1beta1.KesselTupleService/ImportBulkTuples"
+	KesselTupleService_AcquireLock_FullMethodName      = "/kessel.relations.v1beta1.KesselTupleService/AcquireLock"
 )
 
 // KesselTupleServiceClient is the client API for KesselTupleService service.
@@ -41,6 +42,7 @@ type KesselTupleServiceClient interface {
 	ReadTuples(ctx context.Context, in *ReadTuplesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ReadTuplesResponse], error)
 	DeleteTuples(ctx context.Context, in *DeleteTuplesRequest, opts ...grpc.CallOption) (*DeleteTuplesResponse, error)
 	ImportBulkTuples(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[ImportBulkTuplesRequest, ImportBulkTuplesResponse], error)
+	AcquireLock(ctx context.Context, in *AcquireLockRequest, opts ...grpc.CallOption) (*AcquireLockResponse, error)
 }
 
 type kesselTupleServiceClient struct {
@@ -103,6 +105,16 @@ func (c *kesselTupleServiceClient) ImportBulkTuples(ctx context.Context, opts ..
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type KesselTupleService_ImportBulkTuplesClient = grpc.ClientStreamingClient[ImportBulkTuplesRequest, ImportBulkTuplesResponse]
 
+func (c *kesselTupleServiceClient) AcquireLock(ctx context.Context, in *AcquireLockRequest, opts ...grpc.CallOption) (*AcquireLockResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AcquireLockResponse)
+	err := c.cc.Invoke(ctx, KesselTupleService_AcquireLock_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KesselTupleServiceServer is the server API for KesselTupleService service.
 // All implementations must embed UnimplementedKesselTupleServiceServer
 // for forward compatibility.
@@ -119,6 +131,7 @@ type KesselTupleServiceServer interface {
 	ReadTuples(*ReadTuplesRequest, grpc.ServerStreamingServer[ReadTuplesResponse]) error
 	DeleteTuples(context.Context, *DeleteTuplesRequest) (*DeleteTuplesResponse, error)
 	ImportBulkTuples(grpc.ClientStreamingServer[ImportBulkTuplesRequest, ImportBulkTuplesResponse]) error
+	AcquireLock(context.Context, *AcquireLockRequest) (*AcquireLockResponse, error)
 	mustEmbedUnimplementedKesselTupleServiceServer()
 }
 
@@ -140,6 +153,9 @@ func (UnimplementedKesselTupleServiceServer) DeleteTuples(context.Context, *Dele
 }
 func (UnimplementedKesselTupleServiceServer) ImportBulkTuples(grpc.ClientStreamingServer[ImportBulkTuplesRequest, ImportBulkTuplesResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method ImportBulkTuples not implemented")
+}
+func (UnimplementedKesselTupleServiceServer) AcquireLock(context.Context, *AcquireLockRequest) (*AcquireLockResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AcquireLock not implemented")
 }
 func (UnimplementedKesselTupleServiceServer) mustEmbedUnimplementedKesselTupleServiceServer() {}
 func (UnimplementedKesselTupleServiceServer) testEmbeddedByValue()                            {}
@@ -216,6 +232,24 @@ func _KesselTupleService_ImportBulkTuples_Handler(srv interface{}, stream grpc.S
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type KesselTupleService_ImportBulkTuplesServer = grpc.ClientStreamingServer[ImportBulkTuplesRequest, ImportBulkTuplesResponse]
 
+func _KesselTupleService_AcquireLock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AcquireLockRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KesselTupleServiceServer).AcquireLock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KesselTupleService_AcquireLock_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KesselTupleServiceServer).AcquireLock(ctx, req.(*AcquireLockRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KesselTupleService_ServiceDesc is the grpc.ServiceDesc for KesselTupleService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -230,6 +264,10 @@ var KesselTupleService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTuples",
 			Handler:    _KesselTupleService_DeleteTuples_Handler,
+		},
+		{
+			MethodName: "AcquireLock",
+			Handler:    _KesselTupleService_AcquireLock_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

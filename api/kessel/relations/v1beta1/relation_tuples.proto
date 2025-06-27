@@ -4,7 +4,6 @@ package kessel.relations.v1beta1;
 
 import "google/api/annotations.proto";
 import "kessel/relations/v1beta1/common.proto";
-import "kessel/relations/v1beta1/fencing.proto";
 import "buf/validate/validate.proto";
 
 option go_package = "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1";
@@ -42,6 +41,12 @@ service KesselTupleService {
 			body: "*"
 		};
 	};
+	rpc AcquireLock(AcquireLockRequest) returns (AcquireLockResponse) {
+        option (google.api.http) = {
+            post: "/v1beta1/acquirelock"
+            body: "*"
+        };
+    };
 }
 
 message ImportBulkTuplesRequest {
@@ -81,6 +86,20 @@ message DeleteTuplesRequest {
 }
 message DeleteTuplesResponse {
 	ConsistencyToken consistency_token = 2;
+}
+
+message AcquireLockRequest {
+    string identifier = 1 [(buf.validate.field).required = true];    
+    optional string existing_token = 2;
+}
+
+message AcquireLockResponse {
+    string new_token = 1;
+}
+
+message FencingCheck {
+    string identifier = 1 [(buf.validate.field).required = true];
+    string token = 2 [(buf.validate.field).required = true];
 }
 
 // RelationTupleFilter is used to filter tuples based on their resource, relation, and subject.

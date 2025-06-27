@@ -26,6 +26,7 @@ const (
 type AcquireLockRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Identifier    string                 `protobuf:"bytes,1,opt,name=identifier,proto3" json:"identifier,omitempty"`
+	ExistingToken *string                `protobuf:"bytes,2,opt,name=existing_token,json=existingToken,proto3,oneof" json:"existing_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -67,9 +68,16 @@ func (x *AcquireLockRequest) GetIdentifier() string {
 	return ""
 }
 
+func (x *AcquireLockRequest) GetExistingToken() string {
+	if x != nil && x.ExistingToken != nil {
+		return *x.ExistingToken
+	}
+	return ""
+}
+
 type AcquireLockResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	NewLock       string                 `protobuf:"bytes,1,opt,name=new_lock,json=newLock,proto3" json:"new_lock,omitempty"`
+	NewToken      string                 `protobuf:"bytes,1,opt,name=new_token,json=newToken,proto3" json:"new_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -104,9 +112,9 @@ func (*AcquireLockResponse) Descriptor() ([]byte, []int) {
 	return file_kessel_relations_v1beta1_fencing_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *AcquireLockResponse) GetNewLock() string {
+func (x *AcquireLockResponse) GetNewToken() string {
 	if x != nil {
-		return x.NewLock
+		return x.NewToken
 	}
 	return ""
 }
@@ -167,13 +175,15 @@ var File_kessel_relations_v1beta1_fencing_proto protoreflect.FileDescriptor
 
 const file_kessel_relations_v1beta1_fencing_proto_rawDesc = "" +
 	"\n" +
-	"&kessel/relations/v1beta1/fencing.proto\x12\x18kessel.relations.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bbuf/validate/validate.proto\"<\n" +
+	"&kessel/relations/v1beta1/fencing.proto\x12\x18kessel.relations.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bbuf/validate/validate.proto\"{\n" +
 	"\x12AcquireLockRequest\x12&\n" +
 	"\n" +
 	"identifier\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\n" +
-	"identifier\"0\n" +
-	"\x13AcquireLockResponse\x12\x19\n" +
-	"\bnew_lock\x18\x01 \x01(\tR\anewLock\"T\n" +
+	"identifier\x12*\n" +
+	"\x0eexisting_token\x18\x02 \x01(\tH\x00R\rexistingToken\x88\x01\x01B\x11\n" +
+	"\x0f_existing_token\"2\n" +
+	"\x13AcquireLockResponse\x12\x1b\n" +
+	"\tnew_token\x18\x01 \x01(\tR\bnewToken\"T\n" +
 	"\fFencingCheck\x12&\n" +
 	"\n" +
 	"identifier\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\n" +
@@ -216,6 +226,7 @@ func file_kessel_relations_v1beta1_fencing_proto_init() {
 	if File_kessel_relations_v1beta1_fencing_proto != nil {
 		return
 	}
+	file_kessel_relations_v1beta1_fencing_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

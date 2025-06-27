@@ -20,10 +20,11 @@ service KesselFencingService {
 
 message AcquireLockRequest {
     string identifier = 1 [(buf.validate.field).required = true];    
+    optional string existing_token = 2;
 }
 
 message AcquireLockResponse {
-    string new_lock = 1;
+    string new_token = 1;
 }
 
 message FencingCheck {

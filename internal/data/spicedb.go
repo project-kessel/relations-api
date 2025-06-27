@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	apiV1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/conf"
@@ -33,7 +34,10 @@ type SpiceDbRepository struct {
 }
 
 const (
-	relationPrefix = "t_"
+	relationPrefix      = "t_"
+	lockType            = "lock"
+	lockVersionType     = "lockversion"
+	lockVersionRelation = "version"
 )
 
 // NewSpiceDbRepository .
@@ -291,42 +295,6 @@ func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[a
 
 }
 
-func (s *SpiceDbRepository) ExperimentalWrite(ctx context.Context, updates []*biz.ExperimentalWrite) (*apiV1beta1.CreateTuplesResponse, error) {
-	if err := s.initialize(); err != nil {
-		return nil, err
-	}
-
-	relUpdates := []*v1.RelationshipUpdate{}
-	for _, update := range updates {
-		var operation v1.RelationshipUpdate_Operation
-		switch update.Operation {
-		case biz.OperationCreate:
-			operation = v1.RelationshipUpdate_OPERATION_CREATE
-		case biz.OperationTouch:
-			operation = v1.RelationshipUpdate_OPERATION_TOUCH
-		case biz.OperationDelete:
-			operation = v1.RelationshipUpdate_OPERATION_DELETE
-		default:
-			return nil, fmt.Errorf("invalid operation: %v", update.Operation)
-		}
-		update.Relationship.Relation = addRelationPrefix(update.Relationship.Relation, relationPrefix)
-		relUpdates = append(relUpdates, &v1.RelationshipUpdate{
-			Operation:    operation,
-			Relationship: createSpiceDbRelationship(update.Relationship),
-		})
-	}
-
-	resp, err := s.client.WriteRelationships(ctx, &v1.WriteRelationshipsRequest{
-		Updates: relUpdates,
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("error writing relationships to SpiceDB: %w", err)
-	}
-
-	return &apiV1beta1.CreateTuplesResponse{ConsistencyToken: &apiV1beta1.ConsistencyToken{Token: resp.GetWrittenAt().GetToken()}}, nil
-}
-
 func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics, fencing *apiV1beta1.FencingCheck) (*apiV1beta1.CreateTuplesResponse, error) {
 	if err := s.initialize(); err != nil {
 		return nil, err
@@ -361,11 +329,11 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 			{
 				Operation: v1.Precondition_OPERATION_MUST_MATCH,
 				Filter: &v1.RelationshipFilter{
-					ResourceType:       "lock",
+					ResourceType:       lockType,
 					OptionalResourceId: fencing.GetIdentifier(),
-					OptionalRelation:   "version",
+					OptionalRelation:   lockVersionRelation,
 					OptionalSubjectFilter: &v1.SubjectFilter{
-						SubjectType:       "lockversion",
+						SubjectType:       lockVersionType,
 						OptionalSubjectId: fencing.GetToken(),
 					},
 				},
@@ -488,11 +456,11 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 			{
 				Operation: v1.Precondition_OPERATION_MUST_MATCH,
 				Filter: &v1.RelationshipFilter{
-					ResourceType:       "lock",
+					ResourceType:       lockType,
 					OptionalResourceId: fencing.GetIdentifier(),
-					OptionalRelation:   "version",
+					OptionalRelation:   lockVersionRelation,
 					OptionalSubjectFilter: &v1.SubjectFilter{
-						SubjectType:       "lockversion",
+						SubjectType:       lockVersionType,
 						OptionalSubjectId: fencing.GetToken(),
 					},
 				},
@@ -613,6 +581,85 @@ func (s *SpiceDbRepository) IsBackendAvailable() error {
 		}
 	}
 	return fmt.Errorf("error connecting to backend")
+}
+
+func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, existingFencingToken string) (string, error) {
+	if err := s.initialize(); err != nil {
+		return "", err
+	}
+
+	newFencingToken := uuid.New().String()
+	readClient, err := s.client.ReadRelationships(ctx, &v1.ReadRelationshipsRequest{
+		Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
+		RelationshipFilter: &v1.RelationshipFilter{
+			ResourceType:       lockType,
+			OptionalResourceId: identifier,
+			OptionalRelation:   lockVersionRelation,
+		},
+	})
+	if err != nil {
+		return "", fmt.Errorf("error invoking ReadRelationships in SpiceDB: %w", err)
+	}
+
+	existingLock, err := readClient.Recv()
+	if err != nil && !errors.Is(err, io.EOF) {
+		return "", fmt.Errorf("error reading existing lock: %w", err)
+	}
+
+	var updates []*v1.RelationshipUpdate
+	var preconditions []*v1.Precondition
+
+	if existingLock != nil && existingLock.Relationship != nil {
+
+		if existingFencingToken != "" && existingLock.Relationship.Subject.Object.ObjectId != existingFencingToken {
+			return "", fmt.Errorf("existing lock does not match fencing token")
+		}
+
+		updates = append(updates, &v1.RelationshipUpdate{
+			Operation:    v1.RelationshipUpdate_OPERATION_DELETE,
+			Relationship: existingLock.Relationship,
+		})
+
+		preconditions = append(preconditions, &v1.Precondition{
+			Operation: v1.Precondition_OPERATION_MUST_MATCH,
+			Filter: &v1.RelationshipFilter{
+				ResourceType:       existingLock.Relationship.Resource.ObjectType,
+				OptionalResourceId: existingLock.Relationship.Resource.ObjectId,
+				OptionalRelation:   existingLock.Relationship.Relation,
+				OptionalSubjectFilter: &v1.SubjectFilter{
+					SubjectType:       existingLock.Relationship.Subject.Object.ObjectType,
+					OptionalSubjectId: existingLock.Relationship.Subject.Object.ObjectId,
+				},
+			},
+		})
+	}
+
+	updates = append(updates, &v1.RelationshipUpdate{
+		Operation: v1.RelationshipUpdate_OPERATION_CREATE,
+		Relationship: &v1.Relationship{
+			Resource: &v1.ObjectReference{
+				ObjectType: lockType,
+				ObjectId:   identifier,
+			},
+			Relation: lockVersionRelation,
+			Subject: &v1.SubjectReference{
+				Object: &v1.ObjectReference{
+					ObjectType: lockVersionType,
+					ObjectId:   newFencingToken,
+				},
+			},
+		},
+	})
+
+	_, err = s.client.WriteRelationships(ctx, &v1.WriteRelationshipsRequest{
+		Updates:               updates,
+		OptionalPreconditions: preconditions,
+	})
+	if err != nil {
+		return "", fmt.Errorf("error writing relationships to SpiceDB: %w", err)
+	}
+
+	return newFencingToken, nil
 }
 
 func createSpiceDbRelationshipFilter(filter *apiV1beta1.RelationTupleFilter) (*v1.RelationshipFilter, error) {

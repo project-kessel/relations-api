@@ -1289,6 +1289,106 @@ func TestSpiceDbRepository_CheckPermission_MinimizeLatency(t *testing.T) {
 	}
 }
 
+func TestSpiceDbRepository_CreateRelationships_WithFencing(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	// Acquire a lock to get a fencing token
+	lockIdentifier := "test-lock-1"
+	lockResp, err := spiceDbRepo.AcquireLock(ctx, lockIdentifier, "")
+	assert.NoError(t, err)
+	fencingToken := lockResp.GetNewToken()
+	assert.NotEmpty(t, fencingToken)
+
+	// Create a relationship with fencing
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "fencing_group", "member", "rbac", "principal", "fenced_bob", ""),
+	}
+	touch := biz.TouchSemantics(false)
+	fencing := &apiV1beta1.FencingCheck{
+		Identifier: lockIdentifier,
+		Token:      fencingToken,
+	}
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, fencing)
+	assert.NoError(t, err)
+
+	container.WaitForQuantizationInterval()
+
+	// Relationship should exist
+	exists := CheckForRelationship(
+		spiceDbRepo, "fenced_bob", "rbac", "principal", "", "member", "rbac", "group", "fencing_group", nil,
+	)
+	assert.True(t, exists)
+
+	// Try to create with an invalid fencing token
+	badFencing := &apiV1beta1.FencingCheck{
+		Identifier: lockIdentifier,
+		Token:      "invalid-token",
+	}
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, badFencing)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error writing relationships to SpiceDB")
+}
+
+func TestSpiceDbRepository_DeleteRelationships_WithFencing(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	// Acquire a lock to get a fencing token
+	lockIdentifier := "test-lock-1"
+	lockResp, err := spiceDbRepo.AcquireLock(ctx, lockIdentifier, "")
+	assert.NoError(t, err)
+	fencingToken := lockResp.GetNewToken()
+	assert.NotEmpty(t, fencingToken)
+
+	// Create a relationship to delete
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "fencing_group_del", "member", "rbac", "principal", "fenced_bob_del", ""),
+	}
+	touch := biz.TouchSemantics(false)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
+	assert.NoError(t, err)
+
+	// Delete with correct fencing
+	filter := &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("fencing_group_del"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:        pointerize("fenced_bob_del"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("principal"),
+		},
+	}
+	fencing := &apiV1beta1.FencingCheck{
+		Identifier: lockIdentifier,
+		Token:      fencingToken,
+	}
+	_, err = spiceDbRepo.DeleteRelationships(ctx, filter, fencing)
+	assert.NoError(t, err)
+
+	container.WaitForQuantizationInterval()
+
+	// Relationship should not exist
+	exists := CheckForRelationship(
+		spiceDbRepo, "fenced_bob_del", "rbac", "principal", "", "member", "rbac", "group", "fencing_group_del", nil,
+	)
+	assert.False(t, exists)
+
+	// Try to delete with an invalid fencing token
+	_, err = spiceDbRepo.DeleteRelationships(ctx, filter, &apiV1beta1.FencingCheck{
+		Identifier: lockIdentifier,
+		Token:      "invalid-token",
+	})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error invoking DeleteRelationships in SpiceDB")
+}
+
 func TestSpiceDbRepository_AcquireLock_NewLock(t *testing.T) {
 	t.Parallel()
 

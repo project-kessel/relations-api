@@ -1289,6 +1289,122 @@ func TestSpiceDbRepository_CheckPermission_MinimizeLatency(t *testing.T) {
 	}
 }
 
+func TestSpiceDbRepository_AcquireLock_NewLock(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	identifier := "test-lock-1"
+
+	// Acquire a new lock
+	resp, err := spiceDbRepo.AcquireLock(ctx, identifier, "")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp.GetNewToken())
+
+}
+
+func TestSpiceDbRepository_AcquireLock_ReplaceExistingLock(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	identifier := "test-lock-1"
+
+	// Acquire initial lock
+	resp1, err := spiceDbRepo.AcquireLock(ctx, identifier, "")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp1.NewToken)
+
+	// Acquire lock again, forcefully replacing the existing lock
+	resp2, err := spiceDbRepo.AcquireLock(ctx, identifier, "")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp2.NewToken)
+	assert.NotEqual(t, resp1.NewToken, resp2.NewToken)
+}
+
+func TestSpiceDbRepository_AcquireLock_WithValidFencingToken(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	identifier := "test-lock-1"
+
+	// Acquire initial lock
+	resp1, err := spiceDbRepo.AcquireLock(ctx, identifier, "")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp1.NewToken)
+
+	// Acquire lock again by passing valid fencing token
+	resp2, err := spiceDbRepo.AcquireLock(ctx, identifier, resp1.NewToken)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp2.NewToken)
+	assert.NotEqual(t, resp1.NewToken, resp2.NewToken)
+}
+
+func TestSpiceDbRepository_AcquireLock_WithInvalidFencingToken(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	identifier := "test-lock-1"
+
+	// Acquire initial lock
+	resp1, err := spiceDbRepo.AcquireLock(ctx, identifier, "")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp1.NewToken)
+
+	// Try to acquire lock with invalid fencing token
+	_, err = spiceDbRepo.AcquireLock(ctx, identifier, "invalid-token")
+	assert.Error(t, err)
+
+	// Acquire a new lock by passing a valid fencing token
+	resp2, err := spiceDbRepo.AcquireLock(ctx, identifier, resp1.NewToken)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp2.NewToken)
+	assert.NotEqual(t, resp1.NewToken, resp2.NewToken)
+}
+
+func TestSpiceDbRepository_AcquireLock_WithNonExistentFencingToken(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	identifier := "test-lock-1"
+
+	// Try to acquire lock with fake fencing token when no lock exists
+	resp, err := spiceDbRepo.AcquireLock(ctx, identifier, "some-random-garbage")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp.NewToken)
+
+	// Try to acquire lock with fake fencing token when a lock exists
+	_, err = spiceDbRepo.AcquireLock(ctx, identifier, "some-random-garbage")
+	assert.Error(t, err)
+}
+
+func TestSpiceDbRepository_AcquireLock_EmptyIdentifier(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	// Try to acquire lock with an empty identifier
+	_, err = spiceDbRepo.AcquireLock(ctx, "", "")
+	assert.Error(t, err)
+}
+
 func pointerize(value string) *string { //Used to turn string literals into pointers
 	return &value
 }

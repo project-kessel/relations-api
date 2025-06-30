@@ -36,3 +36,9 @@ definition rbac/widget {
 	permission view = t_workspace->view_widget + use
 	permission use = t_workspace->use_widget
 }
+
+definition lock {
+	relation version: lockversion
+}
+
+definition lockversion {}

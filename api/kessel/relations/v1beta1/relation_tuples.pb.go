@@ -436,8 +436,7 @@ func (x *DeleteTuplesResponse) GetConsistencyToken() *ConsistencyToken {
 
 type AcquireLockRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Identifier    string                 `protobuf:"bytes,1,opt,name=identifier,proto3" json:"identifier,omitempty"`
-	ExistingToken *string                `protobuf:"bytes,2,opt,name=existing_token,json=existingToken,proto3,oneof" json:"existing_token,omitempty"`
+	LockId        string                 `protobuf:"bytes,1,opt,name=lock_id,json=lockId,proto3" json:"lock_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -472,23 +471,16 @@ func (*AcquireLockRequest) Descriptor() ([]byte, []int) {
 	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *AcquireLockRequest) GetIdentifier() string {
+func (x *AcquireLockRequest) GetLockId() string {
 	if x != nil {
-		return x.Identifier
-	}
-	return ""
-}
-
-func (x *AcquireLockRequest) GetExistingToken() string {
-	if x != nil && x.ExistingToken != nil {
-		return *x.ExistingToken
+		return x.LockId
 	}
 	return ""
 }
 
 type AcquireLockResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	NewToken      string                 `protobuf:"bytes,1,opt,name=new_token,json=newToken,proto3" json:"new_token,omitempty"`
+	LockToken     string                 `protobuf:"bytes,1,opt,name=lock_token,json=lockToken,proto3" json:"lock_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -523,17 +515,17 @@ func (*AcquireLockResponse) Descriptor() ([]byte, []int) {
 	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *AcquireLockResponse) GetNewToken() string {
+func (x *AcquireLockResponse) GetLockToken() string {
 	if x != nil {
-		return x.NewToken
+		return x.LockToken
 	}
 	return ""
 }
 
 type FencingCheck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Identifier    string                 `protobuf:"bytes,1,opt,name=identifier,proto3" json:"identifier,omitempty"`
-	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	LockId        string                 `protobuf:"bytes,1,opt,name=lock_id,json=lockId,proto3" json:"lock_id,omitempty"`
+	LockToken     string                 `protobuf:"bytes,2,opt,name=lock_token,json=lockToken,proto3" json:"lock_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -568,16 +560,16 @@ func (*FencingCheck) Descriptor() ([]byte, []int) {
 	return file_kessel_relations_v1beta1_relation_tuples_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *FencingCheck) GetIdentifier() string {
+func (x *FencingCheck) GetLockId() string {
 	if x != nil {
-		return x.Identifier
+		return x.LockId
 	}
 	return ""
 }
 
-func (x *FencingCheck) GetToken() string {
+func (x *FencingCheck) GetLockToken() string {
 	if x != nil {
-		return x.Token
+		return x.LockToken
 	}
 	return ""
 }
@@ -764,20 +756,16 @@ const file_kessel_relations_v1beta1_relation_tuples_proto_rawDesc = "" +
 	"\rfencing_check\x18\x02 \x01(\v2&.kessel.relations.v1beta1.FencingCheckH\x00R\ffencingCheck\x88\x01\x01B\x10\n" +
 	"\x0e_fencing_check\"o\n" +
 	"\x14DeleteTuplesResponse\x12W\n" +
-	"\x11consistency_token\x18\x02 \x01(\v2*.kessel.relations.v1beta1.ConsistencyTokenR\x10consistencyToken\"{\n" +
-	"\x12AcquireLockRequest\x12&\n" +
+	"\x11consistency_token\x18\x02 \x01(\v2*.kessel.relations.v1beta1.ConsistencyTokenR\x10consistencyToken\"5\n" +
+	"\x12AcquireLockRequest\x12\x1f\n" +
+	"\alock_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06lockId\"4\n" +
+	"\x13AcquireLockResponse\x12\x1d\n" +
 	"\n" +
-	"identifier\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\n" +
-	"identifier\x12*\n" +
-	"\x0eexisting_token\x18\x02 \x01(\tH\x00R\rexistingToken\x88\x01\x01B\x11\n" +
-	"\x0f_existing_token\"2\n" +
-	"\x13AcquireLockResponse\x12\x1b\n" +
-	"\tnew_token\x18\x01 \x01(\tR\bnewToken\"T\n" +
-	"\fFencingCheck\x12&\n" +
+	"lock_token\x18\x01 \x01(\tR\tlockToken\"V\n" +
+	"\fFencingCheck\x12\x1f\n" +
+	"\alock_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06lockId\x12%\n" +
 	"\n" +
-	"identifier\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\n" +
-	"identifier\x12\x1c\n" +
-	"\x05token\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x05token\"\xe8\x02\n" +
+	"lock_token\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tlockToken\"\xe8\x02\n" +
 	"\x13RelationTupleFilter\x122\n" +
 	"\x12resource_namespace\x18\x01 \x01(\tH\x00R\x11resourceNamespace\x88\x01\x01\x12(\n" +
 	"\rresource_type\x18\x02 \x01(\tH\x01R\fresourceType\x88\x01\x01\x12$\n" +
@@ -883,7 +871,6 @@ func file_kessel_relations_v1beta1_relation_tuples_proto_init() {
 	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[2].OneofWrappers = []any{}
 	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[4].OneofWrappers = []any{}
 	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[6].OneofWrappers = []any{}
-	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[8].OneofWrappers = []any{}
 	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[11].OneofWrappers = []any{}
 	file_kessel_relations_v1beta1_relation_tuples_proto_msgTypes[12].OneofWrappers = []any{}
 	type x struct{}

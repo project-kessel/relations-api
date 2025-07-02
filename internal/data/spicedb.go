@@ -330,11 +330,11 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 				Operation: v1.Precondition_OPERATION_MUST_MATCH,
 				Filter: &v1.RelationshipFilter{
 					ResourceType:       lockType,
-					OptionalResourceId: fencing.GetIdentifier(),
+					OptionalResourceId: fencing.GetLockId(),
 					OptionalRelation:   lockVersionRelation,
 					OptionalSubjectFilter: &v1.SubjectFilter{
 						SubjectType:       lockVersionType,
-						OptionalSubjectId: fencing.GetToken(),
+						OptionalSubjectId: fencing.GetLockToken(),
 					},
 				},
 			},
@@ -457,11 +457,11 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 				Operation: v1.Precondition_OPERATION_MUST_MATCH,
 				Filter: &v1.RelationshipFilter{
 					ResourceType:       lockType,
-					OptionalResourceId: fencing.GetIdentifier(),
+					OptionalResourceId: fencing.GetLockId(),
 					OptionalRelation:   lockVersionRelation,
 					OptionalSubjectFilter: &v1.SubjectFilter{
 						SubjectType:       lockVersionType,
-						OptionalSubjectId: fencing.GetToken(),
+						OptionalSubjectId: fencing.GetLockToken(),
 					},
 				},
 			},
@@ -583,7 +583,7 @@ func (s *SpiceDbRepository) IsBackendAvailable() error {
 	return fmt.Errorf("error connecting to backend")
 }
 
-func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, existingFencingToken string) (*apiV1beta1.AcquireLockResponse, error) {
+func (s *SpiceDbRepository) AcquireLock(ctx context.Context, lockId string) (*apiV1beta1.AcquireLockResponse, error) {
 	if err := s.initialize(); err != nil {
 		return nil, err
 	}
@@ -593,7 +593,7 @@ func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, 
 		Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
 		RelationshipFilter: &v1.RelationshipFilter{
 			ResourceType:       lockType,
-			OptionalResourceId: identifier,
+			OptionalResourceId: lockId,
 			OptionalRelation:   lockVersionRelation,
 		},
 	})
@@ -610,10 +610,6 @@ func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, 
 	var preconditions []*v1.Precondition
 
 	if existingLock != nil && existingLock.Relationship != nil {
-
-		if existingFencingToken != "" && existingLock.Relationship.Subject.Object.ObjectId != existingFencingToken {
-			return nil, fmt.Errorf("existing lock does not match fencing token")
-		}
 
 		updates = append(updates, &v1.RelationshipUpdate{
 			Operation:    v1.RelationshipUpdate_OPERATION_DELETE,
@@ -639,7 +635,7 @@ func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, 
 		Relationship: &v1.Relationship{
 			Resource: &v1.ObjectReference{
 				ObjectType: lockType,
-				ObjectId:   identifier,
+				ObjectId:   lockId,
 			},
 			Relation: lockVersionRelation,
 			Subject: &v1.SubjectReference{
@@ -659,7 +655,7 @@ func (s *SpiceDbRepository) AcquireLock(ctx context.Context, identifier string, 
 		return nil, fmt.Errorf("error writing relationships to SpiceDB: %w", err)
 	}
 
-	return &apiV1beta1.AcquireLockResponse{NewToken: newFencingToken}, nil
+	return &apiV1beta1.AcquireLockResponse{LockToken: newFencingToken}, nil
 }
 
 func createSpiceDbRelationshipFilter(filter *apiV1beta1.RelationTupleFilter) (*v1.RelationshipFilter, error) {

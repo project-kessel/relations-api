@@ -89,17 +89,16 @@ message DeleteTuplesResponse {
 }
 
 message AcquireLockRequest {
-    string identifier = 1 [(buf.validate.field).required = true];    
-    optional string existing_token = 2;
+    string lock_id = 1 [(buf.validate.field).required = true];    
 }
 
 message AcquireLockResponse {
-    string new_token = 1;
+    string lock_token = 1;
 }
 
 message FencingCheck {
-    string identifier = 1 [(buf.validate.field).required = true];
-    string token = 2 [(buf.validate.field).required = true];
+    string lock_id = 1 [(buf.validate.field).required = true];
+    string lock_token = 2 [(buf.validate.field).required = true];
 }
 
 // RelationTupleFilter is used to filter tuples based on their resource, relation, and subject.

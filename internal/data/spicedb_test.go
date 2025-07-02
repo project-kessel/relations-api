@@ -1297,9 +1297,9 @@ func TestSpiceDbRepository_CreateRelationships_WithFencing(t *testing.T) {
 
 	// Acquire a lock to get a fencing token
 	lockIdentifier := "test-lock-1"
-	lockResp, err := spiceDbRepo.AcquireLock(ctx, lockIdentifier, "")
+	lockResp, err := spiceDbRepo.AcquireLock(ctx, lockIdentifier)
 	assert.NoError(t, err)
-	fencingToken := lockResp.GetNewToken()
+	fencingToken := lockResp.GetLockToken()
 	assert.NotEmpty(t, fencingToken)
 
 	// Create a relationship with fencing
@@ -1308,8 +1308,8 @@ func TestSpiceDbRepository_CreateRelationships_WithFencing(t *testing.T) {
 	}
 	touch := biz.TouchSemantics(false)
 	fencing := &apiV1beta1.FencingCheck{
-		Identifier: lockIdentifier,
-		Token:      fencingToken,
+		LockId:    lockIdentifier,
+		LockToken: fencingToken,
 	}
 	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, fencing)
 	assert.NoError(t, err)
@@ -1324,10 +1324,19 @@ func TestSpiceDbRepository_CreateRelationships_WithFencing(t *testing.T) {
 
 	// Try to create with an invalid fencing token
 	badFencing := &apiV1beta1.FencingCheck{
-		Identifier: lockIdentifier,
-		Token:      "invalid-token",
+		LockId:    lockIdentifier,
+		LockToken: "invalid-token",
 	}
 	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, badFencing)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error writing relationships to SpiceDB")
+
+	// try to create with a non-existent lock id
+	badFencing2 := &apiV1beta1.FencingCheck{
+		LockId:    "invalid-lock-id",
+		LockToken: fencingToken,
+	}
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, badFencing2)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error writing relationships to SpiceDB")
 }
@@ -1340,9 +1349,9 @@ func TestSpiceDbRepository_DeleteRelationships_WithFencing(t *testing.T) {
 
 	// Acquire a lock to get a fencing token
 	lockIdentifier := "test-lock-1"
-	lockResp, err := spiceDbRepo.AcquireLock(ctx, lockIdentifier, "")
+	lockResp, err := spiceDbRepo.AcquireLock(ctx, lockIdentifier)
 	assert.NoError(t, err)
-	fencingToken := lockResp.GetNewToken()
+	fencingToken := lockResp.GetLockToken()
 	assert.NotEmpty(t, fencingToken)
 
 	// Create a relationship to delete
@@ -1366,8 +1375,8 @@ func TestSpiceDbRepository_DeleteRelationships_WithFencing(t *testing.T) {
 		},
 	}
 	fencing := &apiV1beta1.FencingCheck{
-		Identifier: lockIdentifier,
-		Token:      fencingToken,
+		LockId:    lockIdentifier,
+		LockToken: fencingToken,
 	}
 	_, err = spiceDbRepo.DeleteRelationships(ctx, filter, fencing)
 	assert.NoError(t, err)
@@ -1382,8 +1391,16 @@ func TestSpiceDbRepository_DeleteRelationships_WithFencing(t *testing.T) {
 
 	// Try to delete with an invalid fencing token
 	_, err = spiceDbRepo.DeleteRelationships(ctx, filter, &apiV1beta1.FencingCheck{
-		Identifier: lockIdentifier,
-		Token:      "invalid-token",
+		LockId:    lockIdentifier,
+		LockToken: "invalid-token",
+	})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error invoking DeleteRelationships in SpiceDB")
+
+	// try to delete with a non-existent lock id
+	_, err = spiceDbRepo.DeleteRelationships(ctx, filter, &apiV1beta1.FencingCheck{
+		LockId:    "invalid-lock-id",
+		LockToken: fencingToken,
 	})
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error invoking DeleteRelationships in SpiceDB")
@@ -1401,9 +1418,9 @@ func TestSpiceDbRepository_AcquireLock_NewLock(t *testing.T) {
 	identifier := "test-lock-1"
 
 	// Acquire a new lock
-	resp, err := spiceDbRepo.AcquireLock(ctx, identifier, "")
+	resp, err := spiceDbRepo.AcquireLock(ctx, identifier)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, resp.GetNewToken())
+	assert.NotEmpty(t, resp.GetLockToken())
 
 }
 
@@ -1417,80 +1434,15 @@ func TestSpiceDbRepository_AcquireLock_ReplaceExistingLock(t *testing.T) {
 	identifier := "test-lock-1"
 
 	// Acquire initial lock
-	resp1, err := spiceDbRepo.AcquireLock(ctx, identifier, "")
+	resp1, err := spiceDbRepo.AcquireLock(ctx, identifier)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, resp1.NewToken)
+	assert.NotEmpty(t, resp1.GetLockToken())
 
 	// Acquire lock again, forcefully replacing the existing lock
-	resp2, err := spiceDbRepo.AcquireLock(ctx, identifier, "")
+	resp2, err := spiceDbRepo.AcquireLock(ctx, identifier)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, resp2.NewToken)
-	assert.NotEqual(t, resp1.NewToken, resp2.NewToken)
-}
-
-func TestSpiceDbRepository_AcquireLock_WithValidFencingToken(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.Background()
-	spiceDbRepo, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-
-	identifier := "test-lock-1"
-
-	// Acquire initial lock
-	resp1, err := spiceDbRepo.AcquireLock(ctx, identifier, "")
-	assert.NoError(t, err)
-	assert.NotEmpty(t, resp1.NewToken)
-
-	// Acquire lock again by passing valid fencing token
-	resp2, err := spiceDbRepo.AcquireLock(ctx, identifier, resp1.NewToken)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, resp2.NewToken)
-	assert.NotEqual(t, resp1.NewToken, resp2.NewToken)
-}
-
-func TestSpiceDbRepository_AcquireLock_WithInvalidFencingToken(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.Background()
-	spiceDbRepo, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-
-	identifier := "test-lock-1"
-
-	// Acquire initial lock
-	resp1, err := spiceDbRepo.AcquireLock(ctx, identifier, "")
-	assert.NoError(t, err)
-	assert.NotEmpty(t, resp1.NewToken)
-
-	// Try to acquire lock with invalid fencing token
-	_, err = spiceDbRepo.AcquireLock(ctx, identifier, "invalid-token")
-	assert.Error(t, err)
-
-	// Acquire a new lock by passing a valid fencing token
-	resp2, err := spiceDbRepo.AcquireLock(ctx, identifier, resp1.NewToken)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, resp2.NewToken)
-	assert.NotEqual(t, resp1.NewToken, resp2.NewToken)
-}
-
-func TestSpiceDbRepository_AcquireLock_WithNonExistentFencingToken(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.Background()
-	spiceDbRepo, err := container.CreateSpiceDbRepository()
-	assert.NoError(t, err)
-
-	identifier := "test-lock-1"
-
-	// Try to acquire lock with fake fencing token when no lock exists
-	resp, err := spiceDbRepo.AcquireLock(ctx, identifier, "some-random-garbage")
-	assert.NoError(t, err)
-	assert.NotEmpty(t, resp.NewToken)
-
-	// Try to acquire lock with fake fencing token when a lock exists
-	_, err = spiceDbRepo.AcquireLock(ctx, identifier, "some-random-garbage")
-	assert.Error(t, err)
+	assert.NotEmpty(t, resp2.GetLockToken())
+	assert.NotEqual(t, resp1.GetLockToken(), resp2.GetLockToken())
 }
 
 func TestSpiceDbRepository_AcquireLock_EmptyIdentifier(t *testing.T) {
@@ -1501,7 +1453,7 @@ func TestSpiceDbRepository_AcquireLock_EmptyIdentifier(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Try to acquire lock with an empty identifier
-	_, err = spiceDbRepo.AcquireLock(ctx, "", "")
+	_, err = spiceDbRepo.AcquireLock(ctx, "")
 	assert.Error(t, err)
 }
 

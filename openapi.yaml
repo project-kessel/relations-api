@@ -329,11 +329,11 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: fencingCheck.identifier
+                - name: fencingCheck.lockId
                   in: query
                   schema:
                     type: string
-                - name: fencingCheck.token
+                - name: fencingCheck.lockToken
                   in: query
                   schema:
                     type: string
@@ -383,14 +383,12 @@ components:
         kessel.relations.v1beta1.AcquireLockRequest:
             type: object
             properties:
-                identifier:
-                    type: string
-                existingToken:
+                lockId:
                     type: string
         kessel.relations.v1beta1.AcquireLockResponse:
             type: object
             properties:
-                newToken:
+                lockToken:
                     type: string
         kessel.relations.v1beta1.CheckForUpdateRequest:
             type: object
@@ -475,9 +473,9 @@ components:
         kessel.relations.v1beta1.FencingCheck:
             type: object
             properties:
-                identifier:
+                lockId:
                     type: string
-                token:
+                lockToken:
                     type: string
         kessel.relations.v1beta1.ImportBulkTuplesRequest:
             type: object

@@ -2,7 +2,7 @@ version 0.1
 namespace kessel
 
 internal type lock {
-    relation version: [ExactlyOne lockversion]
+    relation #version: [ExactlyOne lockversion]
 }
 
 internal type lockversion {}

@@ -35,8 +35,8 @@ type SpiceDbRepository struct {
 
 const (
 	relationPrefix      = "t_"
-	lockType            = "lock"
-	lockVersionType     = "lockversion"
+	lockType            = "kessel/lock"
+	lockVersionType     = "kessel/lockversion"
 	lockVersionRelation = "version"
 )
 
@@ -331,7 +331,7 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 				Filter: &v1.RelationshipFilter{
 					ResourceType:       lockType,
 					OptionalResourceId: fencing.GetLockId(),
-					OptionalRelation:   lockVersionRelation,
+					OptionalRelation:   addRelationPrefix(lockVersionRelation, relationPrefix),
 					OptionalSubjectFilter: &v1.SubjectFilter{
 						SubjectType:       lockVersionType,
 						OptionalSubjectId: fencing.GetLockToken(),
@@ -458,7 +458,7 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 				Filter: &v1.RelationshipFilter{
 					ResourceType:       lockType,
 					OptionalResourceId: fencing.GetLockId(),
-					OptionalRelation:   lockVersionRelation,
+					OptionalRelation:   addRelationPrefix(lockVersionRelation, relationPrefix),
 					OptionalSubjectFilter: &v1.SubjectFilter{
 						SubjectType:       lockVersionType,
 						OptionalSubjectId: fencing.GetLockToken(),
@@ -594,7 +594,7 @@ func (s *SpiceDbRepository) AcquireLock(ctx context.Context, lockId string) (*ap
 		RelationshipFilter: &v1.RelationshipFilter{
 			ResourceType:       lockType,
 			OptionalResourceId: lockId,
-			OptionalRelation:   lockVersionRelation,
+			OptionalRelation:   addRelationPrefix(lockVersionRelation, relationPrefix),
 		},
 	})
 	if err != nil {
@@ -637,7 +637,7 @@ func (s *SpiceDbRepository) AcquireLock(ctx context.Context, lockId string) (*ap
 				ObjectType: lockType,
 				ObjectId:   lockId,
 			},
-			Relation: lockVersionRelation,
+			Relation: addRelationPrefix(lockVersionRelation, relationPrefix),
 			Subject: &v1.SubjectReference{
 				Object: &v1.ObjectReference{
 					ObjectType: lockVersionType,

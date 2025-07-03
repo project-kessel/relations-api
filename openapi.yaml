@@ -30,6 +30,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v1.GetReadyzResponse'
+    /v1beta1/acquirelock:
+        post:
+            tags:
+                - KesselTupleService
+            operationId: KesselTupleService_AcquireLock
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.AcquireLockRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.AcquireLockResponse'
     /v1beta1/check:
         post:
             tags:
@@ -311,6 +329,14 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: fencingCheck.lockId
+                  in: query
+                  schema:
+                    type: string
+                - name: fencingCheck.lockToken
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -354,6 +380,16 @@ components:
                 code:
                     type: integer
                     format: uint32
+        kessel.relations.v1beta1.AcquireLockRequest:
+            type: object
+            properties:
+                lockId:
+                    type: string
+        kessel.relations.v1beta1.AcquireLockResponse:
+            type: object
+            properties:
+                lockToken:
+                    type: string
         kessel.relations.v1beta1.CheckForUpdateRequest:
             type: object
             properties:
@@ -422,6 +458,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/kessel.relations.v1beta1.Relationship'
+                fencingCheck:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.FencingCheck'
         kessel.relations.v1beta1.CreateTuplesResponse:
             type: object
             properties:
@@ -432,6 +470,13 @@ components:
             properties:
                 consistencyToken:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
+        kessel.relations.v1beta1.FencingCheck:
+            type: object
+            properties:
+                lockId:
+                    type: string
+                lockToken:
+                    type: string
         kessel.relations.v1beta1.ImportBulkTuplesRequest:
             type: object
             properties:

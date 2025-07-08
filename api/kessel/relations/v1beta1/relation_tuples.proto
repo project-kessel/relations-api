@@ -41,6 +41,12 @@ service KesselTupleService {
 			body: "*"
 		};
 	};
+	rpc AcquireLock(AcquireLockRequest) returns (AcquireLockResponse) {
+        option (google.api.http) = {
+            post: "/v1beta1/acquirelock"
+            body: "*"
+        };
+    };
 }
 
 message ImportBulkTuplesRequest {
@@ -57,6 +63,7 @@ message CreateTuplesRequest {
 	// Defaults to `false`.
 	bool upsert = 1;
 	repeated Relationship tuples = 2;
+	optional FencingCheck fencing_check = 3;
 }
 message CreateTuplesResponse {
 	ConsistencyToken consistency_token = 2;
@@ -75,9 +82,23 @@ message ReadTuplesResponse {
 
 message DeleteTuplesRequest {
 	RelationTupleFilter filter = 1 [(buf.validate.field).required = true];
+	optional FencingCheck fencing_check = 2;
 }
 message DeleteTuplesResponse {
 	ConsistencyToken consistency_token = 2;
+}
+
+message AcquireLockRequest {
+    string lock_id = 1 [(buf.validate.field).required = true];    
+}
+
+message AcquireLockResponse {
+    string lock_token = 1;
+}
+
+message FencingCheck {
+    string lock_id = 1 [(buf.validate.field).required = true];
+    string lock_token = 2 [(buf.validate.field).required = true];
 }
 
 // RelationTupleFilter is used to filter tuples based on their resource, relation, and subject.

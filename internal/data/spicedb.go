@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	apiV1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/conf"
@@ -33,7 +34,10 @@ type SpiceDbRepository struct {
 }
 
 const (
-	relationPrefix = "t_"
+	relationPrefix      = "t_"
+	lockType            = "kessel/lock"
+	lockVersionType     = "kessel/lockversion"
+	lockVersionRelation = "version"
 )
 
 // NewSpiceDbRepository .
@@ -291,7 +295,7 @@ func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[a
 
 }
 
-func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics) (*apiV1beta1.CreateTuplesResponse, error) {
+func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*apiV1beta1.Relationship, touch biz.TouchSemantics, fencing *apiV1beta1.FencingCheck) (*apiV1beta1.CreateTuplesResponse, error) {
 	if err := s.initialize(); err != nil {
 		return nil, err
 	}
@@ -316,9 +320,28 @@ func (s *SpiceDbRepository) CreateRelationships(ctx context.Context, rels []*api
 		})
 	}
 
-	resp, err := s.client.WriteRelationships(ctx, &v1.WriteRelationshipsRequest{
+	req := &v1.WriteRelationshipsRequest{
 		Updates: relationshipUpdates,
-	})
+	}
+
+	if fencing != nil {
+		req.OptionalPreconditions = []*v1.Precondition{
+			{
+				Operation: v1.Precondition_OPERATION_MUST_MATCH,
+				Filter: &v1.RelationshipFilter{
+					ResourceType:       lockType,
+					OptionalResourceId: fencing.GetLockId(),
+					OptionalRelation:   addRelationPrefix(lockVersionRelation, relationPrefix),
+					OptionalSubjectFilter: &v1.SubjectFilter{
+						SubjectType:       lockVersionType,
+						OptionalSubjectId: fencing.GetLockToken(),
+					},
+				},
+			},
+		}
+	}
+
+	resp, err := s.client.WriteRelationships(ctx, req)
 
 	if err != nil {
 		return nil, fmt.Errorf("error writing relationships to SpiceDB: %w", err)
@@ -410,7 +433,7 @@ func (s *SpiceDbRepository) ReadRelationships(ctx context.Context, filter *apiV1
 	return relationshipTuples, errs, nil
 }
 
-func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter) (*apiV1beta1.DeleteTuplesResponse, error) {
+func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *apiV1beta1.RelationTupleFilter, fencing *apiV1beta1.FencingCheck) (*apiV1beta1.DeleteTuplesResponse, error) {
 	if err := s.initialize(); err != nil {
 		return nil, err
 	}
@@ -427,6 +450,23 @@ func (s *SpiceDbRepository) DeleteRelationships(ctx context.Context, filter *api
 	}
 
 	req := &v1.DeleteRelationshipsRequest{RelationshipFilter: relationshipFilter}
+
+	if fencing != nil {
+		req.OptionalPreconditions = []*v1.Precondition{
+			{
+				Operation: v1.Precondition_OPERATION_MUST_MATCH,
+				Filter: &v1.RelationshipFilter{
+					ResourceType:       lockType,
+					OptionalResourceId: fencing.GetLockId(),
+					OptionalRelation:   addRelationPrefix(lockVersionRelation, relationPrefix),
+					OptionalSubjectFilter: &v1.SubjectFilter{
+						SubjectType:       lockVersionType,
+						OptionalSubjectId: fencing.GetLockToken(),
+					},
+				},
+			},
+		}
+	}
 
 	resp, err := s.client.DeleteRelationships(ctx, req)
 
@@ -541,6 +581,81 @@ func (s *SpiceDbRepository) IsBackendAvailable() error {
 		}
 	}
 	return fmt.Errorf("error connecting to backend")
+}
+
+func (s *SpiceDbRepository) AcquireLock(ctx context.Context, lockId string) (*apiV1beta1.AcquireLockResponse, error) {
+	if err := s.initialize(); err != nil {
+		return nil, err
+	}
+
+	newFencingToken := uuid.New().String()
+	readClient, err := s.client.ReadRelationships(ctx, &v1.ReadRelationshipsRequest{
+		Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
+		RelationshipFilter: &v1.RelationshipFilter{
+			ResourceType:       lockType,
+			OptionalResourceId: lockId,
+			OptionalRelation:   addRelationPrefix(lockVersionRelation, relationPrefix),
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error invoking ReadRelationships in SpiceDB: %w", err)
+	}
+
+	existingLock, err := readClient.Recv()
+	if err != nil && !errors.Is(err, io.EOF) {
+		return nil, fmt.Errorf("error reading existing lock: %w", err)
+	}
+
+	var updates []*v1.RelationshipUpdate
+	var preconditions []*v1.Precondition
+
+	if existingLock != nil && existingLock.Relationship != nil {
+
+		updates = append(updates, &v1.RelationshipUpdate{
+			Operation:    v1.RelationshipUpdate_OPERATION_DELETE,
+			Relationship: existingLock.Relationship,
+		})
+
+		preconditions = append(preconditions, &v1.Precondition{
+			Operation: v1.Precondition_OPERATION_MUST_MATCH,
+			Filter: &v1.RelationshipFilter{
+				ResourceType:       existingLock.Relationship.Resource.ObjectType,
+				OptionalResourceId: existingLock.Relationship.Resource.ObjectId,
+				OptionalRelation:   existingLock.Relationship.Relation,
+				OptionalSubjectFilter: &v1.SubjectFilter{
+					SubjectType:       existingLock.Relationship.Subject.Object.ObjectType,
+					OptionalSubjectId: existingLock.Relationship.Subject.Object.ObjectId,
+				},
+			},
+		})
+	}
+
+	updates = append(updates, &v1.RelationshipUpdate{
+		Operation: v1.RelationshipUpdate_OPERATION_CREATE,
+		Relationship: &v1.Relationship{
+			Resource: &v1.ObjectReference{
+				ObjectType: lockType,
+				ObjectId:   lockId,
+			},
+			Relation: addRelationPrefix(lockVersionRelation, relationPrefix),
+			Subject: &v1.SubjectReference{
+				Object: &v1.ObjectReference{
+					ObjectType: lockVersionType,
+					ObjectId:   newFencingToken,
+				},
+			},
+		},
+	})
+
+	_, err = s.client.WriteRelationships(ctx, &v1.WriteRelationshipsRequest{
+		Updates:               updates,
+		OptionalPreconditions: preconditions,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error writing relationships to SpiceDB: %w", err)
+	}
+
+	return &apiV1beta1.AcquireLockResponse{LockToken: newFencingToken}, nil
 }
 
 func createSpiceDbRelationshipFilter(filter *apiV1beta1.RelationTupleFilter) (*v1.RelationshipFilter, error) {

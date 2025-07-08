@@ -34,13 +34,14 @@ type RelationshipResult struct {
 type ZanzibarRepository interface {
 	Check(ctx context.Context, request *v1beta1.CheckRequest) (*v1beta1.CheckResponse, error)
 	CheckForUpdate(ctx context.Context, request *v1beta1.CheckForUpdateRequest) (*v1beta1.CheckForUpdateResponse, error)
-	CreateRelationships(context.Context, []*v1beta1.Relationship, TouchSemantics) (*v1beta1.CreateTuplesResponse, error)
+	CreateRelationships(context.Context, []*v1beta1.Relationship, TouchSemantics, *v1beta1.FencingCheck) (*v1beta1.CreateTuplesResponse, error)
 	ReadRelationships(ctx context.Context, filter *v1beta1.RelationTupleFilter, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *RelationshipResult, chan error, error)
-	DeleteRelationships(context.Context, *v1beta1.RelationTupleFilter) (*v1beta1.DeleteTuplesResponse, error)
+	DeleteRelationships(context.Context, *v1beta1.RelationTupleFilter, *v1beta1.FencingCheck) (*v1beta1.DeleteTuplesResponse, error)
 	LookupSubjects(ctx context.Context, subjectType *v1beta1.ObjectType, subject_relation, relation string, resource *v1beta1.ObjectReference, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *SubjectResult, chan error, error)
 	LookupResources(ctx context.Context, resouce_type *v1beta1.ObjectType, relation string, subject *v1beta1.SubjectReference, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *ResourceResult, chan error, error)
 	IsBackendAvailable() error
 	ImportBulkTuples(stream grpc.ClientStreamingServer[v1beta1.ImportBulkTuplesRequest, v1beta1.ImportBulkTuplesResponse]) error
+	AcquireLock(ctx context.Context, lockId string) (*v1beta1.AcquireLockResponse, error)
 }
 
 type CheckUsecase struct {
@@ -78,8 +79,8 @@ func NewCreateRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *
 	return &CreateRelationshipsUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *CreateRelationshipsUsecase) CreateRelationships(ctx context.Context, r []*v1beta1.Relationship, touch bool) (*v1beta1.CreateTuplesResponse, error) {
-	return rc.repo.CreateRelationships(ctx, r, TouchSemantics(touch))
+func (rc *CreateRelationshipsUsecase) CreateRelationships(ctx context.Context, r []*v1beta1.Relationship, touch bool, fencing *v1beta1.FencingCheck) (*v1beta1.CreateTuplesResponse, error) {
+	return rc.repo.CreateRelationships(ctx, r, TouchSemantics(touch), fencing)
 }
 
 type ReadRelationshipsUsecase struct {
@@ -123,8 +124,8 @@ func NewDeleteRelationshipsUsecase(repo ZanzibarRepository, logger log.Logger) *
 	return &DeleteRelationshipsUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (rc *DeleteRelationshipsUsecase) DeleteRelationships(ctx context.Context, r *v1beta1.RelationTupleFilter) (*v1beta1.DeleteTuplesResponse, error) {
-	return rc.repo.DeleteRelationships(ctx, r)
+func (rc *DeleteRelationshipsUsecase) DeleteRelationships(ctx context.Context, r *v1beta1.RelationTupleFilter, fencing *v1beta1.FencingCheck) (*v1beta1.DeleteTuplesResponse, error) {
+	return rc.repo.DeleteRelationships(ctx, r, fencing)
 }
 
 type ImportBulkTuplesUsecase struct {
@@ -138,4 +139,17 @@ func NewImportBulkTuplesUsecase(repo ZanzibarRepository, logger log.Logger) *Imp
 
 func (rc *ImportBulkTuplesUsecase) ImportBulkTuples(client grpc.ClientStreamingServer[v1beta1.ImportBulkTuplesRequest, v1beta1.ImportBulkTuplesResponse]) error {
 	return rc.repo.ImportBulkTuples(client)
+}
+
+type AcquireLockUsecase struct {
+	repo ZanzibarRepository
+	log  *log.Helper
+}
+
+func NewAcquireLockUsecase(repo ZanzibarRepository, logger log.Logger) *AcquireLockUsecase {
+	return &AcquireLockUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
+func (rc *AcquireLockUsecase) AcquireLock(ctx context.Context, req *v1beta1.AcquireLockRequest) (*v1beta1.AcquireLockResponse, error) {
+	return rc.repo.AcquireLock(ctx, req.LockId)
 }

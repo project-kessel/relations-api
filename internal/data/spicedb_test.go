@@ -61,7 +61,7 @@ func TestCreateRelationship(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -86,7 +86,7 @@ func TestCreateRelationshipWithConsistencyToken(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	resp, err := spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	resp, err := spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
 	exists := CheckForRelationship(spiceDbRepo, "bob", "rbac", "principal", "", "member", "rbac", "group", "bob_club",
@@ -118,7 +118,7 @@ func TestCreateRelationshipWithSubjectRelation(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -170,10 +170,10 @@ func TestSecondCreateRelationshipFailsWithTouchFalse(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.Error(t, err)
 	assert.Equal(t, codes.AlreadyExists, status.Convert(err).Code())
 
@@ -199,12 +199,12 @@ func TestSecondCreateRelationshipSucceedsWithTouchTrue(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
 	touch = true
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.NoError(t, err)
 
 	container.WaitForQuantizationInterval()
@@ -327,7 +327,7 @@ func TestDoesNotCreateRelationshipWithSlashInSubjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.Error(t, err)
 }
 
@@ -346,7 +346,7 @@ func TestDoesNotCreateRelationshipWithSlashInObjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.Error(t, err)
 }
 
@@ -365,7 +365,7 @@ func TestCreateRelationshipFailsWithBadSubjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.Error(t, err)
 	assert.Equal(t, codes.FailedPrecondition, status.Convert(err).Code())
 	assert.Contains(t, err.Error(),
@@ -387,7 +387,7 @@ func TestCreateRelationshipFailsWithBadObjectType(t *testing.T) {
 
 	touch := biz.TouchSemantics(false)
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
 	assert.Error(t, err)
 	assert.Equal(t, codes.FailedPrecondition, status.Convert(err).Code())
 	assert.Contains(t, err.Error(),
@@ -532,7 +532,7 @@ func TestWriteAndReadBackRelationships(t *testing.T) {
 		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
 	}
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -573,7 +573,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
 	}
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -609,7 +609,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	})
+	}, nil)
 
 	if !assert.NoError(t, err) {
 		return
@@ -652,7 +652,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships_WithConsistencyToken(t *tes
 		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
 	}
 
-	respCreate, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	respCreate, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -690,7 +690,7 @@ func TestWriteReadBackDeleteAndReadBackRelationships_WithConsistencyToken(t *tes
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	})
+	}, nil)
 
 	if !assert.NoError(t, err) {
 		return
@@ -738,7 +738,7 @@ func TestSpiceDbRepository_CheckPermission_WithConsistencyToken(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -800,7 +800,7 @@ func TestSpiceDbRepository_CheckForUpdatePermission(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -857,7 +857,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -909,7 +909,7 @@ func TestSpiceDbRepository_CheckPermission(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	})
+	}, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -952,7 +952,7 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1041,7 +1041,7 @@ func TestSpiceDbRepository_NewEnemyProblem_Success(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	})
+	}, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1223,7 +1223,7 @@ func TestSpiceDbRepository_CheckPermission_MinimizeLatency(t *testing.T) {
 		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
 	}
 
-	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true))
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -1283,10 +1283,178 @@ func TestSpiceDbRepository_CheckPermission_MinimizeLatency(t *testing.T) {
 			SubjectNamespace: pointerize("rbac"),
 			SubjectType:      pointerize("principal"),
 		},
-	})
+	}, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
+}
+
+func TestSpiceDbRepository_CreateRelationships_WithFencing(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	// Acquire a lock to get a fencing token
+	lockIdentifier := "test-lock-1"
+	lockResp, err := spiceDbRepo.AcquireLock(ctx, lockIdentifier)
+	assert.NoError(t, err)
+	fencingToken := lockResp.GetLockToken()
+	assert.NotEmpty(t, fencingToken)
+
+	// Create a relationship with fencing
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "fencing_group", "member", "rbac", "principal", "fenced_bob", ""),
+	}
+	touch := biz.TouchSemantics(false)
+	fencing := &apiV1beta1.FencingCheck{
+		LockId:    lockIdentifier,
+		LockToken: fencingToken,
+	}
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, fencing)
+	assert.NoError(t, err)
+
+	container.WaitForQuantizationInterval()
+
+	// Relationship should exist
+	exists := CheckForRelationship(
+		spiceDbRepo, "fenced_bob", "rbac", "principal", "", "member", "rbac", "group", "fencing_group", nil,
+	)
+	assert.True(t, exists)
+
+	// Try to create with an invalid fencing token
+	badFencing := &apiV1beta1.FencingCheck{
+		LockId:    lockIdentifier,
+		LockToken: "invalid-token",
+	}
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, badFencing)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error writing relationships to SpiceDB")
+
+	// try to create with a non-existent lock id
+	badFencing2 := &apiV1beta1.FencingCheck{
+		LockId:    "invalid-lock-id",
+		LockToken: fencingToken,
+	}
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, badFencing2)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error writing relationships to SpiceDB")
+}
+
+func TestSpiceDbRepository_DeleteRelationships_WithFencing(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	// Acquire a lock to get a fencing token
+	lockIdentifier := "test-lock-1"
+	lockResp, err := spiceDbRepo.AcquireLock(ctx, lockIdentifier)
+	assert.NoError(t, err)
+	fencingToken := lockResp.GetLockToken()
+	assert.NotEmpty(t, fencingToken)
+
+	// Create a relationship to delete
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "fencing_group_del", "member", "rbac", "principal", "fenced_bob_del", ""),
+	}
+	touch := biz.TouchSemantics(false)
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, touch, nil)
+	assert.NoError(t, err)
+
+	// Delete with correct fencing
+	filter := &apiV1beta1.RelationTupleFilter{
+		ResourceId:        pointerize("fencing_group_del"),
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		Relation:          pointerize("member"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectId:        pointerize("fenced_bob_del"),
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("principal"),
+		},
+	}
+	fencing := &apiV1beta1.FencingCheck{
+		LockId:    lockIdentifier,
+		LockToken: fencingToken,
+	}
+	_, err = spiceDbRepo.DeleteRelationships(ctx, filter, fencing)
+	assert.NoError(t, err)
+
+	container.WaitForQuantizationInterval()
+
+	// Relationship should not exist
+	exists := CheckForRelationship(
+		spiceDbRepo, "fenced_bob_del", "rbac", "principal", "", "member", "rbac", "group", "fencing_group_del", nil,
+	)
+	assert.False(t, exists)
+
+	// Try to delete with an invalid fencing token
+	_, err = spiceDbRepo.DeleteRelationships(ctx, filter, &apiV1beta1.FencingCheck{
+		LockId:    lockIdentifier,
+		LockToken: "invalid-token",
+	})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error invoking DeleteRelationships in SpiceDB")
+
+	// try to delete with a non-existent lock id
+	_, err = spiceDbRepo.DeleteRelationships(ctx, filter, &apiV1beta1.FencingCheck{
+		LockId:    "invalid-lock-id",
+		LockToken: fencingToken,
+	})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error invoking DeleteRelationships in SpiceDB")
+}
+
+func TestSpiceDbRepository_AcquireLock_NewLock(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	identifier := "test-lock-1"
+
+	// Acquire a new lock
+	resp, err := spiceDbRepo.AcquireLock(ctx, identifier)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp.GetLockToken())
+
+}
+
+func TestSpiceDbRepository_AcquireLock_ReplaceExistingLock(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	identifier := "test-lock-1"
+
+	// Acquire initial lock
+	resp1, err := spiceDbRepo.AcquireLock(ctx, identifier)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp1.GetLockToken())
+
+	// Acquire lock again, forcefully replacing the existing lock
+	resp2, err := spiceDbRepo.AcquireLock(ctx, identifier)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp2.GetLockToken())
+	assert.NotEqual(t, resp1.GetLockToken(), resp2.GetLockToken())
+}
+
+func TestSpiceDbRepository_AcquireLock_EmptyIdentifier(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	// Try to acquire lock with an empty identifier
+	_, err = spiceDbRepo.AcquireLock(ctx, "")
+	assert.Error(t, err)
 }
 
 func pointerize(value string) *string { //Used to turn string literals into pointers

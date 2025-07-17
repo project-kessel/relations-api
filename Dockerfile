@@ -14,8 +14,7 @@ RUN make build
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1752587672
 
-# installs RHEL fork of go to be able to validate with go tools for FIPS -- likely not needed long term
-RUN microdnf install -y go-toolset
+
 RUN mkdir /config
 
 COPY --from=builder /workspace/bin/kessel-relations /usr/local/bin/

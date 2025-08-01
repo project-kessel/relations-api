@@ -10,7 +10,7 @@ require (
 	github.com/authzed/authzed-go v1.4.1
 	github.com/authzed/grpcutil v0.0.0-20240123194739-2ea1e3d2d98b
 	github.com/go-kratos/kratos/v2 v2.8.4
-	github.com/golang-jwt/jwt/v5 v5.2.3
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
 	github.com/ory/dockertest/v3 v3.12.0

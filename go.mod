@@ -5,7 +5,7 @@ go 1.24.4
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.9-20250912141014-52f32327d4b0.1
-	buf.build/go/protovalidate v0.14.0
+	buf.build/go/protovalidate v1.0.0
 	github.com/MicahParks/keyfunc/v3 v3.6.2
 	github.com/authzed/authzed-go v1.5.0
 	github.com/authzed/grpcutil v0.0.0-20240123194739-2ea1e3d2d98b
@@ -77,7 +77,7 @@ require (
 	github.com/prometheus/procfs v0.17.0 // indirect
 	github.com/samber/lo v1.51.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/stoewer/go-strcase v1.3.0 // indirect
+	github.com/stoewer/go-strcase v1.3.1 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect

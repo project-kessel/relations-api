@@ -7,7 +7,7 @@ require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.9-20250912141014-52f32327d4b0.1
 	buf.build/go/protovalidate v1.0.0
 	github.com/MicahParks/keyfunc/v3 v3.6.2
-	github.com/authzed/authzed-go v1.5.0
+	github.com/authzed/authzed-go v1.6.0
 	github.com/authzed/grpcutil v0.0.0-20240123194739-2ea1e3d2d98b
 	github.com/go-kratos/kratos/v2 v2.9.1
 	github.com/golang-jwt/jwt/v5 v5.3.0

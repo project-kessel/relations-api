@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	KesselCheckService_Check_FullMethodName          = "/kessel.relations.v1beta1.KesselCheckService/Check"
 	KesselCheckService_CheckForUpdate_FullMethodName = "/kessel.relations.v1beta1.KesselCheckService/CheckForUpdate"
+	KesselCheckService_CheckBulk_FullMethodName      = "/kessel.relations.v1beta1.KesselCheckService/CheckBulk"
 )
 
 // KesselCheckServiceClient is the client API for KesselCheckService service.
@@ -31,6 +32,7 @@ type KesselCheckServiceClient interface {
 	// (a Relation between a Resource and a Subject or Subject Set).
 	Check(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error)
 	CheckForUpdate(ctx context.Context, in *CheckForUpdateRequest, opts ...grpc.CallOption) (*CheckForUpdateResponse, error)
+	CheckBulk(ctx context.Context, in *CheckBulkRequest, opts ...grpc.CallOption) (*CheckBulkResponse, error)
 }
 
 type kesselCheckServiceClient struct {
@@ -61,6 +63,16 @@ func (c *kesselCheckServiceClient) CheckForUpdate(ctx context.Context, in *Check
 	return out, nil
 }
 
+func (c *kesselCheckServiceClient) CheckBulk(ctx context.Context, in *CheckBulkRequest, opts ...grpc.CallOption) (*CheckBulkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CheckBulkResponse)
+	err := c.cc.Invoke(ctx, KesselCheckService_CheckBulk_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KesselCheckServiceServer is the server API for KesselCheckService service.
 // All implementations must embed UnimplementedKesselCheckServiceServer
 // for forward compatibility.
@@ -69,6 +81,7 @@ type KesselCheckServiceServer interface {
 	// (a Relation between a Resource and a Subject or Subject Set).
 	Check(context.Context, *CheckRequest) (*CheckResponse, error)
 	CheckForUpdate(context.Context, *CheckForUpdateRequest) (*CheckForUpdateResponse, error)
+	CheckBulk(context.Context, *CheckBulkRequest) (*CheckBulkResponse, error)
 	mustEmbedUnimplementedKesselCheckServiceServer()
 }
 
@@ -84,6 +97,9 @@ func (UnimplementedKesselCheckServiceServer) Check(context.Context, *CheckReques
 }
 func (UnimplementedKesselCheckServiceServer) CheckForUpdate(context.Context, *CheckForUpdateRequest) (*CheckForUpdateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckForUpdate not implemented")
+}
+func (UnimplementedKesselCheckServiceServer) CheckBulk(context.Context, *CheckBulkRequest) (*CheckBulkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckBulk not implemented")
 }
 func (UnimplementedKesselCheckServiceServer) mustEmbedUnimplementedKesselCheckServiceServer() {}
 func (UnimplementedKesselCheckServiceServer) testEmbeddedByValue()                            {}
@@ -142,6 +158,24 @@ func _KesselCheckService_CheckForUpdate_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KesselCheckService_CheckBulk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckBulkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KesselCheckServiceServer).CheckBulk(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KesselCheckService_CheckBulk_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KesselCheckServiceServer).CheckBulk(ctx, req.(*CheckBulkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KesselCheckService_ServiceDesc is the grpc.ServiceDesc for KesselCheckService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -156,6 +190,10 @@ var KesselCheckService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckForUpdate",
 			Handler:    _KesselCheckService_CheckForUpdate_Handler,
+		},
+		{
+			MethodName: "CheckBulk",
+			Handler:    _KesselCheckService_CheckBulk_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -7,7 +7,9 @@ import (
 	"os"
 	"testing"
 
+	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/stretchr/testify/mock"
+	rpcstatus "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/metadata"
 
 	apiV1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
@@ -1287,6 +1289,134 @@ func TestSpiceDbRepository_CheckPermission_MinimizeLatency(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+}
+
+func TestSpiceDbRepository_CheckBulk(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "group", "bob_club", "member", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "rb_test", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "granted", "rbac", "role", "rl1", ""),
+		createRelationship("rbac", "role_binding", "rb_test", "subject", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "role", "rl1", "view_widget", "rbac", "principal", "*", ""),
+	}
+
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	container.WaitForQuantizationInterval()
+
+	items := []*apiV1beta1.CheckBulkRequestItem{
+		{
+			Resource: &apiV1beta1.ObjectReference{
+				Type: &apiV1beta1.ObjectType{
+					Name:      "workspace",
+					Namespace: "rbac",
+				},
+				Id: "test",
+			},
+			Relation: "view_widget",
+			Subject: &apiV1beta1.SubjectReference{
+				Subject: &apiV1beta1.ObjectReference{
+					Type: &apiV1beta1.ObjectType{
+						Name:      "principal",
+						Namespace: "rbac",
+					},
+					Id: "bob",
+				},
+			},
+		},
+		{
+			Resource: &apiV1beta1.ObjectReference{
+				Type: &apiV1beta1.ObjectType{
+					Name:      "workspace",
+					Namespace: "rbac",
+				},
+				Id: "test",
+			},
+			Relation: "view_widget",
+			Subject: &apiV1beta1.SubjectReference{
+				Subject: &apiV1beta1.ObjectReference{
+					Type: &apiV1beta1.ObjectType{
+						Name:      "principal",
+						Namespace: "rbac",
+					},
+					Id: "alice",
+				},
+			},
+		},
+	}
+
+	req := &apiV1beta1.CheckBulkRequest{
+		Items: items,
+	}
+	resp, err := spiceDbRepo.CheckBulk(ctx, req)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	if !assert.Equal(t, len(items), len(resp.GetPairs())) {
+		return
+	}
+
+	results := map[string]apiV1beta1.CheckBulkResponseItem_Allowed{}
+	for _, p := range resp.GetPairs() {
+		subjId := p.GetRequest().GetSubject().GetSubject().GetId()
+		results[subjId] = p.GetItem().GetAllowed()
+	}
+	assert.Equal(t, apiV1beta1.CheckBulkResponseItem_ALLOWED_TRUE, results["bob"])
+	assert.Equal(t, apiV1beta1.CheckBulkResponseItem_ALLOWED_FALSE, results["alice"])
+}
+
+func TestFromSpicePair_WithError(t *testing.T) {
+	t.Parallel()
+
+	// Build a SpiceDB pair that contains an error instead of an item
+	pair := &v1.CheckBulkPermissionsPair{
+		Request: &v1.CheckBulkPermissionsRequestItem{
+			Resource: &v1.ObjectReference{
+				ObjectType: "rbac/workspace",
+				ObjectId:   "test",
+			},
+			Permission: "view_widget",
+			Subject: &v1.SubjectReference{
+				Object: &v1.ObjectReference{
+					ObjectType: "rbac/principal",
+					ObjectId:   "bob",
+				},
+			},
+		},
+		Response: &v1.CheckBulkPermissionsPair_Error{
+			Error: &rpcstatus.Status{
+				Code:    int32(codes.InvalidArgument),
+				Message: "invalid request",
+			},
+		},
+	}
+
+	got := fromSpicePair(pair, log.NewHelper(log.DefaultLogger))
+	assert.NotNil(t, got)
+	// When error is present, Allowed should be UNSPECIFIED
+	assert.Equal(t, apiV1beta1.CheckBulkResponseItem_ALLOWED_UNSPECIFIED, got.GetItem().GetAllowed())
+
+	// And the request should be preserved/mapped back correctly
+	req := got.GetRequest()
+	assert.Equal(t, "rbac", req.GetResource().GetType().GetNamespace())
+	assert.Equal(t, "workspace", req.GetResource().GetType().GetName())
+	assert.Equal(t, "test", req.GetResource().GetId())
+	assert.Equal(t, "view_widget", req.GetRelation())
+	assert.Equal(t, "rbac", req.GetSubject().GetSubject().GetType().GetNamespace())
+	assert.Equal(t, "principal", req.GetSubject().GetSubject().GetType().GetName())
+	assert.Equal(t, "bob", req.GetSubject().GetSubject().GetId())
 }
 
 func TestSpiceDbRepository_CreateRelationships_WithFencing(t *testing.T) {

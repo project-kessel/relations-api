@@ -67,6 +67,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v1beta1.CheckResponse'
+    /v1beta1/checkbulk:
+        post:
+            tags:
+                - KesselCheckService
+            operationId: KesselCheckService_CheckBulk
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkResponse'
     /v1beta1/checkforupdate:
         post:
             tags:
@@ -390,6 +408,46 @@ components:
             properties:
                 lockToken:
                     type: string
+        kessel.relations.v1beta1.CheckBulkRequest:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkRequestItem'
+                consistency:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.Consistency'
+        kessel.relations.v1beta1.CheckBulkRequestItem:
+            type: object
+            properties:
+                resource:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
+                relation:
+                    type: string
+                subject:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
+        kessel.relations.v1beta1.CheckBulkResponse:
+            type: object
+            properties:
+                pairs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkResponsePair'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
+        kessel.relations.v1beta1.CheckBulkResponseItem:
+            type: object
+            properties:
+                allowed:
+                    type: integer
+                    format: enum
+        kessel.relations.v1beta1.CheckBulkResponsePair:
+            type: object
+            properties:
+                request:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkRequestItem'
+                item:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkResponseItem'
         kessel.relations.v1beta1.CheckForUpdateRequest:
             type: object
             properties:

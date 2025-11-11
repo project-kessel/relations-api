@@ -344,6 +344,179 @@ func TestKesselAPIGRPC_LookupResourcesInvalid(t *testing.T) {
 	assert.Equal(t, codes.InvalidArgument, status.Code())
 }
 
+func TestKesselAPIGRPC_BulkCheck(t *testing.T) {
+	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
+	conn, err := grpc.NewClient(
+		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
+	)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	// Create relationships needed for the permission scenario, mirroring internal/data test data
+	tupleClient := v1beta1.NewKesselTupleServiceClient(conn)
+	var rels []*v1beta1.Relationship
+	rels = append(rels, createRelations("role_binding", "rb_test", "user_grant", "workspace", "test")...)
+	rels = append(rels, createRelations("role", "rl1", "granted", "role_binding", "rb_test")...)
+	rels = append(rels, createRelations("principal", "bob", "subject", "role_binding", "rb_test")...)
+	rels = append(rels, createRelations("principal", "*", "view_widget", "role", "rl1")...)
+
+	_, err = tupleClient.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{
+		Tuples: rels,
+	})
+	assert.NoError(t, err)
+
+	// Wait for SpiceDB quantization interval so the checks see the new tuples
+	localKesselContainer.spicedbContainer.WaitForQuantizationInterval()
+
+	// Prepare a single bulk check request for both bob and alice
+	items := []*v1beta1.CheckBulkRequestItem{
+		{
+			Resource: &v1beta1.ObjectReference{
+				Type: simple_type("workspace"),
+				Id:   "test",
+			},
+			Relation: "view_widget",
+			Subject: &v1beta1.SubjectReference{
+				Subject: &v1beta1.ObjectReference{
+					Type: simple_type("principal"),
+					Id:   "bob",
+				},
+			},
+		},
+		{
+			Resource: &v1beta1.ObjectReference{
+				Type: simple_type("workspace"),
+				Id:   "test",
+			},
+			Relation: "view_widget",
+			Subject: &v1beta1.SubjectReference{
+				Subject: &v1beta1.ObjectReference{
+					Type: simple_type("principal"),
+					Id:   "alice",
+				},
+			},
+		},
+	}
+	req := &v1beta1.CheckBulkRequest{Items: items}
+	checkClient := v1beta1.NewKesselCheckServiceClient(conn)
+	resp, err := checkClient.CheckBulk(context.Background(), req)
+	assert.NoError(t, err)
+	if !assert.Equal(t, 2, len(resp.GetPairs())) {
+		return
+	}
+	results := map[string]v1beta1.CheckBulkResponseItem_Allowed{}
+	for _, p := range resp.GetPairs() {
+		subjId := p.GetRequest().GetSubject().GetSubject().GetId()
+		results[subjId] = p.GetItem().GetAllowed()
+	}
+	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_TRUE, results["bob"])
+	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_FALSE, results["alice"])
+}
+
+func TestKesselAPIGRPC_BulkCheck_WithErrorPair(t *testing.T) {
+	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
+	conn, err := grpc.NewClient(
+		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
+	)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	// Seed relationships for valid checks
+	tupleClient := v1beta1.NewKesselTupleServiceClient(conn)
+	var rels []*v1beta1.Relationship
+	rels = append(rels, createRelations("role_binding", "rb_test2", "user_grant", "workspace", "test2")...)
+	rels = append(rels, createRelations("role", "rl2", "granted", "role_binding", "rb_test2")...)
+	rels = append(rels, createRelations("principal", "bob", "subject", "role_binding", "rb_test2")...)
+	rels = append(rels, createRelations("principal", "*", "view_widget", "role", "rl2")...)
+
+	_, err = tupleClient.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{
+		Tuples: rels,
+	})
+	assert.NoError(t, err)
+
+	// Wait for SpiceDB quantization interval so the checks see the new tuples
+	localKesselContainer.spicedbContainer.WaitForQuantizationInterval()
+
+	// Prepare a request with:
+	// - one allowed TRUE (bob)
+	// - one allowed FALSE (alice)
+	// - one item that should produce an internal per-item error (invalid subject type),
+	//   which the API maps to ALLOWED_UNSPECIFIED in the response pair.
+	items := []*v1beta1.CheckBulkRequestItem{
+		{
+			Resource: &v1beta1.ObjectReference{
+				Type: simple_type("workspace"),
+				Id:   "test2",
+			},
+			Relation: "view_widget",
+			Subject: &v1beta1.SubjectReference{
+				Subject: &v1beta1.ObjectReference{
+					Type: simple_type("principal"),
+					Id:   "bob",
+				},
+			},
+		},
+		{
+			Resource: &v1beta1.ObjectReference{
+				Type: simple_type("workspace"),
+				Id:   "test2",
+			},
+			Relation: "view_widget",
+			Subject: &v1beta1.SubjectReference{
+				Subject: &v1beta1.ObjectReference{
+					Type: simple_type("principal"),
+					Id:   "alice",
+				},
+			},
+		},
+		{
+			// invalid subject type name triggers SpiceDB per-item error; server maps to ALLOWED_UNSPECIFIED
+			Resource: &v1beta1.ObjectReference{
+				Type: simple_type("workspace"),
+				Id:   "test2",
+			},
+			Relation: "view_widget",
+			Subject: &v1beta1.SubjectReference{
+				Subject: &v1beta1.ObjectReference{
+					Type: simple_type("not_a_user"),
+					Id:   "charlie",
+				},
+			},
+		},
+	}
+	req := &v1beta1.CheckBulkRequest{Items: items}
+	checkClient := v1beta1.NewKesselCheckServiceClient(conn)
+	resp, err := checkClient.CheckBulk(context.Background(), req)
+	assert.NoError(t, err)
+	if !assert.Equal(t, 3, len(resp.GetPairs())) {
+		return
+	}
+	results := map[string]v1beta1.CheckBulkResponseItem_Allowed{}
+	for _, p := range resp.GetPairs() {
+		subjId := p.GetRequest().GetSubject().GetSubject().GetId()
+		results[subjId] = p.GetItem().GetAllowed()
+	}
+	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_TRUE, results["bob"])
+	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_FALSE, results["alice"])
+	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_UNSPECIFIED, results["charlie"])
+}
+
 func pointerize(value string) *string { //Used to turn string literals into pointers
 	return &value
 }

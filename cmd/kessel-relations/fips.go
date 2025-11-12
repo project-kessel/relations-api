@@ -1,5 +1,4 @@
 //go:build fips_enabled
-// +build fips_enabled
 
 package main
 

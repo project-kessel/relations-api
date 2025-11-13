@@ -97,6 +97,3 @@ require (
 	golang.org/x/time v0.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-// Fix CVE-2024-41110 by forcing docker to use latest version
-replace github.com/docker/docker v27.1.1+incompatible => github.com/docker/docker v28.4.0+incompatible

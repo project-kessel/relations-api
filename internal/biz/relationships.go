@@ -34,6 +34,7 @@ type RelationshipResult struct {
 type ZanzibarRepository interface {
 	Check(ctx context.Context, request *v1beta1.CheckRequest) (*v1beta1.CheckResponse, error)
 	CheckForUpdate(ctx context.Context, request *v1beta1.CheckForUpdateRequest) (*v1beta1.CheckForUpdateResponse, error)
+	CheckBulk(ctx context.Context, request *v1beta1.CheckBulkRequest) (*v1beta1.CheckBulkResponse, error)
 	CreateRelationships(context.Context, []*v1beta1.Relationship, TouchSemantics, *v1beta1.FencingCheck) (*v1beta1.CreateTuplesResponse, error)
 	ReadRelationships(ctx context.Context, filter *v1beta1.RelationTupleFilter, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *RelationshipResult, chan error, error)
 	DeleteRelationships(context.Context, *v1beta1.RelationTupleFilter, *v1beta1.FencingCheck) (*v1beta1.DeleteTuplesResponse, error)
@@ -62,12 +63,25 @@ type CheckForUpdateUsecase struct {
 	log  *log.Helper
 }
 
+type CheckBulkUsecase struct {
+	repo ZanzibarRepository
+	log  *log.Helper
+}
+
+func NewCheckBulkUsecase(repo ZanzibarRepository, logger log.Logger) *CheckBulkUsecase {
+	return &CheckBulkUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
 func NewCheckForUpdateUsecase(repo ZanzibarRepository, logger log.Logger) *CheckForUpdateUsecase {
 	return &CheckForUpdateUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
 func (rc *CheckForUpdateUsecase) CheckForUpdate(ctx context.Context, check *v1beta1.CheckForUpdateRequest) (*v1beta1.CheckForUpdateResponse, error) {
 	return rc.repo.CheckForUpdate(ctx, check)
+}
+
+func (rc *CheckBulkUsecase) CheckBulk(ctx context.Context, check *v1beta1.CheckBulkRequest) (*v1beta1.CheckBulkResponse, error) {
+	return rc.repo.CheckBulk(ctx, check)
 }
 
 type CreateRelationshipsUsecase struct {

@@ -27,6 +27,15 @@ service KesselCheckService {
 			body: "*"
 		};
 	};
+
+	rpc CheckBulk (CheckBulkRequest) returns (CheckBulkResponse) {
+		option (google.api.http) = {
+			post: "/v1beta1/checkbulk"
+			body: "*"
+		};
+	};
+
+
 }
 
 message CheckRequest {
@@ -61,5 +70,37 @@ message CheckForUpdateResponse {
 		// e.g.  ALLOWED_CONDITIONAL = 3;
 	}
 	Allowed allowed = 1;
+	ConsistencyToken consistency_token = 2;
+}
+
+message CheckBulkRequestItem {
+	ObjectReference resource = 1 [(buf.validate.field).required = true];
+	string relation = 2 [(buf.validate.field).string.min_len = 1];
+	SubjectReference subject = 3 [(buf.validate.field).required = true];
+}
+
+message CheckBulkResponseItem {
+	enum Allowed {
+		ALLOWED_UNSPECIFIED = 0;
+		ALLOWED_TRUE = 1;
+		ALLOWED_FALSE = 2;
+		// e.g.  ALLOWED_CONDITIONAL = 3;
+	}
+	Allowed allowed = 1;
+}
+
+message CheckBulkResponsePair {
+	CheckBulkRequestItem request = 1;
+	CheckBulkResponseItem item = 2;
+
+}
+
+message CheckBulkRequest {
+	repeated CheckBulkRequestItem items = 1 [(buf.validate.field).repeated.min_items = 1];
+	Consistency consistency = 2;
+}
+
+message CheckBulkResponse {
+	repeated CheckBulkResponsePair pairs = 1 [(buf.validate.field).repeated.min_items = 1];
 	ConsistencyToken consistency_token = 2;
 }

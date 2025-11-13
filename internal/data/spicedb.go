@@ -31,6 +31,7 @@ type SpiceDbRepository struct {
 	schemaFilePath  string
 	isInitialized   bool
 	fullyConsistent bool //TODO: rename flag to smth like fullyConsistentAsDefault
+	log             *log.Helper
 }
 
 const (
@@ -95,7 +96,8 @@ func NewSpiceDbRepository(c *conf.Data, logger log.Logger) (*SpiceDbRepository, 
 		log.NewHelper(logger).Info("spicedb connection cleanup requested (nothing to clean up)")
 	}
 
-	return &SpiceDbRepository{client, healthClient, c.SpiceDb.SchemaFile, false, c.SpiceDb.FullyConsistent}, cleanup, nil
+	log := log.NewHelper(logger)
+	return &SpiceDbRepository{client, healthClient, c.SpiceDb.SchemaFile, false, c.SpiceDb.FullyConsistent, log}, cleanup, nil
 }
 
 func (s *SpiceDbRepository) initialize() error {
@@ -270,7 +272,7 @@ func (s *SpiceDbRepository) ImportBulkTuples(stream grpc.ClientStreamingServer[a
 				if res, closeErr := client.CloseAndRecv(); closeErr != nil {
 					return fmt.Errorf("error receiving response from Spicedb for bulkimport request: %w", closeErr)
 				} else {
-					log.Infof("total number of relationships loaded: %d", res.NumLoaded)
+					s.log.Infof("total number of relationships loaded: %d", res.NumLoaded)
 					totalImported = res.NumLoaded
 					return stream.SendAndClose(&apiV1beta1.ImportBulkTuplesResponse{NumImported: totalImported})
 				}
@@ -557,6 +559,89 @@ func (s *SpiceDbRepository) CheckForUpdate(ctx context.Context, check *apiV1beta
 	return &apiV1beta1.CheckForUpdateResponse{
 		Allowed:          apiV1beta1.CheckForUpdateResponse_ALLOWED_FALSE,
 		ConsistencyToken: &apiV1beta1.ConsistencyToken{Token: checkResponse.GetCheckedAt().GetToken()},
+	}, nil
+}
+
+// helper to build a SpiceDB CheckBulkPermissionsRequestItem from your API type
+func toSpiceItem(item *apiV1beta1.CheckBulkRequestItem) *v1.CheckBulkPermissionsRequestItem {
+	return &v1.CheckBulkPermissionsRequestItem{
+		Resource: &v1.ObjectReference{
+			ObjectType: kesselTypeToSpiceDBType(item.GetResource().GetType()),
+			ObjectId:   item.GetResource().GetId(),
+		},
+		Permission: item.GetRelation(),
+		Subject: &v1.SubjectReference{
+			Object: &v1.ObjectReference{
+				ObjectType: kesselTypeToSpiceDBType(item.GetSubject().GetSubject().GetType()),
+				ObjectId:   item.GetSubject().GetSubject().GetId(),
+			},
+			OptionalRelation: item.GetSubject().GetRelation(),
+		},
+	}
+}
+
+// helper to convert a SpiceDB pair to your API type
+func fromSpicePair(pair *v1.CheckBulkPermissionsPair, log *log.Helper) *apiV1beta1.CheckBulkResponsePair {
+	req := pair.GetRequest()
+	request := &apiV1beta1.CheckBulkRequestItem{
+		Resource: &apiV1beta1.ObjectReference{
+			Type: spicedbTypeToKesselType(req.GetResource().GetObjectType()),
+			Id:   req.GetResource().GetObjectId(),
+		},
+		Relation: req.GetPermission(),
+		Subject: &apiV1beta1.SubjectReference{
+			Subject: &apiV1beta1.ObjectReference{
+				Type: spicedbTypeToKesselType(req.GetSubject().GetObject().GetObjectType()),
+				Id:   req.GetSubject().GetObject().GetObjectId(),
+			},
+			Relation: optionalStringToStringPointer(req.GetSubject().GetOptionalRelation()),
+		},
+	}
+
+	if pair.GetError() != nil {
+		log.Errorf("Error in checkbulk for req: %v error-code: %v error-message: %v", request, pair.GetError().GetCode(), pair.GetError().GetMessage())
+		return &apiV1beta1.CheckBulkResponsePair{
+			Request: request,
+			Item:    &apiV1beta1.CheckBulkResponseItem{Allowed: apiV1beta1.CheckBulkResponseItem_ALLOWED_UNSPECIFIED},
+		}
+
+	}
+
+	allowed := apiV1beta1.CheckBulkResponseItem_ALLOWED_FALSE
+	if pair.GetItem().GetPermissionship() == v1.CheckPermissionResponse_PERMISSIONSHIP_HAS_PERMISSION {
+		allowed = apiV1beta1.CheckBulkResponseItem_ALLOWED_TRUE
+	}
+	return &apiV1beta1.CheckBulkResponsePair{
+		Request: request,
+		Item:    &apiV1beta1.CheckBulkResponseItem{Allowed: allowed},
+	}
+}
+
+// simplified CheckBulk using the helpers
+func (s *SpiceDbRepository) CheckBulk(ctx context.Context, check *apiV1beta1.CheckBulkRequest) (*apiV1beta1.CheckBulkResponse, error) {
+
+	if err := s.initialize(); err != nil {
+		return nil, err
+	}
+	// …initialize, build request…
+	items := make([]*v1.CheckBulkPermissionsRequestItem, len(check.Items))
+	for i, it := range check.Items {
+		items[i] = toSpiceItem(it)
+	}
+	req := &v1.CheckBulkPermissionsRequest{Consistency: s.determineConsistency(check.Consistency), Items: items}
+
+	resp, err := s.client.CheckBulkPermissions(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("error invoking CheckBulkPermissions in SpiceDB: %w", err)
+	}
+
+	pairs := make([]*apiV1beta1.CheckBulkResponsePair, len(resp.Pairs))
+	for i, p := range resp.Pairs {
+		pairs[i] = fromSpicePair(p, s.log)
+	}
+	return &apiV1beta1.CheckBulkResponse{
+		Pairs:            pairs,
+		ConsistencyToken: &apiV1beta1.ConsistencyToken{Token: resp.GetCheckedAt().GetToken()},
 	}, nil
 }
 

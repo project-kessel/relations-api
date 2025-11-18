@@ -457,7 +457,7 @@ func TestKesselAPIGRPC_BulkCheck_WithErrorPair(t *testing.T) {
 	// - one allowed TRUE (bob)
 	// - one allowed FALSE (alice)
 	// - one item that should produce an internal per-item error (invalid subject type),
-	//   which the API maps to ALLOWED_UNSPECIFIED in the response pair.
+	//   which the API now returns as an error in the response oneof (no item).
 	items := []*v1beta1.CheckBulkRequestItem{
 		{
 			Resource: &v1beta1.ObjectReference{
@@ -507,14 +507,25 @@ func TestKesselAPIGRPC_BulkCheck_WithErrorPair(t *testing.T) {
 	if !assert.Equal(t, 3, len(resp.GetPairs())) {
 		return
 	}
+
 	results := map[string]v1beta1.CheckBulkResponseItem_Allowed{}
+	errorSubjects := []string{}
 	for _, p := range resp.GetPairs() {
 		subjId := p.GetRequest().GetSubject().GetSubject().GetId()
-		results[subjId] = p.GetItem().GetAllowed()
+		if p.GetItem() != nil {
+			results[subjId] = p.GetItem().GetAllowed()
+		} else if p.GetError() != nil {
+			errorSubjects = append(errorSubjects, subjId)
+			// Optionally, ensure it's not OK
+			assert.NotEqual(t, int32(codes.OK), p.GetError().GetCode())
+		} else {
+			assert.Fail(t, "pair has neither item nor error")
+		}
 	}
 	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_TRUE, results["bob"])
 	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_FALSE, results["alice"])
-	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_UNSPECIFIED, results["charlie"])
+	// Ensure the invalid request produced an error oneof for subject "charlie"
+	assert.Contains(t, errorSubjects, "charlie")
 }
 
 func pointerize(value string) *string { //Used to turn string literals into pointers

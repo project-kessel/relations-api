@@ -19,6 +19,7 @@ import (
 	"github.com/authzed/grpcutil"
 	kerrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	rpcstatus "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -602,7 +603,12 @@ func fromSpicePair(pair *v1.CheckBulkPermissionsPair, log *log.Helper) *apiV1bet
 		log.Errorf("Error in checkbulk for req: %v error-code: %v error-message: %v", request, pair.GetError().GetCode(), pair.GetError().GetMessage())
 		return &apiV1beta1.CheckBulkResponsePair{
 			Request: request,
-			Item:    &apiV1beta1.CheckBulkResponseItem{Allowed: apiV1beta1.CheckBulkResponseItem_ALLOWED_UNSPECIFIED},
+			Response: &apiV1beta1.CheckBulkResponsePair_Error{
+				Error: &rpcstatus.Status{
+					Code:    pair.GetError().GetCode(),
+					Message: pair.GetError().GetMessage(),
+				},
+			},
 		}
 
 	}
@@ -613,7 +619,9 @@ func fromSpicePair(pair *v1.CheckBulkPermissionsPair, log *log.Helper) *apiV1bet
 	}
 	return &apiV1beta1.CheckBulkResponsePair{
 		Request: request,
-		Item:    &apiV1beta1.CheckBulkResponseItem{Allowed: allowed},
+		Response: &apiV1beta1.CheckBulkResponsePair_Item{
+			Item: &apiV1beta1.CheckBulkResponseItem{Allowed: allowed},
+		},
 	}
 }
 

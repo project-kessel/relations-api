@@ -5,6 +5,7 @@ package kessel.relations.v1beta1;
 import "google/api/annotations.proto";
 import "kessel/relations/v1beta1/common.proto";
 import "buf/validate/validate.proto";
+import "google/rpc/status.proto";
 
 
 option go_package = "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1";
@@ -91,8 +92,10 @@ message CheckBulkResponseItem {
 
 message CheckBulkResponsePair {
 	CheckBulkRequestItem request = 1;
-	CheckBulkResponseItem item = 2;
-
+	oneof response {
+		CheckBulkResponseItem item = 2;
+		google.rpc.Status error = 3;
+	};
 }
 
 message CheckBulkRequest {

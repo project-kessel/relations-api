@@ -1405,8 +1405,12 @@ func TestFromSpicePair_WithError(t *testing.T) {
 
 	got := fromSpicePair(pair, log.NewHelper(log.DefaultLogger))
 	assert.NotNil(t, got)
-	// When error is present, Allowed should be UNSPECIFIED
-	assert.Equal(t, apiV1beta1.CheckBulkResponseItem_ALLOWED_UNSPECIFIED, got.GetItem().GetAllowed())
+	// When error is present, the oneof response should be set to error and item should be nil
+	assert.Nil(t, got.GetItem())
+	if assert.NotNil(t, got.GetError()) {
+		assert.Equal(t, int32(codes.InvalidArgument), got.GetError().GetCode())
+		assert.Equal(t, "invalid request", got.GetError().GetMessage())
+	}
 
 	// And the request should be preserved/mapped back correctly
 	req := got.GetRequest()

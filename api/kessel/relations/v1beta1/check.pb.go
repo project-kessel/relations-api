@@ -9,6 +9,7 @@ package v1beta1
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
+	status "google.golang.org/genproto/googleapis/rpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -507,9 +508,13 @@ func (x *CheckBulkResponseItem) GetAllowed() CheckBulkResponseItem_Allowed {
 }
 
 type CheckBulkResponsePair struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Request       *CheckBulkRequestItem  `protobuf:"bytes,1,opt,name=request,proto3" json:"request,omitempty"`
-	Item          *CheckBulkResponseItem `protobuf:"bytes,2,opt,name=item,proto3" json:"item,omitempty"`
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	Request *CheckBulkRequestItem  `protobuf:"bytes,1,opt,name=request,proto3" json:"request,omitempty"`
+	// Types that are valid to be assigned to Response:
+	//
+	//	*CheckBulkResponsePair_Item
+	//	*CheckBulkResponsePair_Error
+	Response      isCheckBulkResponsePair_Response `protobuf_oneof:"response"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -551,12 +556,46 @@ func (x *CheckBulkResponsePair) GetRequest() *CheckBulkRequestItem {
 	return nil
 }
 
-func (x *CheckBulkResponsePair) GetItem() *CheckBulkResponseItem {
+func (x *CheckBulkResponsePair) GetResponse() isCheckBulkResponsePair_Response {
 	if x != nil {
-		return x.Item
+		return x.Response
 	}
 	return nil
 }
+
+func (x *CheckBulkResponsePair) GetItem() *CheckBulkResponseItem {
+	if x != nil {
+		if x, ok := x.Response.(*CheckBulkResponsePair_Item); ok {
+			return x.Item
+		}
+	}
+	return nil
+}
+
+func (x *CheckBulkResponsePair) GetError() *status.Status {
+	if x != nil {
+		if x, ok := x.Response.(*CheckBulkResponsePair_Error); ok {
+			return x.Error
+		}
+	}
+	return nil
+}
+
+type isCheckBulkResponsePair_Response interface {
+	isCheckBulkResponsePair_Response()
+}
+
+type CheckBulkResponsePair_Item struct {
+	Item *CheckBulkResponseItem `protobuf:"bytes,2,opt,name=item,proto3,oneof"`
+}
+
+type CheckBulkResponsePair_Error struct {
+	Error *status.Status `protobuf:"bytes,3,opt,name=error,proto3,oneof"`
+}
+
+func (*CheckBulkResponsePair_Item) isCheckBulkResponsePair_Response() {}
+
+func (*CheckBulkResponsePair_Error) isCheckBulkResponsePair_Response() {}
 
 type CheckBulkRequest struct {
 	state         protoimpl.MessageState  `protogen:"open.v1"`
@@ -666,7 +705,7 @@ var File_kessel_relations_v1beta1_check_proto protoreflect.FileDescriptor
 
 const file_kessel_relations_v1beta1_check_proto_rawDesc = "" +
 	"\n" +
-	"$kessel/relations/v1beta1/check.proto\x12\x18kessel.relations.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a%kessel/relations/v1beta1/common.proto\x1a\x1bbuf/validate/validate.proto\"\x99\x02\n" +
+	"$kessel/relations/v1beta1/check.proto\x12\x18kessel.relations.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a%kessel/relations/v1beta1/common.proto\x1a\x1bbuf/validate/validate.proto\x1a\x17google/rpc/status.proto\"\x99\x02\n" +
 	"\fCheckRequest\x12M\n" +
 	"\bresource\x18\x01 \x01(\v2).kessel.relations.v1beta1.ObjectReferenceB\x06\xbaH\x03\xc8\x01\x01R\bresource\x12#\n" +
 	"\brelation\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\brelation\x12L\n" +
@@ -699,10 +738,13 @@ const file_kessel_relations_v1beta1_check_proto_rawDesc = "" +
 	"\aAllowed\x12\x17\n" +
 	"\x13ALLOWED_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fALLOWED_TRUE\x10\x01\x12\x11\n" +
-	"\rALLOWED_FALSE\x10\x02\"\xa6\x01\n" +
+	"\rALLOWED_FALSE\x10\x02\"\xe0\x01\n" +
 	"\x15CheckBulkResponsePair\x12H\n" +
-	"\arequest\x18\x01 \x01(\v2..kessel.relations.v1beta1.CheckBulkRequestItemR\arequest\x12C\n" +
-	"\x04item\x18\x02 \x01(\v2/.kessel.relations.v1beta1.CheckBulkResponseItemR\x04item\"\xab\x01\n" +
+	"\arequest\x18\x01 \x01(\v2..kessel.relations.v1beta1.CheckBulkRequestItemR\arequest\x12E\n" +
+	"\x04item\x18\x02 \x01(\v2/.kessel.relations.v1beta1.CheckBulkResponseItemH\x00R\x04item\x12*\n" +
+	"\x05error\x18\x03 \x01(\v2\x12.google.rpc.StatusH\x00R\x05errorB\n" +
+	"\n" +
+	"\bresponse\"\xab\x01\n" +
 	"\x10CheckBulkRequest\x12N\n" +
 	"\x05items\x18\x01 \x03(\v2..kessel.relations.v1beta1.CheckBulkRequestItemB\b\xbaH\x05\x92\x01\x02\b\x01R\x05items\x12G\n" +
 	"\vconsistency\x18\x02 \x01(\v2%.kessel.relations.v1beta1.ConsistencyR\vconsistency\"\xbd\x01\n" +
@@ -746,6 +788,7 @@ var file_kessel_relations_v1beta1_check_proto_goTypes = []any{
 	(*SubjectReference)(nil),            // 13: kessel.relations.v1beta1.SubjectReference
 	(*Consistency)(nil),                 // 14: kessel.relations.v1beta1.Consistency
 	(*ConsistencyToken)(nil),            // 15: kessel.relations.v1beta1.ConsistencyToken
+	(*status.Status)(nil),               // 16: google.rpc.Status
 }
 var file_kessel_relations_v1beta1_check_proto_depIdxs = []int32{
 	12, // 0: kessel.relations.v1beta1.CheckRequest.resource:type_name -> kessel.relations.v1beta1.ObjectReference
@@ -762,21 +805,22 @@ var file_kessel_relations_v1beta1_check_proto_depIdxs = []int32{
 	2,  // 11: kessel.relations.v1beta1.CheckBulkResponseItem.allowed:type_name -> kessel.relations.v1beta1.CheckBulkResponseItem.Allowed
 	7,  // 12: kessel.relations.v1beta1.CheckBulkResponsePair.request:type_name -> kessel.relations.v1beta1.CheckBulkRequestItem
 	8,  // 13: kessel.relations.v1beta1.CheckBulkResponsePair.item:type_name -> kessel.relations.v1beta1.CheckBulkResponseItem
-	7,  // 14: kessel.relations.v1beta1.CheckBulkRequest.items:type_name -> kessel.relations.v1beta1.CheckBulkRequestItem
-	14, // 15: kessel.relations.v1beta1.CheckBulkRequest.consistency:type_name -> kessel.relations.v1beta1.Consistency
-	9,  // 16: kessel.relations.v1beta1.CheckBulkResponse.pairs:type_name -> kessel.relations.v1beta1.CheckBulkResponsePair
-	15, // 17: kessel.relations.v1beta1.CheckBulkResponse.consistency_token:type_name -> kessel.relations.v1beta1.ConsistencyToken
-	3,  // 18: kessel.relations.v1beta1.KesselCheckService.Check:input_type -> kessel.relations.v1beta1.CheckRequest
-	5,  // 19: kessel.relations.v1beta1.KesselCheckService.CheckForUpdate:input_type -> kessel.relations.v1beta1.CheckForUpdateRequest
-	10, // 20: kessel.relations.v1beta1.KesselCheckService.CheckBulk:input_type -> kessel.relations.v1beta1.CheckBulkRequest
-	4,  // 21: kessel.relations.v1beta1.KesselCheckService.Check:output_type -> kessel.relations.v1beta1.CheckResponse
-	6,  // 22: kessel.relations.v1beta1.KesselCheckService.CheckForUpdate:output_type -> kessel.relations.v1beta1.CheckForUpdateResponse
-	11, // 23: kessel.relations.v1beta1.KesselCheckService.CheckBulk:output_type -> kessel.relations.v1beta1.CheckBulkResponse
-	21, // [21:24] is the sub-list for method output_type
-	18, // [18:21] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	16, // 14: kessel.relations.v1beta1.CheckBulkResponsePair.error:type_name -> google.rpc.Status
+	7,  // 15: kessel.relations.v1beta1.CheckBulkRequest.items:type_name -> kessel.relations.v1beta1.CheckBulkRequestItem
+	14, // 16: kessel.relations.v1beta1.CheckBulkRequest.consistency:type_name -> kessel.relations.v1beta1.Consistency
+	9,  // 17: kessel.relations.v1beta1.CheckBulkResponse.pairs:type_name -> kessel.relations.v1beta1.CheckBulkResponsePair
+	15, // 18: kessel.relations.v1beta1.CheckBulkResponse.consistency_token:type_name -> kessel.relations.v1beta1.ConsistencyToken
+	3,  // 19: kessel.relations.v1beta1.KesselCheckService.Check:input_type -> kessel.relations.v1beta1.CheckRequest
+	5,  // 20: kessel.relations.v1beta1.KesselCheckService.CheckForUpdate:input_type -> kessel.relations.v1beta1.CheckForUpdateRequest
+	10, // 21: kessel.relations.v1beta1.KesselCheckService.CheckBulk:input_type -> kessel.relations.v1beta1.CheckBulkRequest
+	4,  // 22: kessel.relations.v1beta1.KesselCheckService.Check:output_type -> kessel.relations.v1beta1.CheckResponse
+	6,  // 23: kessel.relations.v1beta1.KesselCheckService.CheckForUpdate:output_type -> kessel.relations.v1beta1.CheckForUpdateResponse
+	11, // 24: kessel.relations.v1beta1.KesselCheckService.CheckBulk:output_type -> kessel.relations.v1beta1.CheckBulkResponse
+	22, // [22:25] is the sub-list for method output_type
+	19, // [19:22] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_kessel_relations_v1beta1_check_proto_init() }
@@ -785,6 +829,10 @@ func file_kessel_relations_v1beta1_check_proto_init() {
 		return
 	}
 	file_kessel_relations_v1beta1_common_proto_init()
+	file_kessel_relations_v1beta1_check_proto_msgTypes[6].OneofWrappers = []any{
+		(*CheckBulkResponsePair_Item)(nil),
+		(*CheckBulkResponsePair_Error)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

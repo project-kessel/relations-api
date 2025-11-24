@@ -2625,7 +2625,7 @@ data:
       "timezone": "browser",
       "title": "Kessel - Relations API",
       "uid": "ddxs3i6o0xpmoe",
-      "version": 8,
+      "version": 8
     }
 kind: ConfigMap
 metadata:

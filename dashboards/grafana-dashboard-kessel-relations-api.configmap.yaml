@@ -1098,7 +1098,7 @@ data:
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum by (code,operation) (increase(server_requests_code_total{job=\"kessel-relations-api\", operation=~\"$operation\"}[$__range])) != 0",
+              "expr": "sum by (code,operation) (increase(server_requests_code_total{job=\"kessel-relations-api\", operation=~\"$operation\"}[$__range]))",
               "format": "table",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1130,6 +1130,24 @@ data:
                   "code": "Status Code",
                   "operation": "Operation"
                 }
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "equal",
+                      "options": {
+                        "value": "0"
+                      }
+                    },
+                    "fieldName": "Count"
+                  }
+                ],
+                "match": "any",
+                "type": "exclude"
               }
             }
           ],
@@ -1184,7 +1202,7 @@ data:
                 }
               },
               "mappings": [],
-              "noValue": "No Recent Errors Codes (adjust window)",
+              "noValue": "No Recent Error Codes (adjust window)",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -1232,7 +1250,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(increase(server_requests_code_total{job=\"kessel-relations-api\", code!~\"0|200\"}[$__range])) by (code) != 0\n",
+              "expr": "sum(increase(server_requests_code_total{job=\"kessel-relations-api\", code!~\"0|200\"}[$__range])) by (code) > 0\n",
               "format": "time_series",
               "instant": false,
               "interval": "15s",

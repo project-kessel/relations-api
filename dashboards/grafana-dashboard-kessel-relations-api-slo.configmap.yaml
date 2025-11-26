@@ -1,0 +1,1247 @@
+apiVersion: v1
+data:
+  grafana-dashboard-kessel-relations-api-slo.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "grafana",
+              "uid": "-- Grafana --"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 1056860,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "uid": "$datasource"
+          },
+          "description": "Endpoint performance ranked by SLO compliance. Availability measured against selected target, latency against 95% <$latency_slo_target. Sorted alphabetically by endpoint. Colors: Red <99%, Yellow 99-99.9%, Green ≥99.9%.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "decimals": 2,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 0.99
+                  },
+                  {
+                    "color": "green",
+                    "value": 0.999
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Endpoint"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 600
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "Availability \\(.*\\)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 2
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "red"
+                        },
+                        {
+                          "color": "yellow",
+                          "value": 0.99
+                        },
+                        {
+                          "color": "green",
+                          "value": 0.999
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "Latency \\(95% <.*\\)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 2
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "red"
+                        },
+                        {
+                          "color": "yellow",
+                          "value": 0.9
+                        },
+                        {
+                          "color": "green",
+                          "value": 0.95
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Request Volume"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "reqps"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Error Rate"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green"
+                        },
+                        {
+                          "color": "yellow",
+                          "value": 0.001
+                        },
+                        {
+                          "color": "red",
+                          "value": 0.01
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 102,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "11.6.3",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "expr": "(\n  sum by (operation) (\n    increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\"}[$slo_period])\n  )\n  /\n  sum by (operation) (\n    increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}[$slo_period])\n  )\n)",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "{{operation}}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "expr": "(\n  sum by (operation) (\n    increase(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\",le=\"$latency_slo_target\"}[$slo_period])\n  )\n  /\n  sum by (operation) (\n    increase(server_requests_seconds_bucket_seconds_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\"}[$slo_period])\n  )\n)",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "{{operation}}",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "expr": "(\n  sum by (operation) (\n    rate(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}[5m])\n  )\n)",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "{{operation}}",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "expr": "(\n  1 - (\n    sum by (operation) (\n      increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\"}[$slo_period])\n    )\n    /\n    sum by (operation) (\n      increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}[$slo_period])\n    )\n  )\n)",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "{{operation}}",
+              "refId": "D"
+            }
+          ],
+          "title": "SLO Overview",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "Value #A": 1,
+                  "Value #B": 2,
+                  "Value #C": 3,
+                  "Value #D": 4,
+                  "operation": 0
+                },
+                "renameByName": {
+                  "Value #A": "Availability ($availability_slo_target)",
+                  "Value #B": "Latency (95% <$latency_slo_target)",
+                  "Value #C": "Request Volume",
+                  "Value #D": "Error Rate",
+                  "operation": "Endpoint"
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": false,
+                    "field": "Endpoint"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "limit",
+              "options": {
+                "limitField": 15
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "collapsed": true,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
+          "id": 200,
+          "panels": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "description": "Availability SLO compliance for this endpoint. Success rate excluding 5xx and timeout errors. Green ≥SLO target, Yellow 99-SLO target, Red <99%.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "decimals": 2,
+                  "mappings": [],
+                  "max": 1,
+                  "min": 0.98,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red"
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 0.99
+                      },
+                      {
+                        "color": "green",
+                        "value": 0.999
+                      }
+                    ]
+                  },
+                  "unit": "percentunit"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 6,
+                "w": 8,
+                "x": 0,
+                "y": 9
+              },
+              "id": 201,
+              "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "text": {}
+              },
+              "pluginVersion": "8.5.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "sum(increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[$slo_period]))\n/\nsum(increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\"}[$slo_period]))",
+                  "refId": "A"
+                }
+              ],
+              "title": "Availability ($availability_slo_target)",
+              "type": "gauge"
+            },
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "description": "Rate at which availability error budget is being consumed. Values are multiplied by 1000 for visibility (e.g., 10 = 1% error rate). Normal: <10, Warning: 10-50, Critical: >50.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "decimals": 2,
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 10
+                      },
+                      {
+                        "color": "red",
+                        "value": 50
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 6,
+                "w": 8,
+                "x": 8,
+                "y": 9
+              },
+              "id": 202,
+              "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "text": {}
+              },
+              "pluginVersion": "8.5.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "(\n  1 - (\n    sum(rate(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1h]))\n    /\n    sum(rate(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\"}[1h]))\n  )\n) * 1000",
+                  "refId": "A"
+                }
+              ],
+              "title": "Availability Burn Rate",
+              "type": "gauge"
+            },
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "description": "Percentage of availability error budget consumed over the past day. Shows cumulative budget usage. 0% = no budget used, 100% = SLO violated. Colors: Red >80%, Yellow 50-80%, Green <50%.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "decimals": 2,
+                  "mappings": [],
+                  "max": 1,
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 0.5
+                      },
+                      {
+                        "color": "red",
+                        "value": 0.8
+                      }
+                    ]
+                  },
+                  "unit": "percentunit"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 6,
+                "w": 8,
+                "x": 16,
+                "y": 9
+              },
+              "id": 203,
+              "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "text": {}
+              },
+              "pluginVersion": "8.5.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "1 - clamp_min(\n  (\n    (1 - $availability_slo_target) - (\n      1 - (\n        sum(increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d]))\n        /\n        sum(increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\"}[1d]))\n      )\n    )\n  ) / (1 - $availability_slo_target),\n  0\n)",
+                  "refId": "A"
+                }
+              ],
+              "title": "Availability Budget Used",
+              "type": "gauge"
+            },
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "description": "Availability trend showing daily availability percentage over 28 days. Green line = availability, red dashed line = SLO target.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "vis": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 2,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "decimals": 3,
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "unit": "percentunit"
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "SLO Target"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.drawStyle",
+                        "value": "line"
+                      },
+                      {
+                        "id": "custom.lineStyle",
+                        "value": {
+                          "dash": [
+                            10,
+                            10
+                          ],
+                          "fill": "dash"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "red",
+                          "mode": "fixed"
+                        }
+                      },
+                      {
+                        "id": "custom.hideFrom",
+                        "value": {
+                          "legend": true,
+                          "tooltip": true,
+                          "vis": false
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 15
+              },
+              "id": 204,
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "min",
+                    "mean",
+                    "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "(\n  sum(\n    increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d])\n  )\n  /\n  sum(\n    increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\"}[1d])\n  )\n)",
+                  "interval": "1d",
+                  "legendFormat": "Availability",
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "$availability_slo_target",
+                  "interval": "1d",
+                  "legendFormat": "SLO Target",
+                  "refId": "B"
+                }
+              ],
+              "title": "Availability Trend",
+              "type": "timeseries"
+            }
+          ],
+          "repeat": "route",
+          "title": "Availability SLO - ${route:raw}",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 12
+          },
+          "id": 300,
+          "panels": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "description": "Latency SLO compliance for this endpoint. Percentage of requests completing under target latency. Green ≥95%, Yellow 90-95%, Red <90%.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "decimals": 2,
+                  "mappings": [],
+                  "max": 1,
+                  "min": 0.85,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red"
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 0.9
+                      },
+                      {
+                        "color": "green",
+                        "value": 0.95
+                      }
+                    ]
+                  },
+                  "unit": "percentunit"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 6,
+                "w": 8,
+                "x": 0,
+                "y": 69
+              },
+              "id": 301,
+              "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "text": {}
+              },
+              "pluginVersion": "8.5.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "sum(increase(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[$slo_period]))\n/\nsum(increase(server_requests_seconds_bucket_seconds_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[$slo_period]))",
+                  "refId": "A"
+                }
+              ],
+              "title": "Latency (95% <$latency_slo_target)",
+              "type": "gauge"
+            },
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "description": "Rate at which latency error budget is being consumed. Values are multiplied by 20 for visibility (e.g., 5 = 25% slow requests). Normal: <5, Warning: 5-15, Critical: >15.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "decimals": 2,
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 5
+                      },
+                      {
+                        "color": "red",
+                        "value": 15
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 6,
+                "w": 8,
+                "x": 8,
+                "y": 69
+              },
+              "id": 302,
+              "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "text": {}
+              },
+              "pluginVersion": "8.5.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "(\n  1 - (\n    sum(rate(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[1h]))\n    /\n    sum(rate(server_requests_seconds_bucket_seconds_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1h]))\n  )\n) * 20",
+                  "refId": "A"
+                }
+              ],
+              "title": "Latency Burn Rate",
+              "type": "gauge"
+            },
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "description": "Percentage of latency error budget consumed over the past day. Shows cumulative slow request budget usage. 0% = all requests fast, 100% = latency SLO violated. Colors: Red >80%, Yellow 50-80%, Green <50%.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "decimals": 2,
+                  "mappings": [],
+                  "max": 1,
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 0.5
+                      },
+                      {
+                        "color": "red",
+                        "value": 0.8
+                      }
+                    ]
+                  },
+                  "unit": "percentunit"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 6,
+                "w": 8,
+                "x": 16,
+                "y": 69
+              },
+              "id": 303,
+              "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "text": {}
+              },
+              "pluginVersion": "8.5.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "1 - clamp_min(\n  (\n    0.05 - (\n      1 - (\n        sum(increase(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[1d]))\n        /\n        sum(increase(server_requests_seconds_bucket_seconds_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d]))\n      )\n    )\n  ) / 0.05,\n  0\n)",
+                  "refId": "A"
+                }
+              ],
+              "title": "Latency Budget Used",
+              "type": "gauge"
+            },
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "description": "Latency trend showing daily P95 latency and SLO compliance percentage over 28 days. Blue line = P95 latency, Green line = SLO compliance %, Red dashed line = latency SLO target.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "vis": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 2,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "P95 Latency"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "s"
+                      },
+                      {
+                        "id": "custom.axisPlacement",
+                        "value": "left"
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "blue",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "SLO Compliance"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "percentunit"
+                      },
+                      {
+                        "id": "custom.axisPlacement",
+                        "value": "right"
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "green",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Latency SLO Target"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "s"
+                      },
+                      {
+                        "id": "custom.axisPlacement",
+                        "value": "left"
+                      },
+                      {
+                        "id": "custom.drawStyle",
+                        "value": "line"
+                      },
+                      {
+                        "id": "custom.lineStyle",
+                        "value": {
+                          "dash": [
+                            10,
+                            10
+                          ],
+                          "fill": "dash"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "red",
+                          "mode": "fixed"
+                        }
+                      },
+                      {
+                        "id": "custom.hideFrom",
+                        "value": {
+                          "legend": true,
+                          "tooltip": true,
+                          "vis": false
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 75
+              },
+              "id": 304,
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "min",
+                    "mean",
+                    "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "none"
+                }
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "histogram_quantile(0.95,\n  sum by (le) (\n    rate(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d])\n  )\n)",
+                  "interval": "1d",
+                  "legendFormat": "P95 Latency",
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "(\n  sum(\n    increase(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[1d])\n  )\n  /\n  sum(\n    increase(server_requests_seconds_bucket_seconds_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d])\n  )\n)",
+                  "interval": "1d",
+                  "legendFormat": "SLO Compliance",
+                  "refId": "B"
+                },
+                {
+                  "datasource": {
+                    "uid": "$datasource"
+                  },
+                  "expr": "$latency_slo_target",
+                  "interval": "1d",
+                  "legendFormat": "Latency SLO Target",
+                  "refId": "C"
+                }
+              ],
+              "title": "Latency Trend",
+              "type": "timeseries"
+            }
+          ],
+          "repeat": "route",
+          "title": "Latency SLO - ${route:raw}",
+          "type": "row"
+        }
+      ],
+      "preload": false,
+      "refresh": "",
+      "schemaVersion": 41,
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "text": "All",
+              "value": [
+                "$__all"
+              ]
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(server_requests_seconds_bucket_seconds_count{service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}, operation)",
+            "includeAll": true,
+            "label": "routes",
+            "multi": true,
+            "name": "route",
+            "options": [],
+            "query": {
+              "query": "label_values(server_requests_seconds_bucket_seconds_count{service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}, operation)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "crcs02ue1-prometheus",
+              "value": "PDD8BE47D10408F45"
+            },
+            "name": "datasource",
+            "options": [],
+            "query": "prometheus",
+            "refresh": 1,
+            "type": "datasource"
+          },
+          {
+            "current": {
+              "text": "kessel-stage",
+              "value": "kessel-stage"
+            },
+            "name": "namespace",
+            "options": [
+              {
+                "selected": true,
+                "text": "kessel-stage",
+                "value": "kessel-stage"
+              },
+              {
+                "selected": false,
+                "text": "kessel-prod",
+                "value": "kessel-prod"
+              }
+            ],
+            "query": "kessel-stage,kessel-prod",
+            "type": "custom"
+          },
+          {
+            "current": {
+              "text": "28d",
+              "value": "28d"
+            },
+            "name": "slo_period",
+            "options": [
+              {
+                "selected": false,
+                "text": "1d",
+                "value": "1d"
+              },
+              {
+                "selected": false,
+                "text": "7d",
+                "value": "7d"
+              },
+              {
+                "selected": true,
+                "text": "28d",
+                "value": "28d"
+              }
+            ],
+            "query": "1d,7d,28d",
+            "type": "custom"
+          },
+          {
+            "current": {
+              "text": "0.999",
+              "value": "0.999"
+            },
+            "name": "availability_slo_target",
+            "options": [
+              {
+                "selected": true,
+                "text": "99.9%",
+                "value": "0.999"
+              },
+              {
+                "selected": false,
+                "text": "99.95%",
+                "value": "0.9995"
+              },
+              {
+                "selected": false,
+                "text": "99.99%",
+                "value": "0.9999"
+              }
+            ],
+            "query": "99.9% : 0.999,99.95% : 0.9995,99.99% : 0.9999",
+            "type": "custom"
+          },
+          {
+            "current": {
+              "text": "0.25",
+              "value": "0.25"
+            },
+            "name": "latency_slo_target",
+            "options": [
+              {
+                "selected": false,
+                "text": "100ms",
+                "value": "0.1"
+              },
+              {
+                "selected": true,
+                "text": "250ms",
+                "value": "0.25"
+              },
+              {
+                "selected": false,
+                "text": "500ms",
+                "value": "0.5"
+              },
+              {
+                "selected": false,
+                "text": "1s",
+                "value": "1.0"
+              }
+            ],
+            "query": "100ms : 0.1,250ms : 0.25,500ms : 0.5,1s : 1.0",
+            "type": "custom"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-28d",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Kessel relations API - SLO Dashboard",
+      "uid": "kessel-relations-api-slo",
+      "version": 1
+    }
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-kessel-relations-api-slo
+  labels:
+    grafana_dashboard: "true"
+  annotations:
+    grafana-folder: /grafana-dashboard-definitions/Kessel

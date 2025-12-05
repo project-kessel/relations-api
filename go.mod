@@ -9,7 +9,7 @@ require (
 	github.com/MicahParks/keyfunc/v3 v3.7.0
 	github.com/authzed/authzed-go v1.7.0
 	github.com/authzed/grpcutil v0.0.0-20240123194739-2ea1e3d2d98b
-	github.com/go-kratos/kratos/v2 v2.9.1
+	github.com/go-kratos/kratos/v2 v2.9.2
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.7.0

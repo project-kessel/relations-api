@@ -4,7 +4,7 @@ module github.com/project-kessel/relations-api
 go 1.25.3
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.10-20250912141014-52f32327d4b0.1
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20251209175733-2a1774d88802.1
 	buf.build/go/protovalidate v1.0.1
 	github.com/MicahParks/keyfunc/v3 v3.7.0
 	github.com/authzed/authzed-go v1.7.0

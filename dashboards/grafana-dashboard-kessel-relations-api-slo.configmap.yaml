@@ -242,7 +242,7 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "(\n  sum by (operation) (\n    increase(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\",le=\"$latency_slo_target\"}[$slo_period])\n  )\n  /\n  sum by (operation) (\n    increase(server_requests_seconds_bucket_seconds_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\"}[$slo_period])\n  )\n)",
+              "expr": "(\n  sum by (operation) (\n    increase(server_requests_seconds_bucket_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\",le=\"$latency_slo_target\"}[$slo_period])\n  )\n  /\n  sum by (operation) (\n    increase(server_requests_seconds_bucket_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\"}[$slo_period])\n  )\n)",
               "format": "table",
               "instant": true,
               "legendFormat": "{{operation}}",
@@ -739,7 +739,7 @@ data:
                   "datasource": {
                     "uid": "$datasource"
                   },
-                  "expr": "sum(increase(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[$slo_period]))\n/\nsum(increase(server_requests_seconds_bucket_seconds_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[$slo_period]))",
+                  "expr": "sum(increase(server_requests_seconds_bucket_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[$slo_period]))\n/\nsum(increase(server_requests_seconds_bucket_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[$slo_period]))",
                   "refId": "A"
                 }
               ],
@@ -804,7 +804,7 @@ data:
                   "datasource": {
                     "uid": "$datasource"
                   },
-                  "expr": "(\n  1 - (\n    sum(rate(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[1h]))\n    /\n    sum(rate(server_requests_seconds_bucket_seconds_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1h]))\n  )\n) * 20",
+                  "expr": "(\n  1 - (\n    sum(rate(server_requests_seconds_bucket_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[1h]))\n    /\n    sum(rate(server_requests_seconds_bucket_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1h]))\n  )\n) * 20",
                   "refId": "A"
                 }
               ],
@@ -871,7 +871,7 @@ data:
                   "datasource": {
                     "uid": "$datasource"
                   },
-                  "expr": "1 - clamp_min(\n  (\n    0.05 - (\n      1 - (\n        sum(increase(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[1d]))\n        /\n        sum(increase(server_requests_seconds_bucket_seconds_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d]))\n      )\n    )\n  ) / 0.05,\n  0\n)",
+                  "expr": "1 - clamp_min(\n  (\n    0.05 - (\n      1 - (\n        sum(increase(server_requests_seconds_bucket_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[1d]))\n        /\n        sum(increase(server_requests_seconds_bucket_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d]))\n      )\n    )\n  ) / 0.05,\n  0\n)",
                   "refId": "A"
                 }
               ],
@@ -1048,7 +1048,7 @@ data:
                   "datasource": {
                     "uid": "$datasource"
                   },
-                  "expr": "histogram_quantile(0.95,\n  sum by (le) (\n    rate(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d])\n  )\n)",
+                  "expr": "histogram_quantile(0.95,\n  sum by (le) (\n    rate(server_requests_seconds_bucket_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d])\n  )\n)",
                   "interval": "1d",
                   "legendFormat": "P95 Latency",
                   "refId": "A"
@@ -1057,7 +1057,7 @@ data:
                   "datasource": {
                     "uid": "$datasource"
                   },
-                  "expr": "(\n  sum(\n    increase(server_requests_seconds_bucket_seconds_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[1d])\n  )\n  /\n  sum(\n    increase(server_requests_seconds_bucket_seconds_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d])\n  )\n)",
+                  "expr": "(\n  sum(\n    increase(server_requests_seconds_bucket_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\",le=\"$latency_slo_target\"}[1d])\n  )\n  /\n  sum(\n    increase(server_requests_seconds_bucket_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation=\"${route:raw}\",code!~\"5..|14\"}[1d])\n  )\n)",
                   "interval": "1d",
                   "legendFormat": "SLO Compliance",
                   "refId": "B"
@@ -1098,14 +1098,14 @@ data:
               "type": "prometheus",
               "uid": "$datasource"
             },
-            "definition": "label_values(server_requests_seconds_bucket_seconds_count{service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}, operation)",
+            "definition": "label_values(server_requests_seconds_bucket_count{service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}, operation)",
             "includeAll": true,
             "label": "routes",
             "multi": true,
             "name": "route",
             "options": [],
             "query": {
-              "query": "label_values(server_requests_seconds_bucket_seconds_count{service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}, operation)",
+              "query": "label_values(server_requests_seconds_bucket_count{service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}, operation)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 1,

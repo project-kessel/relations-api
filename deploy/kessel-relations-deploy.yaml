@@ -35,6 +35,18 @@ objects:
           spec:
             template:
               spec:
+                affinity:
+                  podAntiAffinity:
+                    preferredDuringSchedulingIgnoredDuringExecution:
+                    - weight: 100
+                      podAffinityTerm:
+                        labelSelector:
+                          matchExpressions:
+                          - key: app.kubernetes.io/instance
+                            operator: In
+                            values:
+                            - kessel-relations-spicedb-spicedb
+                        topologyKey: kubernetes.io/hostname
                 containers:
                 - name: spicedb
                   resources:

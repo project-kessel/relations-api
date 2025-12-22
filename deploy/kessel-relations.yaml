@@ -154,6 +154,8 @@ objects:
                       value: ${SPICEDB_QUANTIZATION_INTERVAL}
                     - name: SPICEDB_DATASTORE_REVISION_QUANTIZATION_MAX_STALENESS_PERCENT
                       value: ${SPICEDB_QUANTIZATION_STALENESS_PERCENT}
+                    - name: SPICEDB_DISPATCH_CLUSTER_ENABLED # disabled in ephem only to prevent errors with single pod
+                      value: "false"
   - apiVersion: cloud.redhat.com/v1alpha1
     kind: ClowdApp
     metadata:

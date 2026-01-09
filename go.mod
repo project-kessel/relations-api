@@ -1,14 +1,14 @@
 module github.com/project-kessel/relations-api
 
 // Take care to bump versions with FIPS compliance in mind
-go 1.25.3
+go 1.25.5
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20251209175733-2a1774d88802.1
 	buf.build/go/protovalidate v1.1.0
 	github.com/MicahParks/keyfunc/v3 v3.7.0
 	github.com/authzed/authzed-go v1.7.0
-	github.com/authzed/grpcutil v0.0.0-20240123194739-2ea1e3d2d98b
+	github.com/authzed/grpcutil v0.0.0-20260105210157-e237581949c2
 	github.com/go-kratos/kratos/v2 v2.9.2
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
@@ -25,7 +25,7 @@ require (
 	go.uber.org/automaxprocs v1.6.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20251213004720-97cd9d5aeac2
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251213004720-97cd9d5aeac2
-	google.golang.org/grpc v1.77.0
+	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 )
 

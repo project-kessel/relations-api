@@ -232,7 +232,7 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "(\n  sum by (operation) (\n    increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\"}[$slo_period])\n  )\n  /\n  sum by (operation) (\n    increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}[$slo_period])\n  )\n)",
+              "expr": "(\n  sum by (operation) (\n    increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*|.*grpc.health.*|.*[Ss]erver[Rr]eflection.*\",code!~\"5..|14\"}[$slo_period])\n  )\n  /\n  sum by (operation) (\n    increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*|.*grpc.health.*|.*[Ss]erver[Rr]eflection.*\"}[$slo_period])\n  )\n)",
               "format": "table",
               "instant": true,
               "legendFormat": "{{operation}}",
@@ -242,7 +242,7 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "(\n  sum by (operation) (\n    increase(server_requests_seconds_bucket_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\",le=\"$latency_slo_target\"}[$slo_period])\n  )\n  /\n  sum by (operation) (\n    increase(server_requests_seconds_bucket_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\"}[$slo_period])\n  )\n)",
+              "expr": "(\n  sum by (operation) (\n    increase(server_requests_seconds_bucket_bucket{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*|.*grpc.health.*|.*[Ss]erver[Rr]eflection.*\",code!~\"5..|14\",le=\"$latency_slo_target\"}[$slo_period])\n  )\n  /\n  sum by (operation) (\n    increase(server_requests_seconds_bucket_count{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*|.*grpc.health.*|.*[Ss]erver[Rr]eflection.*\",code!~\"5..|14\"}[$slo_period])\n  )\n)",
               "format": "table",
               "instant": true,
               "legendFormat": "{{operation}}",
@@ -252,7 +252,7 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "(\n  sum by (operation) (\n    rate(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}[5m])\n  )\n)",
+              "expr": "(\n  sum by (operation) (\n    rate(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*|.*grpc.health.*|.*[Ss]erver[Rr]eflection.*\"}[5m])\n  )\n)",
               "format": "table",
               "instant": true,
               "legendFormat": "{{operation}}",
@@ -262,7 +262,7 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "(\n  1 - (\n    sum by (operation) (\n      increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\",code!~\"5..|14\"}[$slo_period])\n    )\n    /\n    sum by (operation) (\n      increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}[$slo_period])\n    )\n  )\n)",
+              "expr": "(\n  1 - (\n    sum by (operation) (\n      increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*|.*grpc.health.*|.*[Ss]erver[Rr]eflection.*\",code!~\"5..|14\"}[$slo_period])\n    )\n    /\n    sum by (operation) (\n      increase(server_requests_code_total{namespace=\"$namespace\",service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*|.*grpc.health.*|.*[Ss]erver[Rr]eflection.*\"}[$slo_period])\n    )\n  )\n)",
               "format": "table",
               "instant": true,
               "legendFormat": "{{operation}}",
@@ -675,7 +675,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 12
+            "y": 16
           },
           "id": 300,
           "panels": [
@@ -717,7 +717,7 @@ data:
                 "h": 6,
                 "w": 8,
                 "x": 0,
-                "y": 69
+                "y": 789
               },
               "id": 301,
               "options": {
@@ -782,7 +782,7 @@ data:
                 "h": 6,
                 "w": 8,
                 "x": 8,
-                "y": 69
+                "y": 789
               },
               "id": 302,
               "options": {
@@ -849,7 +849,7 @@ data:
                 "h": 6,
                 "w": 8,
                 "x": 16,
-                "y": 69
+                "y": 789
               },
               "id": 303,
               "options": {
@@ -1024,7 +1024,7 @@ data:
                 "h": 8,
                 "w": 24,
                 "x": 0,
-                "y": 75
+                "y": 795
               },
               "id": 304,
               "options": {
@@ -1098,14 +1098,14 @@ data:
               "type": "prometheus",
               "uid": "$datasource"
             },
-            "definition": "label_values(server_requests_seconds_bucket_count{service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}, operation)",
+            "definition": "label_values(server_requests_seconds_bucket_count{service=~\"kessel-relations-api\", operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*|.*grpc.health.*|.*[Ss]erver[Rr]eflection.*\"},operation)",
             "includeAll": true,
             "label": "routes",
             "multi": true,
             "name": "route",
             "options": [],
             "query": {
-              "query": "label_values(server_requests_seconds_bucket_count{service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*\"}, operation)",
+              "query": "label_values(server_requests_seconds_bucket_count{service=~\"kessel-relations-api\",operation!~\".*[Ll]ive[Zz].*|.*[Rr]eady[Zz].*|.*grpc.health.*|.*[Ss]erver[Rr]eflection.*\"}, operation)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 1,
@@ -1234,9 +1234,9 @@ data:
       },
       "timepicker": {},
       "timezone": "",
-      "title": "Kessel relations API - SLO Dashboard",
+      "title": "Kessel Relations API - SLO Dashboard",
       "uid": "kessel-relations-api-slo",
-      "version": 1
+      "version": 2
     }
 kind: ConfigMap
 metadata:

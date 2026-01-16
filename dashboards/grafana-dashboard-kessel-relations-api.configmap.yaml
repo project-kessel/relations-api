@@ -1250,7 +1250,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(increase(server_requests_code_total{job=\"kessel-relations-api\", code!~\"0|200\"}[$__range])) by (code) > 0\n",
+              "expr": "sum by (code)(rate(server_requests_code_total{job=\"kessel-relations-api\", code!~\"200|0\"}[$__rate_interval]))",
               "format": "time_series",
               "instant": false,
               "interval": "15s",
@@ -1259,7 +1259,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "Error Status Codes ",
+          "title": "Error Status Codes Per Second ",
           "type": "timeseries"
         },
         {

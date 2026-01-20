@@ -1591,6 +1591,149 @@ func TestSpiceDbRepository_AcquireLock_EmptyIdentifier(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestSpiceDbRepository_LookupSubjects(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// Create a permission structure:
+	// - alice and bob are members of the group "admins"
+	// - charlie is a member of the group "viewers"
+	// - workspace "test" has user_grant role_binding "admin_binding" and "viewer_binding"
+	// - "admin_binding" grants role "admin" to group "admins" members
+	// - "viewer_binding" grants role "viewer" to group "viewers" members
+	// - role "admin" has view_widget and use_widget permissions
+	// - role "viewer" has view_widget permission only
+	rels := []*apiV1beta1.Relationship{
+		// Group memberships
+		createRelationship("rbac", "group", "admins", "member", "rbac", "principal", "alice", ""),
+		createRelationship("rbac", "group", "admins", "member", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "group", "viewers", "member", "rbac", "principal", "charlie", ""),
+
+		// Workspace grants
+		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "admin_binding", ""),
+		createRelationship("rbac", "workspace", "test", "user_grant", "rbac", "role_binding", "viewer_binding", ""),
+
+		// Role binding to role
+		createRelationship("rbac", "role_binding", "admin_binding", "granted", "rbac", "role", "admin", ""),
+		createRelationship("rbac", "role_binding", "viewer_binding", "granted", "rbac", "role", "viewer", ""),
+
+		// Role binding to subjects (groups)
+		createRelationship("rbac", "role_binding", "admin_binding", "subject", "rbac", "group", "admins", "member"),
+		createRelationship("rbac", "role_binding", "viewer_binding", "subject", "rbac", "group", "viewers", "member"),
+
+		// Role permissions
+		createRelationship("rbac", "role", "admin", "view_widget", "rbac", "principal", "*", ""),
+		createRelationship("rbac", "role", "admin", "use_widget", "rbac", "principal", "*", ""),
+		createRelationship("rbac", "role", "viewer", "view_widget", "rbac", "principal", "*", ""),
+	}
+
+	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, true, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// LookupSubjects to find all principals that have view_widget permission on workspace:test
+	subjectType := &apiV1beta1.ObjectType{
+		Namespace: "rbac",
+		Name:      "principal",
+	}
+	resource := &apiV1beta1.ObjectReference{
+		Type: &apiV1beta1.ObjectType{
+			Namespace: "rbac",
+			Name:      "workspace",
+		},
+		Id: "test",
+	}
+
+	subjects, errs, err := spiceDbRepo.LookupSubjects(
+		ctx,
+		subjectType,
+		"",            // subject_relation (empty for direct principals)
+		"view_widget", // relation/permission
+		resource,
+		0,  // limit (0 = no limit)
+		"", // continuation
+		&apiV1beta1.Consistency{
+			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: relationshipResp.GetConsistencyToken(),
+			},
+		},
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// Collect all subjects from the channel
+	foundSubjects := make(map[string]bool)
+	for {
+		select {
+		case subj, ok := <-subjects:
+			if !ok {
+				// Channel closed, we're done
+				goto checkResults
+			}
+			foundSubjects[subj.Subject.Subject.Id] = true
+		case err, ok := <-errs:
+			if ok && err != nil {
+				t.Fatalf("Error receiving subjects: %v", err)
+			}
+		}
+	}
+
+checkResults:
+	// Verify that alice, bob, and charlie all have view_widget permission
+	assert.True(t, foundSubjects["alice"], "alice should have view_widget permission")
+	assert.True(t, foundSubjects["bob"], "bob should have view_widget permission")
+	assert.True(t, foundSubjects["charlie"], "charlie should have view_widget permission")
+	assert.Equal(t, 3, len(foundSubjects), "should find exactly 3 subjects with view_widget permission")
+
+	// Now test LookupSubjects for use_widget permission (only alice and bob via admin role)
+	subjects2, errs2, err := spiceDbRepo.LookupSubjects(
+		ctx,
+		subjectType,
+		"",
+		"use_widget",
+		resource,
+		10, // this time we specify a non-zero limit, because limits are to be suppressed and not passed to SpiceDB, which is currently an error
+		"",
+		&apiV1beta1.Consistency{
+			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: relationshipResp.GetConsistencyToken(),
+			},
+		},
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	foundSubjects2 := make(map[string]bool)
+	for {
+		select {
+		case subj, ok := <-subjects2:
+			if !ok {
+				goto checkResults2
+			}
+			foundSubjects2[subj.Subject.Subject.Id] = true
+		case err, ok := <-errs2:
+			if ok && err != nil {
+				t.Fatalf("Error receiving subjects: %v", err)
+			}
+		}
+	}
+
+checkResults2:
+	// Verify that only alice and bob have use_widget permission (not charlie)
+	assert.True(t, foundSubjects2["alice"], "alice should have use_widget permission")
+	assert.True(t, foundSubjects2["bob"], "bob should have use_widget permission")
+	assert.False(t, foundSubjects2["charlie"], "charlie should not have use_widget permission")
+	assert.Equal(t, 2, len(foundSubjects2), "should find exactly 2 subjects with use_widget permission")
+}
+
 func pointerize(value string) *string { //Used to turn string literals into pointers
 	return &value
 }

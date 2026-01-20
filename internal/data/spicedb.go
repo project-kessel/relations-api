@@ -135,6 +135,10 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 		}
 	}
 
+	if limit != 0 {
+		s.log.Warnf("'limit' is not currently supported in LookupSubjects calls in the SpiceDB implementation. Value will be ignored and not passed to SpiceDB.")
+	}
+
 	req := &v1.LookupSubjectsRequest{
 		Consistency: s.determineConsistency(consistency),
 		Resource: &v1.ObjectReference{
@@ -145,7 +149,6 @@ func (s *SpiceDbRepository) LookupSubjects(ctx context.Context, subject_type *ap
 		SubjectObjectType:       kesselTypeToSpiceDBType(subject_type),
 		WildcardOption:          v1.LookupSubjectsRequest_WILDCARD_OPTION_EXCLUDE_WILDCARDS,
 		OptionalSubjectRelation: subject_relation,
-		OptionalConcreteLimit:   limit,
 		OptionalCursor:          cursor,
 	}
 

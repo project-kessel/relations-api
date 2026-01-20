@@ -1591,6 +1591,158 @@ func TestSpiceDbRepository_AcquireLock_EmptyIdentifier(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestSpiceDbRepository_LookupResources(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// Create a permission structure with multiple widgets:
+	// - alice has view access to widgets in workspace1
+	// - charlie has view access to widgets in workspace2
+	// - widget1, widget2, widget3 are in workspace1
+	// - widget4 is in workspace2
+	rels := []*apiV1beta1.Relationship{
+		// Workspace grants
+		createRelationship("rbac", "workspace", "workspace1", "user_grant", "rbac", "role_binding", "binding1", ""),
+		createRelationship("rbac", "workspace", "workspace2", "user_grant", "rbac", "role_binding", "binding2", ""),
+
+		// Role binding to role
+		createRelationship("rbac", "role_binding", "binding1", "granted", "rbac", "role", "viewer", ""),
+		createRelationship("rbac", "role_binding", "binding2", "granted", "rbac", "role", "viewer", ""),
+
+		// Role binding to subjects
+		createRelationship("rbac", "role_binding", "binding1", "subject", "rbac", "principal", "alice", ""),
+		createRelationship("rbac", "role_binding", "binding2", "subject", "rbac", "principal", "charlie", ""),
+
+		// Role permissions
+		createRelationship("rbac", "role", "viewer", "view_widget", "rbac", "principal", "*", ""),
+
+		// Widgets in workspaces
+		createRelationship("rbac", "widget", "widget1", "workspace", "rbac", "workspace", "workspace1", ""),
+		createRelationship("rbac", "widget", "widget2", "workspace", "rbac", "workspace", "workspace1", ""),
+		createRelationship("rbac", "widget", "widget3", "workspace", "rbac", "workspace", "workspace1", ""),
+		createRelationship("rbac", "widget", "widget4", "workspace", "rbac", "workspace", "workspace2", ""),
+	}
+
+	relationshipResp, err := spiceDbRepo.CreateRelationships(ctx, rels, true, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// Test 1: LookupResources to find all widgets that alice can view
+	// alice should see widget1, widget2, widget3 (from workspace1)
+	resourceType := &apiV1beta1.ObjectType{
+		Namespace: "rbac",
+		Name:      "widget",
+	}
+	aliceSubject := &apiV1beta1.SubjectReference{
+		Subject: &apiV1beta1.ObjectReference{
+			Type: &apiV1beta1.ObjectType{
+				Namespace: "rbac",
+				Name:      "principal",
+			},
+			Id: "alice",
+		},
+	}
+
+	resources, errs, err := spiceDbRepo.LookupResources(
+		ctx,
+		resourceType,
+		"view", // relation/permission
+		aliceSubject,
+		0,  // limit (0 = no limit)
+		"", // continuation
+		&apiV1beta1.Consistency{
+			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: relationshipResp.GetConsistencyToken(),
+			},
+		},
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// Collect all resources from the channel
+	foundResources := make(map[string]bool)
+	for {
+		select {
+		case res, ok := <-resources:
+			if !ok {
+				goto checkResults
+			}
+			foundResources[res.Resource.Id] = true
+		case err, ok := <-errs:
+			if ok && err != nil {
+				t.Fatalf("Error receiving resources: %v", err)
+			}
+		}
+	}
+
+checkResults:
+	// alice should see widget1, widget2, widget3 from workspace1
+	assert.True(t, foundResources["widget1"], "alice should have view permission on widget1")
+	assert.True(t, foundResources["widget2"], "alice should have view permission on widget2")
+	assert.True(t, foundResources["widget3"], "alice should have view permission on widget3")
+	assert.False(t, foundResources["widget4"], "alice should not have view permission on widget4")
+	assert.Equal(t, 3, len(foundResources), "alice should find exactly 3 widgets with view permission")
+
+	// Test 2: LookupResources to find all widgets that charlie can view
+	// charlie should only see widget4 (from workspace2)
+	charlieSubject := &apiV1beta1.SubjectReference{
+		Subject: &apiV1beta1.ObjectReference{
+			Type: &apiV1beta1.ObjectType{
+				Namespace: "rbac",
+				Name:      "principal",
+			},
+			Id: "charlie",
+		},
+	}
+
+	resources2, errs2, err := spiceDbRepo.LookupResources(
+		ctx,
+		resourceType,
+		"view",
+		charlieSubject,
+		10, // specify a limit to test that it gets passed through (unlike LookupSubjects)
+		"",
+		&apiV1beta1.Consistency{
+			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{
+				AtLeastAsFresh: relationshipResp.GetConsistencyToken(),
+			},
+		},
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	foundResources2 := make(map[string]bool)
+	for {
+		select {
+		case res, ok := <-resources2:
+			if !ok {
+				goto checkResults2
+			}
+			foundResources2[res.Resource.Id] = true
+		case err, ok := <-errs2:
+			if ok && err != nil {
+				t.Fatalf("Error receiving resources: %v", err)
+			}
+		}
+	}
+
+checkResults2:
+	// charlie should only see widget4 from workspace2
+	assert.False(t, foundResources2["widget1"], "charlie should not have view permission on widget1")
+	assert.False(t, foundResources2["widget2"], "charlie should not have view permission on widget2")
+	assert.False(t, foundResources2["widget3"], "charlie should not have view permission on widget3")
+	assert.True(t, foundResources2["widget4"], "charlie should have view permission on widget4")
+	assert.Equal(t, 1, len(foundResources2), "charlie should find exactly 1 widget with view permission")
+}
+
 func TestSpiceDbRepository_LookupSubjects(t *testing.T) {
 	t.Parallel()
 

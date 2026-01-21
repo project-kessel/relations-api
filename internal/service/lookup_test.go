@@ -39,6 +39,32 @@ func TestLookupService_LookupSubjects_NoResults(t *testing.T) {
 	assert.Empty(t, results)
 }
 
+func TestLookupService_LookupSubjects_NoResults_WithPaginationLimit_Fails(t *testing.T) {
+	// For now, this should produce a failure with current spicedb versions. If this changes, we should change this
+	// test and support default limits and start recommending pagination where desired.
+	t.Parallel()
+	ctx := context.TODO()
+	spicedb, err := container.CreateSpiceDbRepository()
+	assert.NoError(t, err)
+
+	_, err = seedWidgetInDefaultWorkspace(ctx, spicedb, "thing1")
+	assert.NoError(t, err)
+	container.WaitForQuantizationInterval()
+
+	service := createLookupService(spicedb)
+
+	responseCollector := NewLookup_SubjectsServerStub(ctx)
+	err = service.LookupSubjects(&v1beta1.LookupSubjectsRequest{
+		SubjectType: rbac_ns_type("principal"),
+		Relation:    "view",
+		Resource:    &v1beta1.ObjectReference{Type: rbac_ns_type("widget"), Id: "thing1"},
+		Pagination: &v1beta1.RequestPagination{
+			Limit: uint32(1), // a greater than 0 pagination limit should trigger the error
+		},
+	}, responseCollector)
+	assert.Error(t, err)
+}
+
 func TestLookupService_LookupSubjects_NoResults_WithConsistencyToken(t *testing.T) {
 	t.Parallel()
 	ctx := context.TODO()

@@ -29,12 +29,17 @@ func NewGetSubjectsUseCase(repo ZanzibarRepository) *GetSubjectsUsecase {
 }
 
 func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v1beta1.LookupSubjectsRequest) (chan *SubjectResult, chan error, error) {
-	limit := uint32(MaxStreamingCount)
+	// limit is not (yet) supported by the spicedb repository. Setting a default limit here and having to then suppress
+	// it in the spicedb code would remove the ability to give the user this feedback in the form of an error. In the
+	// future the default limit may be restored.
+	// limit := uint32(MaxStreamingCount)
+	limit := uint32(0) // no limit by default
+
 	continuation := ContinuationToken("")
 	subjectRelation := ""
 
 	if req.Pagination != nil {
-		if req.Pagination.Limit < limit {
+		if limit == 0 || req.Pagination.Limit < limit {
 			limit = req.Pagination.Limit
 		}
 
@@ -64,7 +69,7 @@ func (r *GetResourcesUsecase) Get(ctx context.Context, req *v1beta1.LookupResour
 	continuation := ContinuationToken("")
 
 	if req.Pagination != nil {
-		if req.Pagination.Limit < limit {
+		if limit == 0 || req.Pagination.Limit < limit {
 			limit = req.Pagination.Limit
 		}
 

@@ -1851,7 +1851,7 @@ checkResults:
 		"",
 		"use_widget",
 		resource,
-		10, // this time we specify a non-zero limit, because limits are to be suppressed and not passed to SpiceDB, which is currently an error
+		0,
 		"",
 		&apiV1beta1.Consistency{
 			Requirement: &apiV1beta1.Consistency_AtLeastAsFresh{

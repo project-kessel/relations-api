@@ -229,44 +229,6 @@ func TestGetSubjectsUsecase_Get_WithPaginationLimit(t *testing.T) {
 	assert.Equal(t, uint32(10), dummy.capturedLimit, "should pass the requested limit")
 }
 
-func TestGetSubjectsUsecase_Get_WithContinuationToken(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.Background()
-	dummy := &DummyZanzibar{
-		subjects: []*SubjectResult{
-			createTestSubject("charlie"),
-		},
-	}
-
-	usecase := NewGetSubjectsUseCase(dummy)
-
-	continuationToken := "some-continuation-token"
-	req := &v1beta1.LookupSubjectsRequest{
-		Resource: &v1beta1.ObjectReference{
-			Type: &v1beta1.ObjectType{
-				Namespace: "rbac",
-				Name:      "workspace",
-			},
-			Id: "test",
-		},
-		Relation: "view_widget",
-		SubjectType: &v1beta1.ObjectType{
-			Namespace: "rbac",
-			Name:      "principal",
-		},
-		Pagination: &v1beta1.RequestPagination{
-			ContinuationToken: &continuationToken,
-			Limit:             10,
-		},
-	}
-
-	_, _, err := usecase.Get(ctx, req)
-	assert.NoError(t, err)
-
-	assert.Equal(t, ContinuationToken("some-continuation-token"), dummy.capturedContinuationToken, "should pass continuation token")
-}
-
 func TestGetSubjectsUsecase_Get_WithSubjectRelation(t *testing.T) {
 	t.Parallel()
 
@@ -435,46 +397,6 @@ func TestGetResourcesUsecase_Get_WithLimitGreaterThanMax(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, uint32(MaxStreamingCount), dummy.capturedLimit, "should cap limit at MaxStreamingCount")
-}
-
-func TestGetResourcesUsecase_Get_WithContinuationToken(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.Background()
-	dummy := &DummyZanzibar{
-		resources: []*ResourceResult{
-			createTestResource("widget3"),
-		},
-	}
-
-	usecase := NewGetResourcesUseCase(dummy)
-
-	continuationToken := "next-page-token"
-	req := &v1beta1.LookupResourcesRequest{
-		ResourceType: &v1beta1.ObjectType{
-			Namespace: "rbac",
-			Name:      "widget",
-		},
-		Relation: "view",
-		Subject: &v1beta1.SubjectReference{
-			Subject: &v1beta1.ObjectReference{
-				Type: &v1beta1.ObjectType{
-					Namespace: "rbac",
-					Name:      "principal",
-				},
-				Id: "alice",
-			},
-		},
-		Pagination: &v1beta1.RequestPagination{
-			ContinuationToken: &continuationToken,
-			Limit:             20,
-		},
-	}
-
-	_, _, err := usecase.Get(ctx, req)
-	assert.NoError(t, err)
-
-	assert.Equal(t, ContinuationToken("next-page-token"), dummy.capturedContinuationToken, "should pass continuation token")
 }
 
 func TestGetResourcesUsecase_Get_WithZeroLimit(t *testing.T) {

@@ -1635,19 +1635,8 @@ func TestSpiceDbRepository_LookupResources(t *testing.T) {
 
 	// Test 1: LookupResources to find all widgets that alice can view
 	// alice should see widget1, widget2, widget3 (from workspace1)
-	resourceType := &apiV1beta1.ObjectType{
-		Namespace: "rbac",
-		Name:      "widget",
-	}
-	aliceSubject := &apiV1beta1.SubjectReference{
-		Subject: &apiV1beta1.ObjectReference{
-			Type: &apiV1beta1.ObjectType{
-				Namespace: "rbac",
-				Name:      "principal",
-			},
-			Id: "alice",
-		},
-	}
+	resourceType := createObjectType("rbac", "widget")
+	aliceSubject := createSubjectReference("rbac", "principal", "alice")
 
 	resources, errs, err := spiceDbRepo.LookupResources(
 		ctx,
@@ -1667,22 +1656,7 @@ func TestSpiceDbRepository_LookupResources(t *testing.T) {
 	}
 
 	// Collect all resources from the channel
-	foundResources := make(map[string]bool)
-	for {
-		select {
-		case res, ok := <-resources:
-			if !ok {
-				goto checkResults
-			}
-			foundResources[res.Resource.Id] = true
-		case err, ok := <-errs:
-			if ok && err != nil {
-				t.Fatalf("Error receiving resources: %v", err)
-			}
-		}
-	}
-
-checkResults:
+	foundResources := collectResourceIds(t, resources, errs)
 	// alice should see widget1, widget2, widget3 from workspace1
 	assert.True(t, foundResources["widget1"], "alice should have view permission on widget1")
 	assert.True(t, foundResources["widget2"], "alice should have view permission on widget2")
@@ -1692,15 +1666,7 @@ checkResults:
 
 	// Test 2: LookupResources to find all widgets that charlie can view
 	// charlie should only see widget4 (from workspace2)
-	charlieSubject := &apiV1beta1.SubjectReference{
-		Subject: &apiV1beta1.ObjectReference{
-			Type: &apiV1beta1.ObjectType{
-				Namespace: "rbac",
-				Name:      "principal",
-			},
-			Id: "charlie",
-		},
-	}
+	charlieSubject := createSubjectReference("rbac", "principal", "charlie")
 
 	resources2, errs2, err := spiceDbRepo.LookupResources(
 		ctx,
@@ -1719,22 +1685,7 @@ checkResults:
 		return
 	}
 
-	foundResources2 := make(map[string]bool)
-	for {
-		select {
-		case res, ok := <-resources2:
-			if !ok {
-				goto checkResults2
-			}
-			foundResources2[res.Resource.Id] = true
-		case err, ok := <-errs2:
-			if ok && err != nil {
-				t.Fatalf("Error receiving resources: %v", err)
-			}
-		}
-	}
-
-checkResults2:
+	foundResources2 := collectResourceIds(t, resources2, errs2)
 	// charlie should only see widget4 from workspace2
 	assert.False(t, foundResources2["widget1"], "charlie should not have view permission on widget1")
 	assert.False(t, foundResources2["widget2"], "charlie should not have view permission on widget2")
@@ -1790,17 +1741,8 @@ func TestSpiceDbRepository_LookupSubjects(t *testing.T) {
 	}
 
 	// LookupSubjects to find all principals that have view_widget permission on workspace:test
-	subjectType := &apiV1beta1.ObjectType{
-		Namespace: "rbac",
-		Name:      "principal",
-	}
-	resource := &apiV1beta1.ObjectReference{
-		Type: &apiV1beta1.ObjectType{
-			Namespace: "rbac",
-			Name:      "workspace",
-		},
-		Id: "test",
-	}
+	subjectType := createObjectType("rbac", "principal")
+	resource := createObjectReference("rbac", "workspace", "test")
 
 	subjects, errs, err := spiceDbRepo.LookupSubjects(
 		ctx,
@@ -1821,23 +1763,7 @@ func TestSpiceDbRepository_LookupSubjects(t *testing.T) {
 	}
 
 	// Collect all subjects from the channel
-	foundSubjects := make(map[string]bool)
-	for {
-		select {
-		case subj, ok := <-subjects:
-			if !ok {
-				// Channel closed, we're done
-				goto checkResults
-			}
-			foundSubjects[subj.Subject.Subject.Id] = true
-		case err, ok := <-errs:
-			if ok && err != nil {
-				t.Fatalf("Error receiving subjects: %v", err)
-			}
-		}
-	}
-
-checkResults:
+	foundSubjects := collectSubjectIds(t, subjects, errs)
 	// Verify that alice, bob, and charlie all have view_widget permission
 	assert.True(t, foundSubjects["alice"], "alice should have view_widget permission")
 	assert.True(t, foundSubjects["bob"], "bob should have view_widget permission")
@@ -1863,22 +1789,7 @@ checkResults:
 		return
 	}
 
-	foundSubjects2 := make(map[string]bool)
-	for {
-		select {
-		case subj, ok := <-subjects2:
-			if !ok {
-				goto checkResults2
-			}
-			foundSubjects2[subj.Subject.Subject.Id] = true
-		case err, ok := <-errs2:
-			if ok && err != nil {
-				t.Fatalf("Error receiving subjects: %v", err)
-			}
-		}
-	}
-
-checkResults2:
+	foundSubjects2 := collectSubjectIds(t, subjects2, errs2)
 	// Verify that only alice and bob have use_widget permission (not charlie)
 	assert.True(t, foundSubjects2["alice"], "alice should have use_widget permission")
 	assert.True(t, foundSubjects2["bob"], "bob should have use_widget permission")
@@ -1959,4 +1870,63 @@ func spiceRelChanToSlice(c chan *biz.RelationshipResult) []*biz.RelationshipResu
 		s = append(s, i)
 	}
 	return s
+}
+
+// Helper to create ObjectType
+func createObjectType(namespace, name string) *apiV1beta1.ObjectType {
+	return &apiV1beta1.ObjectType{
+		Namespace: namespace,
+		Name:      name,
+	}
+}
+
+// Helper to create ObjectReference
+func createObjectReference(namespace, name, id string) *apiV1beta1.ObjectReference {
+	return &apiV1beta1.ObjectReference{
+		Type: createObjectType(namespace, name),
+		Id:   id,
+	}
+}
+
+// Helper to create SubjectReference
+func createSubjectReference(namespace, name, id string) *apiV1beta1.SubjectReference {
+	return &apiV1beta1.SubjectReference{
+		Subject: createObjectReference(namespace, name, id),
+	}
+}
+
+// Helper to collect subject IDs from channels
+func collectSubjectIds(t *testing.T, subjects chan *biz.SubjectResult, errs chan error) map[string]bool {
+	foundSubjects := make(map[string]bool)
+	for {
+		select {
+		case subj, ok := <-subjects:
+			if !ok {
+				return foundSubjects
+			}
+			foundSubjects[subj.Subject.Subject.Id] = true
+		case err, ok := <-errs:
+			if ok && err != nil {
+				t.Fatalf("Error receiving subjects: %v", err)
+			}
+		}
+	}
+}
+
+// Helper to collect resource IDs from channels
+func collectResourceIds(t *testing.T, resources chan *biz.ResourceResult, errs chan error) map[string]bool {
+	foundResources := make(map[string]bool)
+	for {
+		select {
+		case res, ok := <-resources:
+			if !ok {
+				return foundResources
+			}
+			foundResources[res.Resource.Id] = true
+		case err, ok := <-errs:
+			if ok && err != nil {
+				t.Fatalf("Error receiving resources: %v", err)
+			}
+		}
+	}
 }

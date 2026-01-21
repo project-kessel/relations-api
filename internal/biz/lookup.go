@@ -39,6 +39,8 @@ func (s *GetSubjectsUsecase) Get(ctx context.Context, req *v1beta1.LookupSubject
 	subjectRelation := ""
 
 	if req.Pagination != nil {
+		// Pagination limit should apply either a) when there is no default limit (i.e. limit == 0) or b) when it is
+		// less than the default limit
 		if limit == 0 || req.Pagination.Limit < limit {
 			limit = req.Pagination.Limit
 		}
@@ -69,6 +71,8 @@ func (r *GetResourcesUsecase) Get(ctx context.Context, req *v1beta1.LookupResour
 	continuation := ContinuationToken("")
 
 	if req.Pagination != nil {
+		// Pagination limit should apply either a) when there is no default limit (i.e. limit == 0) or b) when it is
+		// less than the default limit
 		if limit == 0 || req.Pagination.Limit < limit {
 			limit = req.Pagination.Limit
 		}

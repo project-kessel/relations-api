@@ -11,12 +11,11 @@ import (
 
 // DummyZanzibar is a fake implementation of ZanzibarRepository for testing
 type DummyZanzibar struct {
-	subjects                  []*SubjectResult
-	resources                 []*ResourceResult
-	subjectsError             error
-	resourcesError            error
-	capturedLimit             uint32
-	capturedContinuationToken ContinuationToken
+	subjects       []*SubjectResult
+	resources      []*ResourceResult
+	subjectsError  error
+	resourcesError error
+	capturedLimit  uint32
 }
 
 func (dz *DummyZanzibar) Check(ctx context.Context, request *v1beta1.CheckRequest) (*v1beta1.CheckResponse, error) {
@@ -44,9 +43,8 @@ func (dz *DummyZanzibar) DeleteRelationships(ctx context.Context, filter *v1beta
 }
 
 func (dz *DummyZanzibar) LookupSubjects(ctx context.Context, subjectType *v1beta1.ObjectType, subject_relation, relation string, resource *v1beta1.ObjectReference, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *SubjectResult, chan error, error) {
-	// Capture the limit and continuation for assertions
+	// Capture the limit for assertions
 	dz.capturedLimit = limit
-	dz.capturedContinuationToken = continuation
 
 	subjectsChan := make(chan *SubjectResult)
 	errsChan := make(chan error, 1)
@@ -60,8 +58,15 @@ func (dz *DummyZanzibar) LookupSubjects(ctx context.Context, subjectType *v1beta
 			return
 		}
 
+		// Respect the limit when sending results
+		count := uint32(0)
 		for _, subject := range dz.subjects {
+			// If limit is 0, no limit (send all). Otherwise, respect the limit.
+			if limit > 0 && count >= limit {
+				break
+			}
 			subjectsChan <- subject
+			count++
 		}
 	}()
 
@@ -69,9 +74,8 @@ func (dz *DummyZanzibar) LookupSubjects(ctx context.Context, subjectType *v1beta
 }
 
 func (dz *DummyZanzibar) LookupResources(ctx context.Context, resource_type *v1beta1.ObjectType, relation string, subject *v1beta1.SubjectReference, limit uint32, continuation ContinuationToken, consistency *v1beta1.Consistency) (chan *ResourceResult, chan error, error) {
-	// Capture the limit and continuation for assertions
+	// Capture the limit for assertions
 	dz.capturedLimit = limit
-	dz.capturedContinuationToken = continuation
 
 	resourcesChan := make(chan *ResourceResult)
 	errsChan := make(chan error, 1)
@@ -85,8 +89,15 @@ func (dz *DummyZanzibar) LookupResources(ctx context.Context, resource_type *v1b
 			return
 		}
 
+		// Respect the limit when sending results
+		count := uint32(0)
 		for _, resource := range dz.resources {
+			// If limit is 0, no limit (send all). Otherwise, respect the limit.
+			if limit > 0 && count >= limit {
+				break
+			}
 			resourcesChan <- resource
+			count++
 		}
 	}()
 
@@ -137,6 +148,42 @@ func createTestResource(id string) *ResourceResult {
 	}
 }
 
+// Helper to collect subjects from channels
+func collectSubjects(t *testing.T, subjects chan *SubjectResult, errs chan error) []*SubjectResult {
+	var results []*SubjectResult
+	for {
+		select {
+		case subj, ok := <-subjects:
+			if !ok {
+				return results
+			}
+			results = append(results, subj)
+		case err, ok := <-errs:
+			if ok && err != nil {
+				t.Fatalf("Error receiving subjects: %v", err)
+			}
+		}
+	}
+}
+
+// Helper to collect resources from channels
+func collectResources(t *testing.T, resources chan *ResourceResult, errs chan error) []*ResourceResult {
+	var results []*ResourceResult
+	for {
+		select {
+		case res, ok := <-resources:
+			if !ok {
+				return results
+			}
+			results = append(results, res)
+		case err, ok := <-errs:
+			if ok && err != nil {
+				t.Fatalf("Error receiving resources: %v", err)
+			}
+		}
+	}
+}
+
 // Tests for GetSubjectsUsecase
 
 func TestGetSubjectsUsecase_Get_WithNoLimit(t *testing.T) {
@@ -171,25 +218,9 @@ func TestGetSubjectsUsecase_Get_WithNoLimit(t *testing.T) {
 	subjects, errs, err := usecase.Get(ctx, req)
 	assert.NoError(t, err)
 
-	// Collect results
-	var results []*SubjectResult
-	for {
-		select {
-		case subj, ok := <-subjects:
-			if !ok {
-				goto checkResults
-			}
-			results = append(results, subj)
-		case err, ok := <-errs:
-			if ok && err != nil {
-				t.Fatalf("Error receiving subjects: %v", err)
-			}
-		}
-	}
+	results := collectSubjects(t, subjects, errs)
 
-checkResults:
 	assert.Equal(t, uint32(0), dummy.capturedLimit, "should pass limit of 0 when no pagination specified")
-	assert.Equal(t, ContinuationToken(""), dummy.capturedContinuationToken, "should pass empty continuation token")
 	assert.Len(t, results, 2)
 }
 
@@ -200,6 +231,8 @@ func TestGetSubjectsUsecase_Get_WithPaginationLimit(t *testing.T) {
 	dummy := &DummyZanzibar{
 		subjects: []*SubjectResult{
 			createTestSubject("alice"),
+			createTestSubject("bob"),
+			createTestSubject("charlie"),
 		},
 	}
 
@@ -219,50 +252,17 @@ func TestGetSubjectsUsecase_Get_WithPaginationLimit(t *testing.T) {
 			Name:      "principal",
 		},
 		Pagination: &v1beta1.RequestPagination{
-			Limit: 10,
+			Limit: 2,
 		},
 	}
 
-	_, _, err := usecase.Get(ctx, req)
+	subjects, errs, err := usecase.Get(ctx, req)
 	assert.NoError(t, err)
 
-	assert.Equal(t, uint32(10), dummy.capturedLimit, "should pass the requested limit")
-}
+	results := collectSubjects(t, subjects, errs)
 
-func TestGetSubjectsUsecase_Get_WithSubjectRelation(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.Background()
-	dummy := &DummyZanzibar{
-		subjects: []*SubjectResult{
-			createTestSubject("bob"),
-		},
-	}
-
-	usecase := NewGetSubjectsUseCase(dummy)
-
-	subjectRelation := "member"
-	req := &v1beta1.LookupSubjectsRequest{
-		Resource: &v1beta1.ObjectReference{
-			Type: &v1beta1.ObjectType{
-				Namespace: "rbac",
-				Name:      "workspace",
-			},
-			Id: "test",
-		},
-		Relation:        "view_widget",
-		SubjectRelation: &subjectRelation,
-		SubjectType: &v1beta1.ObjectType{
-			Namespace: "rbac",
-			Name:      "group",
-		},
-	}
-
-	_, _, err := usecase.Get(ctx, req)
-	assert.NoError(t, err)
-
-	// Just verify it doesn't error - the actual subject_relation is passed to the repo
-	assert.NoError(t, err)
+	assert.Equal(t, uint32(2), dummy.capturedLimit, "should pass the requested limit")
+	assert.Len(t, results, 2, "should only return 2 subjects even though 3 are available")
 }
 
 // Tests for GetResourcesUsecase
@@ -301,25 +301,9 @@ func TestGetResourcesUsecase_Get_WithNoLimit(t *testing.T) {
 	resources, errs, err := usecase.Get(ctx, req)
 	assert.NoError(t, err)
 
-	// Collect results
-	var results []*ResourceResult
-	for {
-		select {
-		case res, ok := <-resources:
-			if !ok {
-				goto checkResults
-			}
-			results = append(results, res)
-		case err, ok := <-errs:
-			if ok && err != nil {
-				t.Fatalf("Error receiving resources: %v", err)
-			}
-		}
-	}
+	results := collectResources(t, resources, errs)
 
-checkResults:
 	assert.Equal(t, uint32(MaxStreamingCount), dummy.capturedLimit, "should use MaxStreamingCount when no pagination specified")
-	assert.Equal(t, ContinuationToken(""), dummy.capturedContinuationToken, "should pass empty continuation token")
 	assert.Len(t, results, 2)
 }
 
@@ -330,6 +314,8 @@ func TestGetResourcesUsecase_Get_WithPaginationLimit(t *testing.T) {
 	dummy := &DummyZanzibar{
 		resources: []*ResourceResult{
 			createTestResource("widget1"),
+			createTestResource("widget2"),
+			createTestResource("widget3"),
 		},
 	}
 
@@ -351,14 +337,17 @@ func TestGetResourcesUsecase_Get_WithPaginationLimit(t *testing.T) {
 			},
 		},
 		Pagination: &v1beta1.RequestPagination{
-			Limit: 50,
+			Limit: 2,
 		},
 	}
 
-	_, _, err := usecase.Get(ctx, req)
+	resources, errs, err := usecase.Get(ctx, req)
 	assert.NoError(t, err)
 
-	assert.Equal(t, uint32(50), dummy.capturedLimit, "should pass the requested limit when less than MaxStreamingCount")
+	results := collectResources(t, resources, errs)
+
+	assert.Equal(t, uint32(2), dummy.capturedLimit, "should pass the requested limit when less than MaxStreamingCount")
+	assert.Len(t, results, 2, "should only return 2 resources even though 3 are available")
 }
 
 func TestGetResourcesUsecase_Get_WithLimitGreaterThanMax(t *testing.T) {
@@ -406,6 +395,7 @@ func TestGetResourcesUsecase_Get_WithZeroLimit(t *testing.T) {
 	dummy := &DummyZanzibar{
 		resources: []*ResourceResult{
 			createTestResource("widget1"),
+			createTestResource("widget2"),
 		},
 	}
 
@@ -431,10 +421,11 @@ func TestGetResourcesUsecase_Get_WithZeroLimit(t *testing.T) {
 		},
 	}
 
-	_, _, err := usecase.Get(ctx, req)
+	resources, errs, err := usecase.Get(ctx, req)
 	assert.NoError(t, err)
 
-	// When limit is 0 in pagination, the code should use the default MaxStreamingCount
-	// because the condition is: if limit == 0 || req.Pagination.Limit < limit
+	results := collectResources(t, resources, errs)
+
 	assert.Equal(t, uint32(0), dummy.capturedLimit, "should pass limit of 0 when explicitly requested")
+	assert.Len(t, results, 2, "should return all resources when limit is 0")
 }

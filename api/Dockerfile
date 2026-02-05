@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1770203734 AS builder
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1770267347 AS builder
 
 ARG TARGETARCH
 USER root
@@ -12,7 +12,7 @@ RUN go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
 # Install Buf
 RUN go install github.com/bufbuild/buf/cmd/buf@v1.52.0
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1770203734
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1770267347
 
 
 COPY --from=builder /root/go/bin/protoc-gen-go /usr/local/bin/protoc-gen-go

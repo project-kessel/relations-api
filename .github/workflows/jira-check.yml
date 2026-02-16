@@ -1,0 +1,28 @@
+name: jira-check
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+permissions:
+  contents: read
+jobs:
+  verify-jira:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for JIRA card in PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          # Skip JIRA check for certain accounts
+          if [[ "$PR_AUTHOR" == "dependabot"* ]] || [[ "$PR_AUTHOR" == "red-hat-konflux"* ]]; then
+            echo "Skipping JIRA check for $PR_AUTHOR"
+            exit 0
+          fi
+
+          JIRA_PATTERN="[A-Za-z]+-[0-9]+"
+          if [[ "$PR_TITLE" =~ $JIRA_PATTERN ]]; then
+            echo "JIRA card found in PR title: $PR_TITLE"
+          else
+            echo "No JIRA card found in PR title: $PR_TITLE"
+            exit 1
+          fi

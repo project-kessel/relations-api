@@ -32,7 +32,7 @@ func TestMain(m *testing.M) {
 		"span.id", tracing.SpanID(),
 	)
 
-	localKesselContainer, err = CreateKesselAPIContainer(logger)
+	localKesselContainer, err = CreateKesselAPIContainer(context.Background(), logger)
 	if err != nil {
 		fmt.Printf("Error initializing Docker localKesselContainer: %s", err)
 		os.Exit(-1)
@@ -78,7 +78,7 @@ func TestMain(m *testing.M) {
 }
 
 func loadSchema() error {
-	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
 	token, err := GetJWTToken(kcurl, "admin", "admin")
 	if err != nil {
 		fmt.Print(err)
@@ -122,7 +122,7 @@ func loadSchema() error {
 
 func TestKesselAPIGRPC_CreateTuples(t *testing.T) {
 	t.Parallel()
-	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
 	token, err := GetJWTToken(kcurl, "admin", "admin")
 	if err != nil {
 		fmt.Print(err)
@@ -147,7 +147,7 @@ func TestKesselAPIGRPC_CreateTuples(t *testing.T) {
 
 func TestKesselAPIGRPC_ReadTuples(t *testing.T) {
 	t.Parallel()
-	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
 	token, err := GetJWTToken(kcurl, "admin", "admin")
 	if err != nil {
 		fmt.Print(err)
@@ -180,7 +180,7 @@ func TestKesselAPIGRPC_ReadTuples(t *testing.T) {
 
 func TestKesselAPIGRPC_DeleteTuples(t *testing.T) {
 	t.Parallel()
-	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
 	token, err := GetJWTToken(kcurl, "admin", "admin")
 	if err != nil {
 		fmt.Print(err)
@@ -214,7 +214,7 @@ func TestKesselAPIGRPC_DeleteTuples(t *testing.T) {
 
 func TestKesselAPIGRPC_Check(t *testing.T) {
 	t.Parallel()
-	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
 	token, err := GetJWTToken(kcurl, "admin", "admin")
 	if err != nil {
 		fmt.Print(err)
@@ -254,7 +254,7 @@ func TestKesselAPIGRPC_Check(t *testing.T) {
 
 func TestKesselAPIGRPC_LookupSubjects(t *testing.T) {
 	t.Parallel()
-	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
 	token, err := GetJWTToken(kcurl, "admin", "admin")
 	if err != nil {
 		fmt.Print(err)
@@ -281,7 +281,7 @@ func TestKesselAPIGRPC_LookupSubjects(t *testing.T) {
 
 func TestKesselAPIGRPC_LookupResources(t *testing.T) {
 	t.Parallel()
-	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
 	token, err := GetJWTToken(kcurl, "admin", "admin")
 	if err != nil {
 		fmt.Print(err)
@@ -317,7 +317,7 @@ func TestKesselAPIGRPC_LookupResources(t *testing.T) {
 func TestKesselAPIGRPC_LookupResourcesInvalid(t *testing.T) {
 	//Ensures that validation middleware is still active with authentication enabled
 	t.Parallel()
-	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
 	token, err := GetJWTToken(kcurl, "admin", "admin")
 	if err != nil {
 		fmt.Print(err)
@@ -346,7 +346,7 @@ func TestKesselAPIGRPC_LookupResourcesInvalid(t *testing.T) {
 
 func TestKesselAPIGRPC_BulkCheck(t *testing.T) {
 	t.Parallel()
-	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
 	token, err := GetJWTToken(kcurl, "admin", "admin")
 	if err != nil {
 		fmt.Print(err)
@@ -423,7 +423,7 @@ func TestKesselAPIGRPC_BulkCheck(t *testing.T) {
 
 func TestKesselAPIGRPC_BulkCheck_WithErrorPair(t *testing.T) {
 	t.Parallel()
-	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.kccontainer.GetPort("8080/tcp"))
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
 	token, err := GetJWTToken(kcurl, "admin", "admin")
 	if err != nil {
 		fmt.Print(err)

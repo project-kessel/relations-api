@@ -89,7 +89,7 @@ func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) 
 
 	options := &dockertest.RunOptions{
 		Repository: "quay.io/keycloak/keycloak",
-		Tag:        "latest",
+		Tag:        "26.5.2",
 		Cmd: []string{
 			"start-dev",
 			"--health-enabled=true",

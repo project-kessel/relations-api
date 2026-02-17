@@ -39,17 +39,26 @@ type LocalKesselContainer struct {
 }
 
 // CreateKesselAPIContainer creates the network, SpiceDB, Keycloak, and Kessel API containers using testcontainers-go
-func CreateKesselAPIContainer(ctx context.Context, logger log.Logger) (*LocalKesselContainer, error) {
+func CreateKesselAPIContainer(ctx context.Context, logger log.Logger) (_ *LocalKesselContainer, retErr error) {
 	nw, err := network.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not create network: %w", err)
 	}
+	defer func() {
+		if retErr != nil {
+			_ = nw.Remove(ctx)
+		}
+	}()
 
 	spicedbContainer, err := data.CreateContainer(ctx, &data.ContainerOptions{Logger: logger, Network: nw})
 	if err != nil {
-		_ = nw.Remove(ctx)
 		return nil, fmt.Errorf("could not create SpiceDB container: %w", err)
 	}
+	defer func() {
+		if retErr != nil {
+			spicedbContainer.Close()
+		}
+	}()
 
 	kcCtr, err := testcontainers.Run(ctx, "quay.io/keycloak/keycloak:latest",
 		testcontainers.WithCmd("start-dev", "--health-enabled=true"),
@@ -64,16 +73,16 @@ func CreateKesselAPIContainer(ctx context.Context, logger log.Logger) (*LocalKes
 		),
 	)
 	if err != nil {
-		spicedbContainer.Close()
-		_ = nw.Remove(ctx)
 		return nil, fmt.Errorf("could not start Keycloak: %w", err)
 	}
+	defer func() {
+		if retErr != nil {
+			_ = testcontainers.TerminateContainer(kcCtr)
+		}
+	}()
 
 	kcHTTPPort, err := kcCtr.MappedPort(ctx, "8080")
 	if err != nil {
-		_ = testcontainers.TerminateContainer(kcCtr)
-		spicedbContainer.Close()
-		_ = nw.Remove(ctx)
 		return nil, fmt.Errorf("could not get Keycloak HTTP port: %w", err)
 	}
 
@@ -87,9 +96,6 @@ func CreateKesselAPIContainer(ctx context.Context, logger log.Logger) (*LocalKes
 	schemaPath := filepath.Join(basepath, SpicedbSchemaBootstrapFile)
 	schemaFile, err := os.Open(schemaPath)
 	if err != nil {
-		_ = testcontainers.TerminateContainer(kcCtr)
-		spicedbContainer.Close()
-		_ = nw.Remove(ctx)
 		return nil, fmt.Errorf("could not open schema file: %w", err)
 	}
 	defer func() { _ = schemaFile.Close() }()
@@ -103,7 +109,6 @@ func CreateKesselAPIContainer(ctx context.Context, logger log.Logger) (*LocalKes
 		BuildArgs:  map[string]*string{"TARGETARCH": &targetArch},
 	}
 
-	// Build from Dockerfile only (cannot specify both Image and Context in ContainerRequest)
 	genericReq := testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			FromDockerfile: fromDockerfile,
@@ -112,7 +117,7 @@ func CreateKesselAPIContainer(ctx context.Context, logger log.Logger) (*LocalKes
 	}
 	for _, opt := range []testcontainers.ContainerCustomizer{
 		testcontainers.WithEnv(map[string]string{
-			"SPICEDB_ENDPOINT":    "spicedb:50051",
+			"SPICEDB_ENDPOINT":    fmt.Sprintf("%s:50051", spicedbContainer.NetworkAlias()),
 			"SPICEDB_PRESHARED":   "spicedbpreshared",
 			"SPICEDB_JWKSURL":     kcurl,
 			"SPICEDB_ENABLEAUTH":  "true",
@@ -127,9 +132,6 @@ func CreateKesselAPIContainer(ctx context.Context, logger log.Logger) (*LocalKes
 		testcontainers.WithExposedPorts("8000/tcp", "9000/tcp"),
 	} {
 		if err := opt.Customize(&genericReq); err != nil {
-			_ = testcontainers.TerminateContainer(kcCtr)
-			spicedbContainer.Close()
-			_ = nw.Remove(ctx)
 			return nil, fmt.Errorf("customize request: %w", err)
 		}
 	}
@@ -139,40 +141,34 @@ func CreateKesselAPIContainer(ctx context.Context, logger log.Logger) (*LocalKes
 		if ctr != nil {
 			_ = testcontainers.TerminateContainer(ctr)
 		}
-		_ = testcontainers.TerminateContainer(kcCtr)
-		spicedbContainer.Close()
-		_ = nw.Remove(ctx)
 		return nil, fmt.Errorf("could not start Kessel API container: %w", err)
 	}
 	appCtr := ctr.(*testcontainers.DockerContainer)
+	defer func() {
+		if retErr != nil {
+			_ = testcontainers.TerminateContainer(appCtr)
+		}
+	}()
 
 	gRPCport, err := appCtr.MappedPort(ctx, "9000")
 	if err != nil {
-		_ = testcontainers.TerminateContainer(appCtr)
-		_ = testcontainers.TerminateContainer(kcCtr)
-		spicedbContainer.Close()
-		_ = nw.Remove(ctx)
 		return nil, fmt.Errorf("could not get gRPC port: %w", err)
 	}
 	httpPort, err := appCtr.MappedPort(ctx, "8000")
 	if err != nil {
-		_ = testcontainers.TerminateContainer(appCtr)
-		_ = testcontainers.TerminateContainer(kcCtr)
-		spicedbContainer.Close()
-		_ = nw.Remove(ctx)
 		return nil, fmt.Errorf("could not get HTTP port: %w", err)
 	}
 
 	return &LocalKesselContainer{
-		Name:               appCtr.GetContainerID(),
-		logger:             logger,
-		container:          appCtr,
-		gRPCport:           gRPCport.Port(),
-		HTTPport:           httpPort.Port(),
-		KeycloakHTTPPort:   kcHTTPPort.Port(),
-		spicedbContainer:   spicedbContainer,
-		net:                nw,
-		kccontainer:        kcCtr,
+		Name:             appCtr.GetContainerID(),
+		logger:           logger,
+		container:        appCtr,
+		gRPCport:         gRPCport.Port(),
+		HTTPport:         httpPort.Port(),
+		KeycloakHTTPPort: kcHTTPPort.Port(),
+		spicedbContainer: spicedbContainer,
+		net:              nw,
+		kccontainer:      kcCtr,
 	}, nil
 }
 

@@ -18,10 +18,6 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 const (
@@ -46,6 +42,7 @@ type LocalSpiceDbContainer struct {
 	port           string
 	container      *testcontainers.DockerContainer
 	name           string
+	networkAlias   string
 	schemaLocation string
 }
 
@@ -67,13 +64,12 @@ func CreateContainer(ctx context.Context, opts *ContainerOptions) (*LocalSpiceDb
 		testcontainers.WithCmd("serve-testing", "--skip-release-check=true"),
 		testcontainers.WithExposedPorts("50051/tcp", "50052/tcp"),
 		testcontainers.WithWaitStrategy(
-			wait.ForListeningPort("50051/tcp").WithStartupTimeout(3*time.Minute),
+			wait.ForListeningPort("50051/tcp").WithStartupTimeout(3 * time.Minute),
 		),
 	}
 
 	if opts.Network != nil {
 		runOpts = append(runOpts,
-			testcontainers.WithName(spicedbNetworkAlias),
 			network.WithNetwork([]string{spicedbNetworkAlias}, opts.Network),
 		)
 	}
@@ -89,34 +85,21 @@ func CreateContainer(ctx context.Context, opts *ContainerOptions) (*LocalSpiceDb
 		return nil, fmt.Errorf("could not get spicedb port: %w", err)
 	}
 
-	// Optional: wait for gRPC health so serve-testing is fully ready
-	host, err := ctr.Host(ctx)
+	inspect, err := ctr.Inspect(ctx)
 	if err != nil {
 		_ = testcontainers.TerminateContainer(ctr)
-		return nil, fmt.Errorf("could not get spicedb host: %w", err)
+		return nil, fmt.Errorf("could not inspect spicedb container: %w", err)
 	}
-	addr := fmt.Sprintf("%s:%s", host, port.Port())
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err == nil {
-		client := grpc_health_v1.NewHealthClient(conn)
-		for i := 0; i < 60; i++ {
-			_, err = client.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
-			if err == nil {
-				_ = conn.Close()
-				break
-			}
-			time.Sleep(500 * time.Millisecond)
-		}
-		if err != nil {
-			_ = conn.Close()
-			log.NewHelper(opts.Logger).Warnf("spicedb gRPC health check did not succeed: %v", err)
-		}
-	}
+	name := inspect.Name
 
-	name := spicedbNetworkAlias
+	alias := ""
+	if opts.Network != nil {
+		alias = spicedbNetworkAlias
+	}
 
 	return &LocalSpiceDbContainer{
 		name:           name,
+		networkAlias:   alias,
 		logger:         opts.Logger,
 		port:           port.Port(),
 		container:      ctr,
@@ -129,9 +112,15 @@ func (l *LocalSpiceDbContainer) Port() string {
 	return l.port
 }
 
-// Name returns the container name (or network alias when on a network)
+// Name returns the actual container name assigned by Docker
 func (l *LocalSpiceDbContainer) Name() string {
 	return l.name
+}
+
+// NetworkAlias returns the network alias used for inter-container communication,
+// or empty if no network is configured
+func (l *LocalSpiceDbContainer) NetworkAlias() string {
+	return l.networkAlias
 }
 
 // NewToken returns a new token used for the container so a new store is created in serve-testing

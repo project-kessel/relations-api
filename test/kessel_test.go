@@ -32,7 +32,9 @@ func TestMain(m *testing.M) {
 		"span.id", tracing.SpanID(),
 	)
 
-	localKesselContainer, err = CreateKesselAPIContainer(context.Background(), logger)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+	localKesselContainer, err = CreateKesselAPIContainer(ctx, logger)
 	if err != nil {
 		fmt.Printf("Error initializing Docker localKesselContainer: %s", err)
 		os.Exit(-1)

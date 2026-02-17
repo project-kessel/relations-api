@@ -34,7 +34,16 @@ const (
 	FullyConsistent = false // Should probably be inline with our config file. (TODO: Can we make our tests grab the same value?)
 )
 
-const spicedbNetworkAlias = "spicedb"
+const spicedbNetworkAliasPrefix = "spicedb"
+
+// uniqueNetworkAlias returns a network alias unique per container to avoid collisions when multiple SpiceDB containers run in parallel (e.g. parallel tests).
+func uniqueNetworkAlias() string {
+	b := make([]byte, 4)
+	if _, err := rand.Read(b); err != nil {
+		return fmt.Sprintf("%s-%d", spicedbNetworkAliasPrefix, time.Now().UnixNano())
+	}
+	return fmt.Sprintf("%s-%x", spicedbNetworkAliasPrefix, b)
+}
 
 // LocalSpiceDbContainer struct that holds the testcontainers container and exposes the port
 type LocalSpiceDbContainer struct {
@@ -68,9 +77,11 @@ func CreateContainer(ctx context.Context, opts *ContainerOptions) (*LocalSpiceDb
 		),
 	}
 
+	var networkAlias string
 	if opts.Network != nil {
+		networkAlias = uniqueNetworkAlias()
 		runOpts = append(runOpts,
-			network.WithNetwork([]string{spicedbNetworkAlias}, opts.Network),
+			network.WithNetwork([]string{networkAlias}, opts.Network),
 		)
 	}
 
@@ -94,7 +105,7 @@ func CreateContainer(ctx context.Context, opts *ContainerOptions) (*LocalSpiceDb
 
 	alias := ""
 	if opts.Network != nil {
-		alias = spicedbNetworkAlias
+		alias = networkAlias
 	}
 
 	return &LocalSpiceDbContainer{

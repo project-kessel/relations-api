@@ -30,7 +30,9 @@ func TestMain(m *testing.M) {
 		"span.id", tracing.SpanID(),
 	)
 
-	container, err = data.CreateContainer(context.Background(), &data.ContainerOptions{Logger: logger})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+	container, err = data.CreateContainer(ctx, &data.ContainerOptions{Logger: logger})
 
 	if err != nil {
 		fmt.Printf("Error initializing Docker container: %s", err)

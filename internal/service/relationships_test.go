@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
@@ -30,7 +31,9 @@ func TestMain(m *testing.M) {
 		"span.id", tracing.SpanID(),
 	)
 
-	container, err = data.CreateContainer(&data.ContainerOptions{Logger: logger})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+	container, err = data.CreateContainer(ctx, &data.ContainerOptions{Logger: logger})
 
 	if err != nil {
 		fmt.Printf("Error initializing Docker container: %s", err)

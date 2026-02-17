@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"testing"
+	"time"
 
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/stretchr/testify/mock"
@@ -34,7 +35,9 @@ func TestMain(m *testing.M) {
 		"span.id", tracing.SpanID(),
 	)
 
-	container, err = CreateContainer(&ContainerOptions{Logger: logger})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+	container, err = CreateContainer(ctx, &ContainerOptions{Logger: logger})
 
 	if err != nil {
 		fmt.Printf("Error initializing Docker container: %s", err)

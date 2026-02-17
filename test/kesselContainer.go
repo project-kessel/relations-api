@@ -2,211 +2,189 @@ package test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
 	"github.com/project-kessel/relations-api/internal/data"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/network"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 const (
 	SpicedbSchemaBootstrapFile = "../internal/data/spicedb-test-data/basic_schema.zed"
+	keycloakNetworkAlias       = "keycloak"
 )
 
-// LocalKesselContainer struct that holds pointers to the localKesselContainer, dockertest pool and exposes the port
+// LocalKesselContainer holds the testcontainers for the Kessel API, SpiceDB, and Keycloak
 type LocalKesselContainer struct {
-	Name             string
-	logger           log.Logger
-	HTTPport         string
-	gRPCport         string
-	container        *dockertest.Resource
-	pool             *dockertest.Pool
-	spicedbContainer *data.LocalSpiceDbContainer
-	network          string
-	kccontainer      *dockertest.Resource
+	Name               string
+	logger             log.Logger
+	HTTPport           string
+	gRPCport           string
+	KeycloakHTTPPort   string // host-mapped port for Keycloak HTTP (8080), for use in GetJWTToken etc.
+	container          *testcontainers.DockerContainer
+	spicedbContainer    *data.LocalSpiceDbContainer
+	net                *testcontainers.DockerNetwork
+	kccontainer        *testcontainers.DockerContainer
 }
 
-func CreateKesselAPIContainer(logger log.Logger) (*LocalKesselContainer, error) {
-	pool, err := dockertest.NewPool("")
+// CreateKesselAPIContainer creates the network, SpiceDB, Keycloak, and Kessel API containers using testcontainers-go
+func CreateKesselAPIContainer(ctx context.Context, logger log.Logger) (_ *LocalKesselContainer, retErr error) {
+	nw, err := network.New(ctx)
 	if err != nil {
-		log.Fatalf("Could not construct pool: %spicedb", err)
-		return nil, err
+		return nil, fmt.Errorf("could not create network: %w", err)
 	}
-
-	// Create a custom network
-	networkName := "kessel-network"
-	findNetwork := func(name string) (*docker.Network, error) {
-		networks, err := pool.Client.ListNetworks()
-		if err != nil {
-			return nil, err
+	defer func() {
+		if retErr != nil {
+			_ = nw.Remove(ctx)
 		}
-		for _, net := range networks {
-			if net.Name == name {
-				return &net, nil
-			}
+	}()
+
+	spicedbContainer, err := data.CreateContainer(ctx, &data.ContainerOptions{Logger: logger, Network: nw})
+	if err != nil {
+		return nil, fmt.Errorf("could not create SpiceDB container: %w", err)
+	}
+	defer func() {
+		if retErr != nil {
+			spicedbContainer.Close()
 		}
-		return nil, nil
-	}
+	}()
 
-	// Check if network exists
-	network, err := findNetwork(networkName)
+	kcCtr, err := testcontainers.Run(ctx, "quay.io/keycloak/keycloak:latest",
+		testcontainers.WithCmd("start-dev", "--health-enabled=true"),
+		testcontainers.WithExposedPorts("8080/tcp", "9000/tcp"),
+		testcontainers.WithEnv(map[string]string{
+			"KEYCLOAK_ADMIN":         "admin",
+			"KEYCLOAK_ADMIN_PASSWORD": "admin",
+		}),
+		network.WithNetwork([]string{keycloakNetworkAlias}, nw),
+		testcontainers.WithWaitStrategy(
+			wait.ForHTTP("/health").WithPort("9000/tcp").WithStartupTimeout(3*time.Minute),
+		),
+	)
 	if err != nil {
-		log.Infof("Could not list networks: %s", err)
+		return nil, fmt.Errorf("could not start Keycloak: %w", err)
 	}
-	if network == nil {
-		network, err = pool.Client.CreateNetwork(docker.CreateNetworkOptions{
-			Name:           networkName,
-			Driver:         "bridge",
-			CheckDuplicate: true,
-		})
-		if err != nil {
-			log.Fatalf("Could not create network: %s", err)
+	defer func() {
+		if retErr != nil {
+			_ = testcontainers.TerminateContainer(kcCtr)
 		}
-	}
+	}()
 
-	pool.MaxWait = 3 * time.Minute
-	// Create a custom network
-	container, err := data.CreateContainer(&data.ContainerOptions{Logger: logger, Network: network})
+	kcHTTPPort, err := kcCtr.MappedPort(ctx, "8080")
 	if err != nil {
-		fmt.Printf("Error initializing Docker localKesselContainer: %s", err)
-		os.Exit(-1)
-	}
-	err = pool.Client.Ping()
-	if err != nil {
-		log.Fatalf("Could not connect to Docker: %s", err)
+		return nil, fmt.Errorf("could not get Keycloak HTTP port: %w", err)
 	}
 
-	options := &dockertest.RunOptions{
-		Repository: "quay.io/keycloak/keycloak",
-		Tag:        "latest",
-		Cmd: []string{
-			"start-dev",
-			"--health-enabled=true",
-		},
-		ExposedPorts: []string{"8080/tcp", "9000/tcp"},
-		Env: []string{
-			"KEYCLOAK_ADMIN=admin",
-			"KEYCLOAK_ADMIN_PASSWORD=admin",
-		},
-		NetworkID: network.ID,
-	}
-
-	kcresource, err := pool.RunWithOptions(options, func(config *docker.HostConfig) {
-		config.NetworkMode = "bridge"
-		config.AutoRemove = true
-		config.RestartPolicy = docker.RestartPolicy{Name: "no"}
-	})
-	if err != nil {
-		log.Fatalf("Could not start keycloak resource: %s", err)
-	}
-
-	portMetric := kcresource.GetPort("9000/tcp")
-	kcname := strings.Trim(kcresource.Container.Name, "/")
-	kcurl := fmt.Sprintf("http://%s:%s/realms/master/protocol/openid-connect/certs", kcname, "8080")
-
-	// Wait for the container to be ready
-	if err := pool.Retry(func() error {
-		err = checkKeycloakHealth(fmt.Sprintf("http://localhost:%s", portMetric))
-		log.Info("Waiting for Keycloak to be ready...")
-		return err
-	}); err != nil {
-		log.Fatalf("Could not connect to keycloak container: %s", err)
-	}
+	// JWKS URL for the Kessel API container (reaches Keycloak by network alias)
+	kcurl := fmt.Sprintf("http://%s:8080/realms/master/protocol/openid-connect/certs", keycloakNetworkAlias)
 
 	var (
 		_, b, _, _ = runtime.Caller(0)
 		basepath   = filepath.Dir(b)
 	)
+	schemaPath := filepath.Join(basepath, SpicedbSchemaBootstrapFile)
+	schemaFile, err := os.Open(schemaPath)
+	if err != nil {
+		return nil, fmt.Errorf("could not open schema file: %w", err)
+	}
+	defer func() { _ = schemaFile.Close() }()
 
-	targetArch := runtime.GOARCH // "amd64" or "arm64", depending on your needs
-	enable_auth := fmt.Sprintf("SPICEDB_ENABLEAUTH=%t", true)
-	sso := fmt.Sprintf("SPICEDB_JWKSURL=%s", kcurl)
-	name := strings.Trim(container.Name(), "/")
-	endpoint := fmt.Sprintf("SPICEDB_ENDPOINT=%s:%s", name, "50051")
-	presharedSecret := fmt.Sprintf("SPICEDB_PRESHARED=%s", "spicedbpreshared")
-	schemaFile := fmt.Sprintf("SPICEDB_SCHEMA_FILE=%s", "/mnt/spicedb_schema.zed")
+	targetArch := runtime.GOARCH
+	fromDockerfile := testcontainers.FromDockerfile{
+		Context:    filepath.Join(basepath, ".."),
+		Dockerfile: "Dockerfile",
+		Repo:       "relations-api",
+		Tag:        "test",
+		BuildArgs:  map[string]*string{"TARGETARCH": &targetArch},
+	}
 
-	resource, err := pool.BuildAndRunWithBuildOptions(&dockertest.BuildOptions{
-		Dockerfile: "Dockerfile", // Path to your Dockerfile
-		ContextDir: "../",        // Context directory for the Dockerfile
-		Platform:   "linux/" + runtime.GOARCH,
-		BuildArgs: []docker.BuildArg{
-			{Name: "TARGETARCH", Value: targetArch},
+	genericReq := testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			FromDockerfile: fromDockerfile,
 		},
-	}, &dockertest.RunOptions{
-		Name:      "rel",
-		Env:       []string{endpoint, presharedSecret, sso, enable_auth, schemaFile},
-		Mounts:    []string{fmt.Sprintf("%s:/mnt/spicedb_schema.zed:ro", path.Join(basepath, SpicedbSchemaBootstrapFile))},
-		NetworkID: network.ID,
-	})
-	if err != nil {
-		log.Fatalf("Could not start resource: %s", err.Error())
+		Started: true,
+	}
+	for _, opt := range []testcontainers.ContainerCustomizer{
+		testcontainers.WithEnv(map[string]string{
+			"SPICEDB_ENDPOINT":    fmt.Sprintf("%s:50051", spicedbContainer.NetworkAlias()),
+			"SPICEDB_PRESHARED":   "spicedbpreshared",
+			"SPICEDB_JWKSURL":     kcurl,
+			"SPICEDB_ENABLEAUTH":  "true",
+			"SPICEDB_SCHEMA_FILE": "/tmp/spicedb_schema.zed",
+		}),
+		testcontainers.WithFiles(testcontainers.ContainerFile{
+			Reader:            schemaFile,
+			ContainerFilePath: "/tmp/spicedb_schema.zed",
+			FileMode:          0o644,
+		}),
+		network.WithNetwork([]string{"rel"}, nw),
+		testcontainers.WithExposedPorts("8000/tcp", "9000/tcp"),
+	} {
+		if err := opt.Customize(&genericReq); err != nil {
+			return nil, fmt.Errorf("customize request: %w", err)
+		}
 	}
 
-	gRPCport := resource.GetPort("9000/tcp")
-	httpPort := resource.GetPort("8000/tcp")
-
-	return &LocalKesselContainer{
-		Name:             resource.Container.Name,
-		kccontainer:      kcresource,
-		container:        resource,
-		gRPCport:         gRPCport,
-		HTTPport:         httpPort,
-		spicedbContainer: container,
-		logger:           logger,
-		pool:             pool,
-		network:          network.ID,
-	}, nil
-}
-
-type TokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	ExpiresIn    int    `json:"expires_in"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-func checkKeycloakHealth(baseURL string) error {
-	resp, err := http.Get(fmt.Sprintf("%s/health", baseURL))
+	ctr, err := testcontainers.GenericContainer(ctx, genericReq)
 	if err != nil {
-		return err
+		if ctr != nil {
+			_ = testcontainers.TerminateContainer(ctr)
+		}
+		return nil, fmt.Errorf("could not start Kessel API container: %w", err)
 	}
-
+	appCtr := ctr.(*testcontainers.DockerContainer)
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			log.Errorf("error closing response: %v", err)
+		if retErr != nil {
+			_ = testcontainers.TerminateContainer(appCtr)
 		}
 	}()
 
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	gRPCport, err := appCtr.MappedPort(ctx, "9000")
+	if err != nil {
+		return nil, fmt.Errorf("could not get gRPC port: %w", err)
+	}
+	httpPort, err := appCtr.MappedPort(ctx, "8000")
+	if err != nil {
+		return nil, fmt.Errorf("could not get HTTP port: %w", err)
 	}
 
-	return nil
+	return &LocalKesselContainer{
+		Name:             appCtr.GetContainerID(),
+		logger:           logger,
+		container:        appCtr,
+		gRPCport:         gRPCport.Port(),
+		HTTPport:         httpPort.Port(),
+		KeycloakHTTPPort: kcHTTPPort.Port(),
+		spicedbContainer: spicedbContainer,
+		net:              nw,
+		kccontainer:      kcCtr,
+	}, nil
 }
+
+// GetJWTToken obtains a JWT from Keycloak (baseURL should be the host-accessible URL, e.g. http://localhost:PORT)
 func GetJWTToken(baseURL, username, password string) (*TokenResponse, error) {
 	client := &http.Client{}
-	data := url.Values{}
-	data.Set("client_id", "admin-cli")
-	data.Set("username", username)
-	data.Set("password", password)
-	data.Set("grant_type", "password")
+	form := url.Values{}
+	form.Set("client_id", "admin-cli")
+	form.Set("username", username)
+	form.Set("password", password)
+	form.Set("grant_type", "password")
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/realms/master/protocol/openid-connect/token", baseURL), bytes.NewBufferString(data.Encode()))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/realms/master/protocol/openid-connect/token", baseURL), bytes.NewBufferString(form.Encode()))
 	if err != nil {
 		return nil, err
 	}
-
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 
@@ -238,17 +216,22 @@ func GetJWTToken(baseURL, username, password string) (*TokenResponse, error) {
 	return &tokenResponse, nil
 }
 
+type TokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	ExpiresIn    int    `json:"expires_in"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 func (l *LocalKesselContainer) Close() {
-	err := l.pool.Purge(l.container)
-	if err != nil {
-		log.NewHelper(l.logger).Error("Could not purge Kessel Container from test. Please delete manually.")
+	ctx := context.Background()
+	if err := testcontainers.TerminateContainer(l.container); err != nil {
+		log.NewHelper(l.logger).Error("Could not terminate Kessel API container. Please remove manually.")
 	}
 	l.spicedbContainer.Close()
-	if err := l.kccontainer.Close(); err != nil {
-		log.NewHelper(l.logger).Errorf("error closing kessel container: %w", err)
+	if err := testcontainers.TerminateContainer(l.kccontainer); err != nil {
+		log.NewHelper(l.logger).Errorf("error terminating Keycloak container: %v", err)
 	}
-
-	if err := l.pool.Client.RemoveNetwork(l.network); err != nil {
-		log.Fatalf("Could not remove network: %s", err)
+	if err := l.net.Remove(ctx); err != nil {
+		log.NewHelper(l.logger).Errorf("could not remove network: %v", err)
 	}
 }

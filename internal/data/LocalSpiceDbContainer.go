@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-
 	"os"
 	"path"
 	"path/filepath"
@@ -13,15 +12,12 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
 	"github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/biz"
 	"github.com/project-kessel/relations-api/internal/conf"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health/grpc_health_v1"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/network"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 const (
@@ -38,93 +34,104 @@ const (
 	FullyConsistent = false // Should probably be inline with our config file. (TODO: Can we make our tests grab the same value?)
 )
 
-// LocalSpiceDbContainer struct that holds pointers to the container, dockertest pool and exposes the port
+const spicedbNetworkAliasPrefix = "spicedb"
+
+// uniqueNetworkAlias returns a network alias unique per container to avoid collisions when multiple SpiceDB containers run in parallel (e.g. parallel tests).
+func uniqueNetworkAlias() string {
+	b := make([]byte, 4)
+	if _, err := rand.Read(b); err != nil {
+		return fmt.Sprintf("%s-%d", spicedbNetworkAliasPrefix, time.Now().UnixNano())
+	}
+	return fmt.Sprintf("%s-%x", spicedbNetworkAliasPrefix, b)
+}
+
+// LocalSpiceDbContainer struct that holds the testcontainers container and exposes the port
 type LocalSpiceDbContainer struct {
 	logger         log.Logger
 	port           string
-	container      *dockertest.Resource
-	pool           *dockertest.Pool
+	container      *testcontainers.DockerContainer
 	name           string
+	networkAlias   string
 	schemaLocation string
 }
 
+// ContainerOptions configures SpiceDB container creation
 type ContainerOptions struct {
 	Logger  log.Logger
-	Network *docker.Network
+	Network *testcontainers.DockerNetwork
 }
 
-// CreateContainer creates a new SpiceDbContainer using dockertest
-func CreateContainer(opts *ContainerOptions) (*LocalSpiceDbContainer, error) {
-	pool, err := dockertest.NewPool("") // Empty string uses default docker env
-	if err != nil {
-		return nil, fmt.Errorf("could not connect to docker: %w", err)
-	}
-
-	pool.MaxWait = 3 * time.Minute
-
+// CreateContainer creates a new SpiceDbContainer using testcontainers-go
+func CreateContainer(ctx context.Context, opts *ContainerOptions) (*LocalSpiceDbContainer, error) {
 	var (
 		_, b, _, _ = runtime.Caller(0)
 		basepath   = filepath.Dir(b)
 	)
 
-	cmd := []string{"serve-testing", "--skip-release-check=true"}
-
-	runopt := &dockertest.RunOptions{
-		Repository:   SpicedbImage,
-		Tag:          SpicedbVersion, // Replace this with an actual version
-		Cmd:          cmd,
-		ExposedPorts: []string{"50051/tcp", "50052/tcp"},
+	image := SpicedbImage + ":" + SpicedbVersion
+	runOpts := []testcontainers.ContainerCustomizer{
+		testcontainers.WithCmd("serve-testing", "--skip-release-check=true"),
+		testcontainers.WithExposedPorts("50051/tcp", "50052/tcp"),
+		testcontainers.WithWaitStrategy(
+			wait.ForListeningPort("50051/tcp").WithStartupTimeout(3 * time.Minute),
+		),
 	}
+
+	var networkAlias string
 	if opts.Network != nil {
-		runopt.NetworkID = opts.Network.ID
+		networkAlias = uniqueNetworkAlias()
+		runOpts = append(runOpts,
+			network.WithNetwork([]string{networkAlias}, opts.Network),
+		)
 	}
-	resource, err := pool.RunWithOptions(runopt)
 
+	ctr, err := testcontainers.Run(ctx, image, runOpts...)
 	if err != nil {
 		return nil, fmt.Errorf("could not start spicedb resource: %w", err)
 	}
 
-	port := resource.GetPort("50051/tcp")
+	port, err := ctr.MappedPort(ctx, "50051")
+	if err != nil {
+		_ = testcontainers.TerminateContainer(ctr)
+		return nil, fmt.Errorf("could not get spicedb port: %w", err)
+	}
 
-	// Give the service time to boot.
-	cErr := pool.Retry(func() error {
-		log.NewHelper(opts.Logger).Info("Attempting to connect to spicedb...")
+	inspect, err := ctr.Inspect(ctx)
+	if err != nil {
+		_ = testcontainers.TerminateContainer(ctr)
+		return nil, fmt.Errorf("could not inspect spicedb container: %w", err)
+	}
+	name := inspect.Name
 
-		conn, err := grpc.NewClient(
-			fmt.Sprintf("localhost:%s", port),
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-		)
-		if err != nil {
-			return fmt.Errorf("error connecting to spiceDB: %v", err.Error())
-		}
-
-		client := grpc_health_v1.NewHealthClient(conn)
-		_, err = client.Check(context.Background(), &grpc_health_v1.HealthCheckRequest{})
-		return err
-	})
-
-	if cErr != nil {
-		return nil, cErr
+	alias := ""
+	if opts.Network != nil {
+		alias = networkAlias
 	}
 
 	return &LocalSpiceDbContainer{
-		name:           resource.Container.Name,
+		name:           name,
+		networkAlias:   alias,
 		logger:         opts.Logger,
-		port:           port,
-		container:      resource,
-		pool:           pool,
+		port:           port.Port(),
+		container:      ctr,
 		schemaLocation: path.Join(basepath, SpicedbSchemaBootstrapFile),
 	}, nil
 }
 
-// Port returns the Port the container is listening
+// Port returns the port the container is listening on (host-mapped)
 func (l *LocalSpiceDbContainer) Port() string {
 	return l.port
 }
 
-// Name returns the container name
+// Name returns the actual container name assigned by Docker
 func (l *LocalSpiceDbContainer) Name() string {
 	return l.name
+}
+
+// NetworkAlias returns the network alias used for inter-container communication,
+// or empty if no network is configured
+func (l *LocalSpiceDbContainer) NetworkAlias() string {
+	return l.networkAlias
 }
 
 // NewToken returns a new token used for the container so a new store is created in serve-testing
@@ -144,7 +151,7 @@ func (l *LocalSpiceDbContainer) WaitForQuantizationInterval() {
 	}
 }
 
-// CreateClient creates a new client that connects to the dockerized spicedb instance and the right store
+// CreateSpiceDbRepository creates a repository that connects to the containerized SpiceDB instance
 func (l *LocalSpiceDbContainer) CreateSpiceDbRepository() (*SpiceDbRepository, error) {
 	randomKey, err := l.NewToken()
 	if err != nil {
@@ -185,11 +192,10 @@ func (l *LocalSpiceDbContainer) CreateSpiceDbRepository() (*SpiceDbRepository, e
 	return repo, nil
 }
 
-// Close purges the container
+// Close terminates the container
 func (l *LocalSpiceDbContainer) Close() {
-	err := l.pool.Purge(l.container)
-	if err != nil {
-		log.NewHelper(l.logger).Error("Could not purge SpiceDB Container from test. Please delete manually.")
+	if err := testcontainers.TerminateContainer(l.container); err != nil {
+		log.NewHelper(l.logger).Error("Could not terminate SpiceDB container. Please remove manually.")
 	}
 }
 

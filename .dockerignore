@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+.github
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+.claude
+
+# CI/CD
+.tekton
+
+# Documentation
+*.md
+README*
+LICENSE
+dashboards
+
+# Docker
+docker-compose*.yaml
+Dockerfile.*
+.dockerignore
+
+# Build artifacts
+bin/
+*.log
+
+# Test files
+*_test.go
+test/
+testdata/
+
+# Scripts
+*.sh
+
+# Secrets
+.secrets

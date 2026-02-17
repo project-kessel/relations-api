@@ -26,4 +26,6 @@ jobs:
       - name: Build
         run: go build -tags release -v ./...
       - name: Test
+        env:
+          DOCKER_BUILDKIT: 1
         run: go test -v ./...

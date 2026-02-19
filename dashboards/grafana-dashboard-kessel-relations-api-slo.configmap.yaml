@@ -1136,11 +1136,16 @@ data:
               },
               {
                 "selected": false,
+                "text": "kessel-testing-perf",
+                "value": "kessel-testing-perf"
+              },
+              {
+                "selected": false,
                 "text": "kessel-prod",
                 "value": "kessel-prod"
               }
             ],
-            "query": "kessel-stage,kessel-prod",
+            "query": "kessel-stage,kessel-prod,kessel-testing-perf",
             "type": "custom"
           },
           {

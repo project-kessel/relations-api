@@ -785,9 +785,12 @@ func createSpiceDbRelationshipFilter(filter *apiV1beta1.RelationTupleFilter) (*v
 		}
 
 		// the generated GetRelation() will only provide a value or empty string
-		// but our query should support nil values -- check for nil and explicitly set if so
+		// but our query should support nil values too
+		// * nil: means "any relation" (wildcard), so OptionalRelation stays nil
+		// * empty string: explicitly filter for empty relation, set OptionalRelation with empty RelationFilter
+		// * actual value: filter for specific relation, set OptionalRelation with that value
 		if subjectFilter.Relation == nil {
-			spiceDbSubjectFilter.OptionalRelation = &v1.SubjectFilter_RelationFilter{}
+			spiceDbSubjectFilter.OptionalRelation = nil
 		} else {
 			spiceDbSubjectFilter.OptionalRelation = &v1.SubjectFilter_RelationFilter{
 				Relation: subjectFilter.GetRelation(),

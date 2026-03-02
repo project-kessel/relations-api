@@ -1800,6 +1800,76 @@ func TestSpiceDbRepository_LookupSubjects(t *testing.T) {
 	assert.Equal(t, 2, len(foundSubjects2), "should find exactly 2 subjects with use_widget permission")
 }
 
+func TestCreateSpiceDbRelationshipFilter_SubjectRelationNil(t *testing.T) {
+	t.Parallel()
+
+	// Test case 1: subjectFilter.Relation is nil
+	filter := &apiV1beta1.RelationTupleFilter{
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("principal"),
+			Relation:         nil, // explicitly nil
+		},
+	}
+
+	result, err := createSpiceDbRelationshipFilter(filter)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.NotNil(t, result.OptionalSubjectFilter)
+	// When Relation is nil, OptionalRelation should be nil
+	assert.Nil(t, result.OptionalSubjectFilter.OptionalRelation)
+}
+
+func TestCreateSpiceDbRelationshipFilter_SubjectRelationEmptyString(t *testing.T) {
+	t.Parallel()
+
+	// Test case 2: subjectFilter.Relation is an empty string
+	emptyStr := ""
+	filter := &apiV1beta1.RelationTupleFilter{
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("principal"),
+			Relation:         &emptyStr, // empty string pointer
+		},
+	}
+
+	result, err := createSpiceDbRelationshipFilter(filter)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.NotNil(t, result.OptionalSubjectFilter)
+	// When Relation is empty string, OptionalRelation should be set with RelationFilter containing empty string
+	assert.NotNil(t, result.OptionalSubjectFilter.OptionalRelation)
+	assert.Equal(t, "", result.OptionalSubjectFilter.OptionalRelation.Relation)
+}
+
+func TestCreateSpiceDbRelationshipFilter_SubjectRelationWithValue(t *testing.T) {
+	t.Parallel()
+
+	// Test case 3: subjectFilter.Relation has an actual value
+	relationValue := "member"
+	filter := &apiV1beta1.RelationTupleFilter{
+		ResourceNamespace: pointerize("rbac"),
+		ResourceType:      pointerize("group"),
+		SubjectFilter: &apiV1beta1.SubjectFilter{
+			SubjectNamespace: pointerize("rbac"),
+			SubjectType:      pointerize("principal"),
+			Relation:         &relationValue, // actual value
+		},
+	}
+
+	result, err := createSpiceDbRelationshipFilter(filter)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.NotNil(t, result.OptionalSubjectFilter)
+	// When Relation has a value, OptionalRelation should be set with RelationFilter containing that value
+	assert.NotNil(t, result.OptionalSubjectFilter.OptionalRelation)
+	assert.Equal(t, "member", result.OptionalSubjectFilter.OptionalRelation.Relation)
+}
+
 func pointerize(value string) *string { //Used to turn string literals into pointers
 	return &value
 }

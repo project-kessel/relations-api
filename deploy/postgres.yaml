@@ -42,7 +42,26 @@ objects:
               requests:
                 cpu: 30m
                 memory: 128Mi
+            volumeMounts:
+            - name: postgres-data
+              mountPath: /temp/data
+          volumes:
+          - name: postgres-data
+            persistentVolumeClaim:
+              claimName: postgres-data
           restartPolicy: Always
+
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: postgres-data
+      namespace: ${NAMESPACE}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
 
   - apiVersion: v1
     kind: Service

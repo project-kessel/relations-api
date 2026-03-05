@@ -110,7 +110,6 @@ objects:
     kind: PersistentVolumeClaim
     metadata:
       name: postgres-data
-      namespace: ${NAMESPACE}
     spec:
       accessModes:
         - ReadWriteOnce
@@ -262,7 +261,6 @@ parameters:
   - description: SpiceDB Memory Limit
     name: SPICEDB_MEMORY_LIMIT
     value: 256Mi
-  
   - description: SpiceDB Postgres CPU Request
     name: SPICEDB_POSTGRES_CPU_REQUEST
     value: 30m

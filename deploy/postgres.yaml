@@ -87,13 +87,13 @@ objects:
 parameters:
   - description: Namespace to deploy into
     name: NAMESPACE
-    value: ${NAMESPACE} 
+    required: true
   - description: Postgres DB name
     name: POSTGRES_DB
-    value: ${POSTGRES_DB}
+    required: true
   - description: Postgres DB username
     name: POSTGRES_USER
-    value: ${POSTGRES_USER}   
+    required: true
   - description: Postgres DB password
     name: POSTGRES_PASSWORD
-    value: ${POSTGRES_PASSWORD}           
+    required: true

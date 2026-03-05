@@ -253,25 +253,25 @@ parameters:
     value: '1.0'
   - description: SpiceDB CPU Request
     name: SPICEDB_CPU_REQUEST
-    value: 25m
+    value: 200m
   - description: SpiceDB CPU Limit
     name: SPICEDB_CPU_LIMIT
-    value: 100m
+    value: 500m
   - description: SpiceDB Memory Request
     name: SPICEDB_MEMORY_REQUEST
     value: 128Mi
   - description: SpiceDB Memory Limit
     name: SPICEDB_MEMORY_LIMIT
-    value: 256Mi
+    value: 128Mi
   - description: SpiceDB Postgres CPU Request
     name: SPICEDB_POSTGRES_CPU_REQUEST
-    value: 30m
+    value: 200m
   - description: SpiceDB Postgres CPU Limit
     name: SPICEDB_POSTGRES_CPU_LIMIT
-    value: 60m
+    value: 500m
   - description: SpiceDB Postgres Memory Request
     name: SPICEDB_POSTGRES_MEMORY_REQUEST
     value: 128Mi
   - description: SpiceDB Postgres Memory Limit
     name: SPICEDB_POSTGRES_MEMORY_LIMIT
-    value: 256Mi
+    value: 128Mi

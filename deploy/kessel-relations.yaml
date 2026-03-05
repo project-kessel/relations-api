@@ -57,6 +57,8 @@ objects:
         app: postgres
       name: postgres
     spec:
+      strategy:
+        type: Recreate
       selector:
         matchLabels:
           app: postgres
@@ -83,7 +85,7 @@ objects:
                   name: postgres-secret
                   key: POSTGRESQL_PASSWORD
             - name: PGDATA
-              value: /temp/data
+              value: /var/lib/pgsql/data
             image: registry.redhat.io/rhel9/postgresql-16:9.5-1744136555
             imagePullPolicy: Always
             name: postgres
@@ -99,7 +101,7 @@ objects:
                 memory: ${SPICEDB_POSTGRES_MEMORY_REQUEST}
             volumeMounts:
             - name: postgres-data
-              mountPath: /temp/data
+              mountPath: /var/lib/pgsql/data
           volumes:
           - name: postgres-data
             persistentVolumeClaim:

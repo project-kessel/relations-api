@@ -5,7 +5,7 @@ go 1.25.7
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260209202127-80ab13bee0bf.1
-	buf.build/go/protovalidate v1.1.2
+	buf.build/go/protovalidate v1.1.3
 	github.com/MicahParks/keyfunc/v3 v3.8.0
 	github.com/authzed/authzed-go v1.7.0
 	github.com/authzed/grpcutil v0.0.0-20240123194739-2ea1e3d2d98b

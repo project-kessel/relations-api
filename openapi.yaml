@@ -85,6 +85,27 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkResponse'
+    /v1beta1/checkbulkforupdate:
+        post:
+            tags:
+                - KesselCheckService
+            description: |-
+                CheckBulkForUpdate runs N strongly-consistent checks (same semantics as CheckForUpdate per item).
+                 No consistency field in request; response has one pair per item in the same order.
+            operationId: KesselCheckService_CheckBulkForUpdate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkForUpdateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkForUpdateResponse'
     /v1beta1/checkforupdate:
         post:
             tags:
@@ -432,6 +453,21 @@ components:
             properties:
                 lockToken:
                     type: string
+        kessel.relations.v1beta1.CheckBulkForUpdateRequest:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkRequestItem'
+            description: 'CheckBulkForUpdate: strongly consistent; no consistency field. Same item shape as CheckBulk.'
+        kessel.relations.v1beta1.CheckBulkForUpdateResponse:
+            type: object
+            properties:
+                pairs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkResponsePair'
         kessel.relations.v1beta1.CheckBulkRequest:
             type: object
             properties:

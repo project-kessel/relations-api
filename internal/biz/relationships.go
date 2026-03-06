@@ -3,7 +3,9 @@ package biz
 import (
 	"context"
 
+	rpcstatus "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 
 	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 
@@ -82,6 +84,56 @@ func (rc *CheckForUpdateUsecase) CheckForUpdate(ctx context.Context, check *v1be
 
 func (rc *CheckBulkUsecase) CheckBulk(ctx context.Context, check *v1beta1.CheckBulkRequest) (*v1beta1.CheckBulkResponse, error) {
 	return rc.repo.CheckBulk(ctx, check)
+}
+
+// CheckBulkForUpdateUsecase runs N strongly-consistent CheckForUpdate checks (one per item) and returns pairs in order.
+type CheckBulkForUpdateUsecase struct {
+	repo ZanzibarRepository
+	log  *log.Helper
+}
+
+// NewCheckBulkForUpdateUsecase creates a usecase that delegates each item to repo.CheckForUpdate.
+func NewCheckBulkForUpdateUsecase(repo ZanzibarRepository, logger log.Logger) *CheckBulkForUpdateUsecase {
+	return &CheckBulkForUpdateUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
+// CheckBulkForUpdate runs one CheckForUpdate per request item and returns one pair per item in the same order.
+func (u *CheckBulkForUpdateUsecase) CheckBulkForUpdate(ctx context.Context, req *v1beta1.CheckBulkForUpdateRequest) (*v1beta1.CheckBulkForUpdateResponse, error) {
+	pairs := make([]*v1beta1.CheckBulkResponsePair, 0, len(req.GetItems()))
+	for _, item := range req.GetItems() {
+		cfuReq := &v1beta1.CheckForUpdateRequest{
+			Resource: item.GetResource(),
+			Relation: item.GetRelation(),
+			Subject:  item.GetSubject(),
+		}
+		resp, err := u.repo.CheckForUpdate(ctx, cfuReq)
+		if err != nil {
+			pairs = append(pairs, pairWithError(item, err))
+			continue
+		}
+		allowed := v1beta1.CheckBulkResponseItem_ALLOWED_FALSE
+		if resp.GetAllowed() == v1beta1.CheckForUpdateResponse_ALLOWED_TRUE {
+			allowed = v1beta1.CheckBulkResponseItem_ALLOWED_TRUE
+		}
+		pairs = append(pairs, &v1beta1.CheckBulkResponsePair{
+			Request: item,
+			Response: &v1beta1.CheckBulkResponsePair_Item{
+				Item: &v1beta1.CheckBulkResponseItem{Allowed: allowed},
+			},
+		})
+	}
+	return &v1beta1.CheckBulkForUpdateResponse{Pairs: pairs}, nil
+}
+
+// pairWithError builds a CheckBulkResponsePair with the request item and a gRPC Status error.
+func pairWithError(item *v1beta1.CheckBulkRequestItem, err error) *v1beta1.CheckBulkResponsePair {
+	s := status.Convert(err)
+	return &v1beta1.CheckBulkResponsePair{
+		Request: item,
+		Response: &v1beta1.CheckBulkResponsePair_Error{
+			Error: &rpcstatus.Status{Code: int32(s.Code()), Message: s.Message()},
+		},
+	}
 }
 
 type CreateRelationshipsUsecase struct {

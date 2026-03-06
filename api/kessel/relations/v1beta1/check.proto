@@ -36,7 +36,14 @@ service KesselCheckService {
 		};
 	};
 
-
+	// CheckBulkForUpdate runs N strongly-consistent checks (same semantics as CheckForUpdate per item).
+	// No consistency field in request; response has one pair per item in the same order.
+	rpc CheckBulkForUpdate (CheckBulkForUpdateRequest) returns (CheckBulkForUpdateResponse) {
+		option (google.api.http) = {
+			post: "/v1beta1/checkbulkforupdate"
+			body: "*"
+		};
+	};
 }
 
 message CheckRequest {
@@ -106,4 +113,13 @@ message CheckBulkRequest {
 message CheckBulkResponse {
 	repeated CheckBulkResponsePair pairs = 1 [(buf.validate.field).repeated.min_items = 1];
 	ConsistencyToken consistency_token = 2;
+}
+
+// CheckBulkForUpdate: strongly consistent; no consistency field. Same item shape as CheckBulk.
+message CheckBulkForUpdateRequest {
+	repeated CheckBulkRequestItem items = 1 [(buf.validate.field).repeated.min_items = 1];
+}
+
+message CheckBulkForUpdateResponse {
+	repeated CheckBulkResponsePair pairs = 1 [(buf.validate.field).repeated.min_items = 1];
 }

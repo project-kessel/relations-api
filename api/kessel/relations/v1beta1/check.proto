@@ -116,13 +116,13 @@ message CheckBulkResponse {
 }
 
 // CheckBulkForUpdate mirrors CheckBulk (RequestItem, ResponseItem, Pair, Request, Response); no consistency field or token (strongly consistent).
-message CheckForUpdateRequestItem {
+message CheckBulkForUpdateRequestItem {
 	ObjectReference resource = 1 [(buf.validate.field).required = true];
 	string relation = 2 [(buf.validate.field).string.min_len = 1];
 	SubjectReference subject = 3 [(buf.validate.field).required = true];
 }
 
-message CheckForUpdateResponseItem {
+message CheckBulkForUpdateResponseItem {
 	enum Allowed {
 		ALLOWED_UNSPECIFIED = 0;
 		ALLOWED_TRUE = 1;
@@ -133,15 +133,15 @@ message CheckForUpdateResponseItem {
 }
 
 message CheckBulkForUpdateResponsePair {
-	CheckForUpdateRequestItem request = 1;
+	CheckBulkForUpdateRequestItem request = 1;
 	oneof response {
-		CheckForUpdateResponseItem item = 2;
+		CheckBulkForUpdateResponseItem item = 2;
 		google.rpc.Status error = 3;
 	};
 }
 
 message CheckBulkForUpdateRequest {
-	repeated CheckForUpdateRequestItem items = 1 [(buf.validate.field).repeated.min_items = 1];
+	repeated CheckBulkForUpdateRequestItem items = 1 [(buf.validate.field).repeated.min_items = 1];
 }
 
 message CheckBulkForUpdateResponse {

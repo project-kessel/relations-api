@@ -115,7 +115,6 @@ message CheckBulkResponse {
 	ConsistencyToken consistency_token = 2;
 }
 
-// CheckBulkForUpdate mirrors CheckBulk (RequestItem, ResponseItem, Pair, Request, Response); no consistency field or token (strongly consistent).
 message CheckBulkForUpdateRequestItem {
 	ObjectReference resource = 1 [(buf.validate.field).required = true];
 	string relation = 2 [(buf.validate.field).string.min_len = 1];

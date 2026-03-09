@@ -750,7 +750,6 @@ func (x *CheckBulkResponse) GetConsistencyToken() *ConsistencyToken {
 	return nil
 }
 
-// CheckBulkForUpdate mirrors CheckBulk (RequestItem, ResponseItem, Pair, Request, Response); no consistency field or token (strongly consistent).
 type CheckBulkForUpdateRequestItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Resource      *ObjectReference       `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`

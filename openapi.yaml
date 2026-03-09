@@ -454,31 +454,21 @@ components:
                 lockToken:
                     type: string
         kessel.relations.v1beta1.CheckBulkForUpdateRequest:
-            description: CheckBulkForUpdate request; N items, no consistency field (strongly consistent). Mirrors CheckBulk but without consistency or token.
+            description: CheckBulkForUpdate request; no consistency field (strongly consistent). Reuses CheckBulkRequestItem.
             type: object
             properties:
                 items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateRequestItem'
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkRequestItem'
         kessel.relations.v1beta1.CheckBulkForUpdateResponse:
-            description: CheckBulkForUpdate response; one pair per item in request order, no consistency_token.
+            description: CheckBulkForUpdate response; no consistency_token. Reuses CheckBulkResponsePair.
             type: object
             properties:
                 pairs:
                     type: array
                     items:
-                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkForUpdateResponsePair'
-        kessel.relations.v1beta1.CheckBulkForUpdateResponsePair:
-            description: One (request, result) pair in a CheckBulkForUpdate response.
-            type: object
-            properties:
-                request:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateRequestItem'
-                item:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateResponseItem'
-                error:
-                    $ref: '#/components/schemas/google.rpc.Status'
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkResponsePair'
         kessel.relations.v1beta1.CheckBulkRequest:
             type: object
             properties:
@@ -530,16 +520,6 @@ components:
                     type: string
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
-        kessel.relations.v1beta1.CheckForUpdateRequestItem:
-            description: One check input in a CheckBulkForUpdate request (resource, relation, subject). Same shape as CheckForUpdateRequest.
-            type: object
-            properties:
-                resource:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
-                relation:
-                    type: string
-                subject:
-                    $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
         kessel.relations.v1beta1.CheckForUpdateResponse:
             type: object
             properties:
@@ -548,13 +528,6 @@ components:
                     format: enum
                 consistencyToken:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
-        kessel.relations.v1beta1.CheckForUpdateResponseItem:
-            description: One check result in a CheckBulkForUpdate response (allowed only; no consistency_token).
-            type: object
-            properties:
-                allowed:
-                    type: integer
-                    format: enum
         kessel.relations.v1beta1.CheckRequest:
             type: object
             properties:

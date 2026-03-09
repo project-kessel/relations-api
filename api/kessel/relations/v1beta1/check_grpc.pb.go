@@ -34,8 +34,6 @@ type KesselCheckServiceClient interface {
 	Check(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error)
 	CheckForUpdate(ctx context.Context, in *CheckForUpdateRequest, opts ...grpc.CallOption) (*CheckForUpdateResponse, error)
 	CheckBulk(ctx context.Context, in *CheckBulkRequest, opts ...grpc.CallOption) (*CheckBulkResponse, error)
-	// CheckBulkForUpdate runs N strongly-consistent checks (same semantics as CheckForUpdate per item).
-	// No consistency field in request; response has one pair per item in the same order.
 	CheckBulkForUpdate(ctx context.Context, in *CheckBulkForUpdateRequest, opts ...grpc.CallOption) (*CheckBulkForUpdateResponse, error)
 }
 
@@ -96,8 +94,6 @@ type KesselCheckServiceServer interface {
 	Check(context.Context, *CheckRequest) (*CheckResponse, error)
 	CheckForUpdate(context.Context, *CheckForUpdateRequest) (*CheckForUpdateResponse, error)
 	CheckBulk(context.Context, *CheckBulkRequest) (*CheckBulkResponse, error)
-	// CheckBulkForUpdate runs N strongly-consistent checks (same semantics as CheckForUpdate per item).
-	// No consistency field in request; response has one pair per item in the same order.
 	CheckBulkForUpdate(context.Context, *CheckBulkForUpdateRequest) (*CheckBulkForUpdateResponse, error)
 	mustEmbedUnimplementedKesselCheckServiceServer()
 }

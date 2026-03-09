@@ -29,8 +29,6 @@ type KesselCheckServiceHTTPServer interface {
 	// (a Relation between a Resource and a Subject or Subject Set).
 	Check(context.Context, *CheckRequest) (*CheckResponse, error)
 	CheckBulk(context.Context, *CheckBulkRequest) (*CheckBulkResponse, error)
-	// CheckBulkForUpdate CheckBulkForUpdate runs N strongly-consistent checks (same semantics as CheckForUpdate per item).
-	// No consistency field in request; response has one pair per item in the same order.
 	CheckBulkForUpdate(context.Context, *CheckBulkForUpdateRequest) (*CheckBulkForUpdateResponse, error)
 	CheckForUpdate(context.Context, *CheckForUpdateRequest) (*CheckForUpdateResponse, error)
 }
@@ -136,8 +134,6 @@ type KesselCheckServiceHTTPClient interface {
 	// (a Relation between a Resource and a Subject or Subject Set).
 	Check(ctx context.Context, req *CheckRequest, opts ...http.CallOption) (rsp *CheckResponse, err error)
 	CheckBulk(ctx context.Context, req *CheckBulkRequest, opts ...http.CallOption) (rsp *CheckBulkResponse, err error)
-	// CheckBulkForUpdate CheckBulkForUpdate runs N strongly-consistent checks (same semantics as CheckForUpdate per item).
-	// No consistency field in request; response has one pair per item in the same order.
 	CheckBulkForUpdate(ctx context.Context, req *CheckBulkForUpdateRequest, opts ...http.CallOption) (rsp *CheckBulkForUpdateResponse, err error)
 	CheckForUpdate(ctx context.Context, req *CheckForUpdateRequest, opts ...http.CallOption) (rsp *CheckForUpdateResponse, err error)
 }
@@ -178,8 +174,6 @@ func (c *KesselCheckServiceHTTPClientImpl) CheckBulk(ctx context.Context, in *Ch
 	return &out, nil
 }
 
-// CheckBulkForUpdate CheckBulkForUpdate runs N strongly-consistent checks (same semantics as CheckForUpdate per item).
-// No consistency field in request; response has one pair per item in the same order.
 func (c *KesselCheckServiceHTTPClientImpl) CheckBulkForUpdate(ctx context.Context, in *CheckBulkForUpdateRequest, opts ...http.CallOption) (*CheckBulkForUpdateResponse, error) {
 	var out CheckBulkForUpdateResponse
 	pattern := "/v1beta1/checkbulkforupdate"

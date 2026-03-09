@@ -16,16 +16,16 @@ type CheckService struct {
 	check             *biz.CheckUsecase
 	checkForUpdate    *biz.CheckForUpdateUsecase
 	checkBulk         *biz.CheckBulkUsecase
-	checkBulkForUpdate *biz.CheckBulkForUpdateUsecase
+	checkForUpdateBulk *biz.CheckForUpdateBulkUsecase
 	log               *log.Helper
 }
 
-func NewCheckService(logger log.Logger, checkUseCase *biz.CheckUsecase, checkForUpdateUseCase *biz.CheckForUpdateUsecase, checkBulkUseCase *biz.CheckBulkUsecase, checkBulkForUpdateUseCase *biz.CheckBulkForUpdateUsecase) *CheckService {
+func NewCheckService(logger log.Logger, checkUseCase *biz.CheckUsecase, checkForUpdateUseCase *biz.CheckForUpdateUsecase, checkBulkUseCase *biz.CheckBulkUsecase, checkForUpdateBulkUseCase *biz.CheckForUpdateBulkUsecase) *CheckService {
 	return &CheckService{
 		check:              checkUseCase,
 		checkForUpdate:     checkForUpdateUseCase,
 		checkBulk:          checkBulkUseCase,
-		checkBulkForUpdate: checkBulkForUpdateUseCase,
+		checkForUpdateBulk: checkForUpdateBulkUseCase,
 		log:                log.NewHelper(logger),
 	}
 }
@@ -54,10 +54,10 @@ func (s *CheckService) CheckBulk(ctx context.Context, req *pb.CheckBulkRequest) 
 	return resp, nil
 }
 
-func (s *CheckService) CheckBulkForUpdate(ctx context.Context, req *pb.CheckBulkForUpdateRequest) (*pb.CheckBulkForUpdateResponse, error) {
-	resp, err := s.checkBulkForUpdate.CheckBulkForUpdate(ctx, req)
+func (s *CheckService) CheckForUpdateBulk(ctx context.Context, req *pb.CheckForUpdateBulkRequest) (*pb.CheckForUpdateBulkResponse, error) {
+	resp, err := s.checkForUpdateBulk.CheckForUpdateBulk(ctx, req)
 	if err != nil {
-		return resp, fmt.Errorf("failed to perform checkBulkForUpdate: %w", err)
+		return resp, fmt.Errorf("failed to perform checkForUpdateBulk: %w", err)
 	}
 	return resp, nil
 }

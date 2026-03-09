@@ -30,7 +30,7 @@ func (dz *DummyZanzibar) CheckBulk(ctx context.Context, request *v1beta1.CheckBu
 	return nil, nil
 }
 
-func (dz *DummyZanzibar) CheckBulkForUpdate(ctx context.Context, request *v1beta1.CheckBulkForUpdateRequest) (*v1beta1.CheckBulkForUpdateResponse, error) {
+func (dz *DummyZanzibar) CheckForUpdateBulk(ctx context.Context, request *v1beta1.CheckForUpdateBulkRequest) (*v1beta1.CheckForUpdateBulkResponse, error) {
 	return nil, nil
 }
 

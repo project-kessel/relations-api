@@ -22,7 +22,7 @@ const (
 	KesselCheckService_Check_FullMethodName              = "/kessel.relations.v1beta1.KesselCheckService/Check"
 	KesselCheckService_CheckForUpdate_FullMethodName     = "/kessel.relations.v1beta1.KesselCheckService/CheckForUpdate"
 	KesselCheckService_CheckBulk_FullMethodName          = "/kessel.relations.v1beta1.KesselCheckService/CheckBulk"
-	KesselCheckService_CheckBulkForUpdate_FullMethodName = "/kessel.relations.v1beta1.KesselCheckService/CheckBulkForUpdate"
+	KesselCheckService_CheckForUpdateBulk_FullMethodName = "/kessel.relations.v1beta1.KesselCheckService/CheckForUpdateBulk"
 )
 
 // KesselCheckServiceClient is the client API for KesselCheckService service.
@@ -34,7 +34,7 @@ type KesselCheckServiceClient interface {
 	Check(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error)
 	CheckForUpdate(ctx context.Context, in *CheckForUpdateRequest, opts ...grpc.CallOption) (*CheckForUpdateResponse, error)
 	CheckBulk(ctx context.Context, in *CheckBulkRequest, opts ...grpc.CallOption) (*CheckBulkResponse, error)
-	CheckBulkForUpdate(ctx context.Context, in *CheckBulkForUpdateRequest, opts ...grpc.CallOption) (*CheckBulkForUpdateResponse, error)
+	CheckForUpdateBulk(ctx context.Context, in *CheckForUpdateBulkRequest, opts ...grpc.CallOption) (*CheckForUpdateBulkResponse, error)
 }
 
 type kesselCheckServiceClient struct {
@@ -75,10 +75,10 @@ func (c *kesselCheckServiceClient) CheckBulk(ctx context.Context, in *CheckBulkR
 	return out, nil
 }
 
-func (c *kesselCheckServiceClient) CheckBulkForUpdate(ctx context.Context, in *CheckBulkForUpdateRequest, opts ...grpc.CallOption) (*CheckBulkForUpdateResponse, error) {
+func (c *kesselCheckServiceClient) CheckForUpdateBulk(ctx context.Context, in *CheckForUpdateBulkRequest, opts ...grpc.CallOption) (*CheckForUpdateBulkResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CheckBulkForUpdateResponse)
-	err := c.cc.Invoke(ctx, KesselCheckService_CheckBulkForUpdate_FullMethodName, in, out, cOpts...)
+	out := new(CheckForUpdateBulkResponse)
+	err := c.cc.Invoke(ctx, KesselCheckService_CheckForUpdateBulk_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ type KesselCheckServiceServer interface {
 	Check(context.Context, *CheckRequest) (*CheckResponse, error)
 	CheckForUpdate(context.Context, *CheckForUpdateRequest) (*CheckForUpdateResponse, error)
 	CheckBulk(context.Context, *CheckBulkRequest) (*CheckBulkResponse, error)
-	CheckBulkForUpdate(context.Context, *CheckBulkForUpdateRequest) (*CheckBulkForUpdateResponse, error)
+	CheckForUpdateBulk(context.Context, *CheckForUpdateBulkRequest) (*CheckForUpdateBulkResponse, error)
 	mustEmbedUnimplementedKesselCheckServiceServer()
 }
 
@@ -114,8 +114,8 @@ func (UnimplementedKesselCheckServiceServer) CheckForUpdate(context.Context, *Ch
 func (UnimplementedKesselCheckServiceServer) CheckBulk(context.Context, *CheckBulkRequest) (*CheckBulkResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CheckBulk not implemented")
 }
-func (UnimplementedKesselCheckServiceServer) CheckBulkForUpdate(context.Context, *CheckBulkForUpdateRequest) (*CheckBulkForUpdateResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method CheckBulkForUpdate not implemented")
+func (UnimplementedKesselCheckServiceServer) CheckForUpdateBulk(context.Context, *CheckForUpdateBulkRequest) (*CheckForUpdateBulkResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CheckForUpdateBulk not implemented")
 }
 func (UnimplementedKesselCheckServiceServer) mustEmbedUnimplementedKesselCheckServiceServer() {}
 func (UnimplementedKesselCheckServiceServer) testEmbeddedByValue()                            {}
@@ -192,20 +192,20 @@ func _KesselCheckService_CheckBulk_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KesselCheckService_CheckBulkForUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckBulkForUpdateRequest)
+func _KesselCheckService_CheckForUpdateBulk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckForUpdateBulkRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KesselCheckServiceServer).CheckBulkForUpdate(ctx, in)
+		return srv.(KesselCheckServiceServer).CheckForUpdateBulk(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: KesselCheckService_CheckBulkForUpdate_FullMethodName,
+		FullMethod: KesselCheckService_CheckForUpdateBulk_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KesselCheckServiceServer).CheckBulkForUpdate(ctx, req.(*CheckBulkForUpdateRequest))
+		return srv.(KesselCheckServiceServer).CheckForUpdateBulk(ctx, req.(*CheckForUpdateBulkRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -230,8 +230,8 @@ var KesselCheckService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KesselCheckService_CheckBulk_Handler,
 		},
 		{
-			MethodName: "CheckBulkForUpdate",
-			Handler:    _KesselCheckService_CheckBulkForUpdate_Handler,
+			MethodName: "CheckForUpdateBulk",
+			Handler:    _KesselCheckService_CheckForUpdateBulk_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

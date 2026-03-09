@@ -21,16 +21,16 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationKesselCheckServiceCheck = "/kessel.relations.v1beta1.KesselCheckService/Check"
 const OperationKesselCheckServiceCheckBulk = "/kessel.relations.v1beta1.KesselCheckService/CheckBulk"
-const OperationKesselCheckServiceCheckBulkForUpdate = "/kessel.relations.v1beta1.KesselCheckService/CheckBulkForUpdate"
 const OperationKesselCheckServiceCheckForUpdate = "/kessel.relations.v1beta1.KesselCheckService/CheckForUpdate"
+const OperationKesselCheckServiceCheckForUpdateBulk = "/kessel.relations.v1beta1.KesselCheckService/CheckForUpdateBulk"
 
 type KesselCheckServiceHTTPServer interface {
 	// Check Checks for the existence of a single Relationship
 	// (a Relation between a Resource and a Subject or Subject Set).
 	Check(context.Context, *CheckRequest) (*CheckResponse, error)
 	CheckBulk(context.Context, *CheckBulkRequest) (*CheckBulkResponse, error)
-	CheckBulkForUpdate(context.Context, *CheckBulkForUpdateRequest) (*CheckBulkForUpdateResponse, error)
 	CheckForUpdate(context.Context, *CheckForUpdateRequest) (*CheckForUpdateResponse, error)
+	CheckForUpdateBulk(context.Context, *CheckForUpdateBulkRequest) (*CheckForUpdateBulkResponse, error)
 }
 
 func RegisterKesselCheckServiceHTTPServer(s *http.Server, srv KesselCheckServiceHTTPServer) {
@@ -38,7 +38,7 @@ func RegisterKesselCheckServiceHTTPServer(s *http.Server, srv KesselCheckService
 	r.POST("/v1beta1/check", _KesselCheckService_Check0_HTTP_Handler(srv))
 	r.POST("/v1beta1/checkforupdate", _KesselCheckService_CheckForUpdate0_HTTP_Handler(srv))
 	r.POST("/v1beta1/checkbulk", _KesselCheckService_CheckBulk0_HTTP_Handler(srv))
-	r.POST("/v1beta1/checkbulkforupdate", _KesselCheckService_CheckBulkForUpdate0_HTTP_Handler(srv))
+	r.POST("/v1beta1/checkforupdatebulk", _KesselCheckService_CheckForUpdateBulk0_HTTP_Handler(srv))
 }
 
 func _KesselCheckService_Check0_HTTP_Handler(srv KesselCheckServiceHTTPServer) func(ctx http.Context) error {
@@ -107,24 +107,24 @@ func _KesselCheckService_CheckBulk0_HTTP_Handler(srv KesselCheckServiceHTTPServe
 	}
 }
 
-func _KesselCheckService_CheckBulkForUpdate0_HTTP_Handler(srv KesselCheckServiceHTTPServer) func(ctx http.Context) error {
+func _KesselCheckService_CheckForUpdateBulk0_HTTP_Handler(srv KesselCheckServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in CheckBulkForUpdateRequest
+		var in CheckForUpdateBulkRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationKesselCheckServiceCheckBulkForUpdate)
+		http.SetOperation(ctx, OperationKesselCheckServiceCheckForUpdateBulk)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CheckBulkForUpdate(ctx, req.(*CheckBulkForUpdateRequest))
+			return srv.CheckForUpdateBulk(ctx, req.(*CheckForUpdateBulkRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*CheckBulkForUpdateResponse)
+		reply := out.(*CheckForUpdateBulkResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -134,8 +134,8 @@ type KesselCheckServiceHTTPClient interface {
 	// (a Relation between a Resource and a Subject or Subject Set).
 	Check(ctx context.Context, req *CheckRequest, opts ...http.CallOption) (rsp *CheckResponse, err error)
 	CheckBulk(ctx context.Context, req *CheckBulkRequest, opts ...http.CallOption) (rsp *CheckBulkResponse, err error)
-	CheckBulkForUpdate(ctx context.Context, req *CheckBulkForUpdateRequest, opts ...http.CallOption) (rsp *CheckBulkForUpdateResponse, err error)
 	CheckForUpdate(ctx context.Context, req *CheckForUpdateRequest, opts ...http.CallOption) (rsp *CheckForUpdateResponse, err error)
+	CheckForUpdateBulk(ctx context.Context, req *CheckForUpdateBulkRequest, opts ...http.CallOption) (rsp *CheckForUpdateBulkResponse, err error)
 }
 
 type KesselCheckServiceHTTPClientImpl struct {
@@ -174,11 +174,11 @@ func (c *KesselCheckServiceHTTPClientImpl) CheckBulk(ctx context.Context, in *Ch
 	return &out, nil
 }
 
-func (c *KesselCheckServiceHTTPClientImpl) CheckBulkForUpdate(ctx context.Context, in *CheckBulkForUpdateRequest, opts ...http.CallOption) (*CheckBulkForUpdateResponse, error) {
-	var out CheckBulkForUpdateResponse
-	pattern := "/v1beta1/checkbulkforupdate"
+func (c *KesselCheckServiceHTTPClientImpl) CheckForUpdate(ctx context.Context, in *CheckForUpdateRequest, opts ...http.CallOption) (*CheckForUpdateResponse, error) {
+	var out CheckForUpdateResponse
+	pattern := "/v1beta1/checkforupdate"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationKesselCheckServiceCheckBulkForUpdate))
+	opts = append(opts, http.Operation(OperationKesselCheckServiceCheckForUpdate))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
@@ -187,11 +187,11 @@ func (c *KesselCheckServiceHTTPClientImpl) CheckBulkForUpdate(ctx context.Contex
 	return &out, nil
 }
 
-func (c *KesselCheckServiceHTTPClientImpl) CheckForUpdate(ctx context.Context, in *CheckForUpdateRequest, opts ...http.CallOption) (*CheckForUpdateResponse, error) {
-	var out CheckForUpdateResponse
-	pattern := "/v1beta1/checkforupdate"
+func (c *KesselCheckServiceHTTPClientImpl) CheckForUpdateBulk(ctx context.Context, in *CheckForUpdateBulkRequest, opts ...http.CallOption) (*CheckForUpdateBulkResponse, error) {
+	var out CheckForUpdateBulkResponse
+	pattern := "/v1beta1/checkforupdatebulk"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationKesselCheckServiceCheckForUpdate))
+	opts = append(opts, http.Operation(OperationKesselCheckServiceCheckForUpdateBulk))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

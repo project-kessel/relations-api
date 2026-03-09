@@ -36,7 +36,14 @@ service KesselCheckService {
 		};
 	};
 
-
+	// CheckBulkForUpdate runs N strongly-consistent checks (same semantics as CheckForUpdate per item).
+	// No consistency field in request; response has one pair per item in the same order.
+	rpc CheckBulkForUpdate (CheckBulkForUpdateRequest) returns (CheckBulkForUpdateResponse) {
+		option (google.api.http) = {
+			post: "/v1beta1/checkbulkforupdate"
+			body: "*"
+		};
+	};
 }
 
 message CheckRequest {
@@ -106,4 +113,37 @@ message CheckBulkRequest {
 message CheckBulkResponse {
 	repeated CheckBulkResponsePair pairs = 1 [(buf.validate.field).repeated.min_items = 1];
 	ConsistencyToken consistency_token = 2;
+}
+
+// CheckBulkForUpdate mirrors CheckBulk (RequestItem, ResponseItem, Pair, Request, Response); no consistency field or token (strongly consistent).
+message CheckForUpdateRequestItem {
+	ObjectReference resource = 1 [(buf.validate.field).required = true];
+	string relation = 2 [(buf.validate.field).string.min_len = 1];
+	SubjectReference subject = 3 [(buf.validate.field).required = true];
+}
+
+message CheckForUpdateResponseItem {
+	enum Allowed {
+		ALLOWED_UNSPECIFIED = 0;
+		ALLOWED_TRUE = 1;
+		ALLOWED_FALSE = 2;
+		// e.g.  ALLOWED_CONDITIONAL = 3;
+	}
+	Allowed allowed = 1;
+}
+
+message CheckBulkForUpdateResponsePair {
+	CheckForUpdateRequestItem request = 1;
+	oneof response {
+		CheckForUpdateResponseItem item = 2;
+		google.rpc.Status error = 3;
+	};
+}
+
+message CheckBulkForUpdateRequest {
+	repeated CheckForUpdateRequestItem items = 1 [(buf.validate.field).repeated.min_items = 1];
+}
+
+message CheckBulkForUpdateResponse {
+	repeated CheckBulkForUpdateResponsePair pairs = 1 [(buf.validate.field).repeated.min_items = 1];
 }

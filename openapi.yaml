@@ -85,6 +85,27 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkResponse'
+    /v1beta1/checkbulkforupdate:
+        post:
+            tags:
+                - KesselCheckService
+            description: |-
+                CheckBulkForUpdate runs N strongly-consistent checks (same semantics as CheckForUpdate per item).
+                 No consistency field in request; response has one pair per item in the same order.
+            operationId: KesselCheckService_CheckBulkForUpdate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkForUpdateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkForUpdateResponse'
     /v1beta1/checkforupdate:
         post:
             tags:
@@ -432,6 +453,29 @@ components:
             properties:
                 lockToken:
                     type: string
+        kessel.relations.v1beta1.CheckBulkForUpdateRequest:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateRequestItem'
+        kessel.relations.v1beta1.CheckBulkForUpdateResponse:
+            type: object
+            properties:
+                pairs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkForUpdateResponsePair'
+        kessel.relations.v1beta1.CheckBulkForUpdateResponsePair:
+            type: object
+            properties:
+                request:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateRequestItem'
+                item:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateResponseItem'
+                error:
+                    $ref: '#/components/schemas/google.rpc.Status'
         kessel.relations.v1beta1.CheckBulkRequest:
             type: object
             properties:
@@ -483,6 +527,16 @@ components:
                     type: string
                 subject:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
+        kessel.relations.v1beta1.CheckForUpdateRequestItem:
+            type: object
+            properties:
+                resource:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ObjectReference'
+                relation:
+                    type: string
+                subject:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.SubjectReference'
+            description: CheckBulkForUpdate mirrors CheckBulk (RequestItem, ResponseItem, Pair, Request, Response); no consistency field or token (strongly consistent).
         kessel.relations.v1beta1.CheckForUpdateResponse:
             type: object
             properties:
@@ -491,6 +545,12 @@ components:
                     format: enum
                 consistencyToken:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
+        kessel.relations.v1beta1.CheckForUpdateResponseItem:
+            type: object
+            properties:
+                allowed:
+                    type: integer
+                    format: enum
         kessel.relations.v1beta1.CheckRequest:
             type: object
             properties:

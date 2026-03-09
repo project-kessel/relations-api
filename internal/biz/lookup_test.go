@@ -30,6 +30,10 @@ func (dz *DummyZanzibar) CheckBulk(ctx context.Context, request *v1beta1.CheckBu
 	return nil, nil
 }
 
+func (dz *DummyZanzibar) CheckBulkForUpdate(ctx context.Context, request *v1beta1.CheckBulkForUpdateRequest) (*v1beta1.CheckBulkForUpdateResponse, error) {
+	return nil, nil
+}
+
 func (dz *DummyZanzibar) CreateRelationships(ctx context.Context, rels []*v1beta1.Relationship, touch TouchSemantics, fencing *v1beta1.FencingCheck) (*v1beta1.CreateTuplesResponse, error) {
 	return nil, nil
 }

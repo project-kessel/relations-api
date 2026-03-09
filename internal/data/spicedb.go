@@ -581,6 +581,24 @@ func toSpiceItem(item *apiV1beta1.CheckBulkRequestItem) *v1.CheckBulkPermissions
 	}
 }
 
+// toSpiceItemFromBulkForUpdate converts CheckBulkForUpdateRequestItem to SpiceDB format (same shape as CheckBulkRequestItem).
+func toSpiceItemFromBulkForUpdate(item *apiV1beta1.CheckBulkForUpdateRequestItem) *v1.CheckBulkPermissionsRequestItem {
+	return &v1.CheckBulkPermissionsRequestItem{
+		Resource: &v1.ObjectReference{
+			ObjectType: kesselTypeToSpiceDBType(item.GetResource().GetType()),
+			ObjectId:   item.GetResource().GetId(),
+		},
+		Permission: item.GetRelation(),
+		Subject: &v1.SubjectReference{
+			Object: &v1.ObjectReference{
+				ObjectType: kesselTypeToSpiceDBType(item.GetSubject().GetSubject().GetType()),
+				ObjectId:   item.GetSubject().GetSubject().GetId(),
+			},
+			OptionalRelation: item.GetSubject().GetRelation(),
+		},
+	}
+}
+
 // helper to convert a SpiceDB pair to your API type
 func fromSpicePair(pair *v1.CheckBulkPermissionsPair, log *log.Helper) *apiV1beta1.CheckBulkResponsePair {
 	req := pair.GetRequest()
@@ -623,6 +641,77 @@ func fromSpicePair(pair *v1.CheckBulkPermissionsPair, log *log.Helper) *apiV1bet
 			Item: &apiV1beta1.CheckBulkResponseItem{Allowed: allowed},
 		},
 	}
+}
+
+// fromSpicePairToBulkForUpdate converts a SpiceDB CheckBulkPermissionsPair to CheckBulkForUpdateResponsePair (no consistency_token per item).
+func fromSpicePairToBulkForUpdate(pair *v1.CheckBulkPermissionsPair, log *log.Helper) *apiV1beta1.CheckBulkForUpdateResponsePair {
+	req := pair.GetRequest()
+	request := &apiV1beta1.CheckBulkForUpdateRequestItem{
+		Resource: &apiV1beta1.ObjectReference{
+			Type: spicedbTypeToKesselType(req.GetResource().GetObjectType()),
+			Id:   req.GetResource().GetObjectId(),
+		},
+		Relation: req.GetPermission(),
+		Subject: &apiV1beta1.SubjectReference{
+			Subject: &apiV1beta1.ObjectReference{
+				Type: spicedbTypeToKesselType(req.GetSubject().GetObject().GetObjectType()),
+				Id:   req.GetSubject().GetObject().GetObjectId(),
+			},
+			Relation: optionalStringToStringPointer(req.GetSubject().GetOptionalRelation()),
+		},
+	}
+
+	if pair.GetError() != nil {
+		log.Errorf("Error in checkbulkforupdate for req: %v error-code: %v error-message: %v", request, pair.GetError().GetCode(), pair.GetError().GetMessage())
+		return &apiV1beta1.CheckBulkForUpdateResponsePair{
+			Request: request,
+			Response: &apiV1beta1.CheckBulkForUpdateResponsePair_Error{
+				Error: &rpcstatus.Status{
+					Code:    pair.GetError().GetCode(),
+					Message: pair.GetError().GetMessage(),
+				},
+			},
+		}
+	}
+
+	allowed := apiV1beta1.CheckBulkForUpdateResponseItem_ALLOWED_FALSE
+	if pair.GetItem().GetPermissionship() == v1.CheckPermissionResponse_PERMISSIONSHIP_HAS_PERMISSION {
+		allowed = apiV1beta1.CheckBulkForUpdateResponseItem_ALLOWED_TRUE
+	}
+	return &apiV1beta1.CheckBulkForUpdateResponsePair{
+		Request: request,
+		Response: &apiV1beta1.CheckBulkForUpdateResponsePair_Item{
+			Item: &apiV1beta1.CheckBulkForUpdateResponseItem{Allowed: allowed},
+		},
+	}
+}
+
+// CheckBulkForUpdate runs N strongly-consistent checks (FullyConsistent); response has one pair per item, no consistency_token.
+func (s *SpiceDbRepository) CheckBulkForUpdate(ctx context.Context, check *apiV1beta1.CheckBulkForUpdateRequest) (*apiV1beta1.CheckBulkForUpdateResponse, error) {
+	if err := s.initialize(); err != nil {
+		return nil, err
+	}
+	items := make([]*v1.CheckBulkPermissionsRequestItem, len(check.Items))
+	for i, it := range check.Items {
+		items[i] = toSpiceItemFromBulkForUpdate(it)
+	}
+	req := &v1.CheckBulkPermissionsRequest{
+		Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
+		Items:       items,
+	}
+
+	resp, err := s.client.CheckBulkPermissions(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("error invoking CheckBulkPermissions in SpiceDB (CheckBulkForUpdate): %w", err)
+	}
+
+	pairs := make([]*apiV1beta1.CheckBulkForUpdateResponsePair, len(resp.Pairs))
+	for i, p := range resp.Pairs {
+		pairs[i] = fromSpicePairToBulkForUpdate(p, s.log)
+	}
+	return &apiV1beta1.CheckBulkForUpdateResponse{
+		Pairs: pairs,
+	}, nil
 }
 
 // simplified CheckBulk using the helpers

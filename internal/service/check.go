@@ -13,18 +13,20 @@ import (
 
 type CheckService struct {
 	pb.UnimplementedKesselCheckServiceServer
-	check          *biz.CheckUsecase
-	checkForUpdate *biz.CheckForUpdateUsecase
-	checkBulk      *biz.CheckBulkUsecase
-	log            *log.Helper
+	check             *biz.CheckUsecase
+	checkForUpdate    *biz.CheckForUpdateUsecase
+	checkBulk         *biz.CheckBulkUsecase
+	checkBulkForUpdate *biz.CheckBulkForUpdateUsecase
+	log               *log.Helper
 }
 
-func NewCheckService(logger log.Logger, checkUseCase *biz.CheckUsecase, checkForUpdateUseCase *biz.CheckForUpdateUsecase, checkBulkUseCase *biz.CheckBulkUsecase) *CheckService {
+func NewCheckService(logger log.Logger, checkUseCase *biz.CheckUsecase, checkForUpdateUseCase *biz.CheckForUpdateUsecase, checkBulkUseCase *biz.CheckBulkUsecase, checkBulkForUpdateUseCase *biz.CheckBulkForUpdateUsecase) *CheckService {
 	return &CheckService{
-		check:          checkUseCase,
-		checkForUpdate: checkForUpdateUseCase,
-		checkBulk:      checkBulkUseCase,
-		log:            log.NewHelper(logger),
+		check:              checkUseCase,
+		checkForUpdate:     checkForUpdateUseCase,
+		checkBulk:          checkBulkUseCase,
+		checkBulkForUpdate: checkBulkForUpdateUseCase,
+		log:                log.NewHelper(logger),
 	}
 }
 
@@ -48,6 +50,14 @@ func (s *CheckService) CheckBulk(ctx context.Context, req *pb.CheckBulkRequest) 
 	resp, err := s.checkBulk.CheckBulk(ctx, req)
 	if err != nil {
 		return resp, fmt.Errorf("failed to perform checkBulk: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *CheckService) CheckBulkForUpdate(ctx context.Context, req *pb.CheckBulkForUpdateRequest) (*pb.CheckBulkForUpdateResponse, error) {
+	resp, err := s.checkBulkForUpdate.CheckBulkForUpdate(ctx, req)
+	if err != nil {
+		return resp, fmt.Errorf("failed to perform checkBulkForUpdate: %w", err)
 	}
 	return resp, nil
 }

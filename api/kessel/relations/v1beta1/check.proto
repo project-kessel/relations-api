@@ -119,4 +119,5 @@ message CheckForUpdateBulkRequest {
 
 message CheckForUpdateBulkResponse {
 	repeated CheckBulkResponsePair pairs = 1 [(buf.validate.field).repeated.min_items = 1];
+	ConsistencyToken consistency_token = 2;
 }

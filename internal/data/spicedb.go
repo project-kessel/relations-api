@@ -626,7 +626,7 @@ func fromSpicePair(pair *v1.CheckBulkPermissionsPair, log *log.Helper) *apiV1bet
 	}
 }
 
-// CheckForUpdateBulk runs N strongly-consistent checks (FullyConsistent). Reuses CheckBulkRequestItem and CheckBulkResponsePair; response has no consistency_token.
+// CheckForUpdateBulk runs N strongly-consistent checks (FullyConsistent). Reuses CheckBulkRequestItem and CheckBulkResponsePair; returns consistency_token like CheckBulkResponse.
 func (s *SpiceDbRepository) CheckForUpdateBulk(ctx context.Context, check *apiV1beta1.CheckForUpdateBulkRequest) (*apiV1beta1.CheckForUpdateBulkResponse, error) {
 	if err := s.initialize(); err != nil {
 		return nil, err
@@ -650,7 +650,8 @@ func (s *SpiceDbRepository) CheckForUpdateBulk(ctx context.Context, check *apiV1
 		pairs[i] = fromSpicePair(p, s.log)
 	}
 	return &apiV1beta1.CheckForUpdateBulkResponse{
-		Pairs: pairs,
+		Pairs:            pairs,
+		ConsistencyToken: &apiV1beta1.ConsistencyToken{Token: resp.GetCheckedAt().GetToken()},
 	}, nil
 }
 

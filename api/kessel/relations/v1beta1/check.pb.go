@@ -746,10 +746,11 @@ func (x *CheckForUpdateBulkRequest) GetItems() []*CheckBulkRequestItem {
 }
 
 type CheckForUpdateBulkResponse struct {
-	state         protoimpl.MessageState   `protogen:"open.v1"`
-	Pairs         []*CheckBulkResponsePair `protobuf:"bytes,1,rep,name=pairs,proto3" json:"pairs,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState   `protogen:"open.v1"`
+	Pairs            []*CheckBulkResponsePair `protobuf:"bytes,1,rep,name=pairs,proto3" json:"pairs,omitempty"`
+	ConsistencyToken *ConsistencyToken        `protobuf:"bytes,2,opt,name=consistency_token,json=consistencyToken,proto3" json:"consistency_token,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *CheckForUpdateBulkResponse) Reset() {
@@ -785,6 +786,13 @@ func (*CheckForUpdateBulkResponse) Descriptor() ([]byte, []int) {
 func (x *CheckForUpdateBulkResponse) GetPairs() []*CheckBulkResponsePair {
 	if x != nil {
 		return x.Pairs
+	}
+	return nil
+}
+
+func (x *CheckForUpdateBulkResponse) GetConsistencyToken() *ConsistencyToken {
+	if x != nil {
+		return x.ConsistencyToken
 	}
 	return nil
 }
@@ -840,9 +848,10 @@ const file_kessel_relations_v1beta1_check_proto_rawDesc = "" +
 	"\x05pairs\x18\x01 \x03(\v2/.kessel.relations.v1beta1.CheckBulkResponsePairB\b\xbaH\x05\x92\x01\x02\b\x01R\x05pairs\x12W\n" +
 	"\x11consistency_token\x18\x02 \x01(\v2*.kessel.relations.v1beta1.ConsistencyTokenR\x10consistencyToken\"k\n" +
 	"\x19CheckForUpdateBulkRequest\x12N\n" +
-	"\x05items\x18\x01 \x03(\v2..kessel.relations.v1beta1.CheckBulkRequestItemB\b\xbaH\x05\x92\x01\x02\b\x01R\x05items\"m\n" +
+	"\x05items\x18\x01 \x03(\v2..kessel.relations.v1beta1.CheckBulkRequestItemB\b\xbaH\x05\x92\x01\x02\b\x01R\x05items\"\xc6\x01\n" +
 	"\x1aCheckForUpdateBulkResponse\x12O\n" +
-	"\x05pairs\x18\x01 \x03(\v2/.kessel.relations.v1beta1.CheckBulkResponsePairB\b\xbaH\x05\x92\x01\x02\b\x01R\x05pairs2\xd3\x04\n" +
+	"\x05pairs\x18\x01 \x03(\v2/.kessel.relations.v1beta1.CheckBulkResponsePairB\b\xbaH\x05\x92\x01\x02\b\x01R\x05pairs\x12W\n" +
+	"\x11consistency_token\x18\x02 \x01(\v2*.kessel.relations.v1beta1.ConsistencyTokenR\x10consistencyToken2\xd3\x04\n" +
 	"\x12KesselCheckService\x12s\n" +
 	"\x05Check\x12&.kessel.relations.v1beta1.CheckRequest\x1a'.kessel.relations.v1beta1.CheckResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1beta1/check\x12\x97\x01\n" +
 	"\x0eCheckForUpdate\x12/.kessel.relations.v1beta1.CheckForUpdateRequest\x1a0.kessel.relations.v1beta1.CheckForUpdateResponse\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/v1beta1/checkforupdate\x12\x83\x01\n" +
@@ -907,19 +916,20 @@ var file_kessel_relations_v1beta1_check_proto_depIdxs = []int32{
 	17, // 18: kessel.relations.v1beta1.CheckBulkResponse.consistency_token:type_name -> kessel.relations.v1beta1.ConsistencyToken
 	7,  // 19: kessel.relations.v1beta1.CheckForUpdateBulkRequest.items:type_name -> kessel.relations.v1beta1.CheckBulkRequestItem
 	9,  // 20: kessel.relations.v1beta1.CheckForUpdateBulkResponse.pairs:type_name -> kessel.relations.v1beta1.CheckBulkResponsePair
-	3,  // 21: kessel.relations.v1beta1.KesselCheckService.Check:input_type -> kessel.relations.v1beta1.CheckRequest
-	5,  // 22: kessel.relations.v1beta1.KesselCheckService.CheckForUpdate:input_type -> kessel.relations.v1beta1.CheckForUpdateRequest
-	10, // 23: kessel.relations.v1beta1.KesselCheckService.CheckBulk:input_type -> kessel.relations.v1beta1.CheckBulkRequest
-	12, // 24: kessel.relations.v1beta1.KesselCheckService.CheckForUpdateBulk:input_type -> kessel.relations.v1beta1.CheckForUpdateBulkRequest
-	4,  // 25: kessel.relations.v1beta1.KesselCheckService.Check:output_type -> kessel.relations.v1beta1.CheckResponse
-	6,  // 26: kessel.relations.v1beta1.KesselCheckService.CheckForUpdate:output_type -> kessel.relations.v1beta1.CheckForUpdateResponse
-	11, // 27: kessel.relations.v1beta1.KesselCheckService.CheckBulk:output_type -> kessel.relations.v1beta1.CheckBulkResponse
-	13, // 28: kessel.relations.v1beta1.KesselCheckService.CheckForUpdateBulk:output_type -> kessel.relations.v1beta1.CheckForUpdateBulkResponse
-	25, // [25:29] is the sub-list for method output_type
-	21, // [21:25] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	17, // 21: kessel.relations.v1beta1.CheckForUpdateBulkResponse.consistency_token:type_name -> kessel.relations.v1beta1.ConsistencyToken
+	3,  // 22: kessel.relations.v1beta1.KesselCheckService.Check:input_type -> kessel.relations.v1beta1.CheckRequest
+	5,  // 23: kessel.relations.v1beta1.KesselCheckService.CheckForUpdate:input_type -> kessel.relations.v1beta1.CheckForUpdateRequest
+	10, // 24: kessel.relations.v1beta1.KesselCheckService.CheckBulk:input_type -> kessel.relations.v1beta1.CheckBulkRequest
+	12, // 25: kessel.relations.v1beta1.KesselCheckService.CheckForUpdateBulk:input_type -> kessel.relations.v1beta1.CheckForUpdateBulkRequest
+	4,  // 26: kessel.relations.v1beta1.KesselCheckService.Check:output_type -> kessel.relations.v1beta1.CheckResponse
+	6,  // 27: kessel.relations.v1beta1.KesselCheckService.CheckForUpdate:output_type -> kessel.relations.v1beta1.CheckForUpdateResponse
+	11, // 28: kessel.relations.v1beta1.KesselCheckService.CheckBulk:output_type -> kessel.relations.v1beta1.CheckBulkResponse
+	13, // 29: kessel.relations.v1beta1.KesselCheckService.CheckForUpdateBulk:output_type -> kessel.relations.v1beta1.CheckForUpdateBulkResponse
+	26, // [26:30] is the sub-list for method output_type
+	22, // [22:26] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_kessel_relations_v1beta1_check_proto_init() }

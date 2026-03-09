@@ -506,6 +506,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkResponsePair'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.CheckForUpdateRequest:
             type: object
             properties:

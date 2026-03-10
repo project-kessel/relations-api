@@ -1380,6 +1380,96 @@ func TestSpiceDbRepository_CheckBulk(t *testing.T) {
 	assert.Equal(t, apiV1beta1.CheckBulkResponseItem_ALLOWED_FALSE, results["alice"])
 }
 
+func TestSpiceDbRepository_CheckForUpdateBulk(t *testing.T) {
+	t.Parallel()
+
+	// Unique IDs so this test does not collide with CheckBulk or other tests
+	ctx := context.Background()
+	spiceDbRepo, err := container.CreateSpiceDbRepository()
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	rels := []*apiV1beta1.Relationship{
+		createRelationship("rbac", "workspace", "checkforupdatebulk_workspace", "user_grant", "rbac", "role_binding", "checkforupdatebulk_role_binding", ""),
+		createRelationship("rbac", "role_binding", "checkforupdatebulk_role_binding", "granted", "rbac", "role", "checkforupdatebulk_role", ""),
+		createRelationship("rbac", "role_binding", "checkforupdatebulk_role_binding", "subject", "rbac", "principal", "bob", ""),
+		createRelationship("rbac", "role", "checkforupdatebulk_role", "view_widget", "rbac", "principal", "*", ""),
+	}
+
+	_, err = spiceDbRepo.CreateRelationships(ctx, rels, biz.TouchSemantics(true), nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// CheckForUpdateBulk is strongly consistent; no quantization wait needed.
+
+	items := []*apiV1beta1.CheckBulkRequestItem{
+		{
+			Resource: &apiV1beta1.ObjectReference{
+				Type: &apiV1beta1.ObjectType{
+					Name:      "workspace",
+					Namespace: "rbac",
+				},
+				Id: "checkforupdatebulk_workspace",
+			},
+			Relation: "view_widget",
+			Subject: &apiV1beta1.SubjectReference{
+				Subject: &apiV1beta1.ObjectReference{
+					Type: &apiV1beta1.ObjectType{
+						Name:      "principal",
+						Namespace: "rbac",
+					},
+					Id: "bob",
+				},
+			},
+		},
+		{
+			Resource: &apiV1beta1.ObjectReference{
+				Type: &apiV1beta1.ObjectType{
+					Name:      "workspace",
+					Namespace: "rbac",
+				},
+				Id: "checkforupdatebulk_workspace",
+			},
+			Relation: "view_widget",
+			Subject: &apiV1beta1.SubjectReference{
+				Subject: &apiV1beta1.ObjectReference{
+					Type: &apiV1beta1.ObjectType{
+						Name:      "principal",
+						Namespace: "rbac",
+					},
+					Id: "alice",
+				},
+			},
+		},
+	}
+
+	req := &apiV1beta1.CheckForUpdateBulkRequest{
+		Items: items,
+	}
+	resp, err := spiceDbRepo.CheckForUpdateBulk(ctx, req)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	if !assert.Equal(t, len(items), len(resp.GetPairs())) {
+		return
+	}
+
+	results := map[string]apiV1beta1.CheckBulkResponseItem_Allowed{}
+	for _, p := range resp.GetPairs() {
+		subjId := p.GetRequest().GetSubject().GetSubject().GetId()
+		results[subjId] = p.GetItem().GetAllowed()
+	}
+	assert.Equal(t, apiV1beta1.CheckBulkResponseItem_ALLOWED_TRUE, results["bob"])
+	assert.Equal(t, apiV1beta1.CheckBulkResponseItem_ALLOWED_FALSE, results["alice"])
+
+	// Response includes consistency_token like CheckBulkResponse.
+	assert.NotNil(t, resp.GetConsistencyToken())
+	assert.NotEmpty(t, resp.GetConsistencyToken().GetToken())
+}
+
 func TestFromSpicePair_WithError(t *testing.T) {
 	t.Parallel()
 

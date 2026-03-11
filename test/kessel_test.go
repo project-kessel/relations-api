@@ -423,6 +423,187 @@ func TestKesselAPIGRPC_BulkCheck(t *testing.T) {
 	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_FALSE, results["alice"])
 }
 
+func TestKesselAPIGRPC_CheckForUpdateBulk(t *testing.T) {
+	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
+	conn, err := grpc.NewClient(
+		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
+	)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	// Unique relationships for this test to avoid collisions with BulkCheck and other tests
+	tupleClient := v1beta1.NewKesselTupleServiceClient(conn)
+	var rels []*v1beta1.Relationship
+	rels = append(rels, createRelations("role_binding", "checkforupdatebulk_role_binding", "user_grant", "workspace", "checkforupdatebulk_workspace")...)
+	rels = append(rels, createRelations("role", "checkforupdatebulk_role", "granted", "role_binding", "checkforupdatebulk_role_binding")...)
+	rels = append(rels, createRelations("principal", "bob", "subject", "role_binding", "checkforupdatebulk_role_binding")...)
+	rels = append(rels, createRelations("principal", "*", "view_widget", "role", "checkforupdatebulk_role")...)
+
+	_, err = tupleClient.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{
+		Tuples: rels,
+	})
+	assert.NoError(t, err)
+
+	// CheckForUpdateBulk is strongly consistent; no quantization wait needed.
+
+	items := []*v1beta1.CheckBulkRequestItem{
+		{
+			Resource: &v1beta1.ObjectReference{
+				Type: simple_type("workspace"),
+				Id:   "checkforupdatebulk_workspace",
+			},
+			Relation: "view_widget",
+			Subject: &v1beta1.SubjectReference{
+				Subject: &v1beta1.ObjectReference{
+					Type: simple_type("principal"),
+					Id:   "bob",
+				},
+			},
+		},
+		{
+			Resource: &v1beta1.ObjectReference{
+				Type: simple_type("workspace"),
+				Id:   "checkforupdatebulk_workspace",
+			},
+			Relation: "view_widget",
+			Subject: &v1beta1.SubjectReference{
+				Subject: &v1beta1.ObjectReference{
+					Type: simple_type("principal"),
+					Id:   "alice",
+				},
+			},
+		},
+	}
+	req := &v1beta1.CheckForUpdateBulkRequest{Items: items}
+	checkClient := v1beta1.NewKesselCheckServiceClient(conn)
+	resp, err := checkClient.CheckForUpdateBulk(context.Background(), req)
+	assert.NoError(t, err)
+	if !assert.Equal(t, 2, len(resp.GetPairs())) {
+		return
+	}
+	results := map[string]v1beta1.CheckBulkResponseItem_Allowed{}
+	for _, p := range resp.GetPairs() {
+		subjId := p.GetRequest().GetSubject().GetSubject().GetId()
+		results[subjId] = p.GetItem().GetAllowed()
+	}
+	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_TRUE, results["bob"])
+	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_FALSE, results["alice"])
+	assert.NotNil(t, resp.GetConsistencyToken())
+	assert.NotEmpty(t, resp.GetConsistencyToken().GetToken())
+}
+
+func TestKesselAPIGRPC_CheckForUpdateBulk_WithErrorPair(t *testing.T) {
+	t.Parallel()
+	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)
+	token, err := GetJWTToken(kcurl, "admin", "admin")
+	if err != nil {
+		fmt.Print(err)
+	}
+	conn, err := grpc.NewClient(
+		fmt.Sprintf("localhost:%s", localKesselContainer.gRPCport),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpcutil.WithInsecureBearerToken(token.AccessToken),
+	)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	// Unique relationships for this test to avoid collisions with other tests
+	tupleClient := v1beta1.NewKesselTupleServiceClient(conn)
+	var rels []*v1beta1.Relationship
+	rels = append(rels, createRelations("role_binding", "checkforupdatebulk_error_role_binding", "user_grant", "workspace", "checkforupdatebulk_error_workspace")...)
+	rels = append(rels, createRelations("role", "checkforupdatebulk_error_role", "granted", "role_binding", "checkforupdatebulk_error_role_binding")...)
+	rels = append(rels, createRelations("principal", "bob", "subject", "role_binding", "checkforupdatebulk_error_role_binding")...)
+	rels = append(rels, createRelations("principal", "*", "view_widget", "role", "checkforupdatebulk_error_role")...)
+
+	_, err = tupleClient.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{
+		Tuples: rels,
+	})
+	assert.NoError(t, err)
+
+	// CheckForUpdateBulk is strongly consistent; no quantization wait needed.
+
+	// Prepare a request with:
+	// - one allowed TRUE (bob)
+	// - one allowed FALSE (alice)
+	// - one item that should produce an internal per-item error (invalid subject type)
+	items := []*v1beta1.CheckBulkRequestItem{
+		{
+			Resource: &v1beta1.ObjectReference{
+				Type: simple_type("workspace"),
+				Id:   "checkforupdatebulk_error_workspace",
+			},
+			Relation: "view_widget",
+			Subject: &v1beta1.SubjectReference{
+				Subject: &v1beta1.ObjectReference{
+					Type: simple_type("principal"),
+					Id:   "bob",
+				},
+			},
+		},
+		{
+			Resource: &v1beta1.ObjectReference{
+				Type: simple_type("workspace"),
+				Id:   "checkforupdatebulk_error_workspace",
+			},
+			Relation: "view_widget",
+			Subject: &v1beta1.SubjectReference{
+				Subject: &v1beta1.ObjectReference{
+					Type: simple_type("principal"),
+					Id:   "alice",
+				},
+			},
+		},
+		{
+			Resource: &v1beta1.ObjectReference{
+				Type: simple_type("workspace"),
+				Id:   "checkforupdatebulk_error_workspace",
+			},
+			Relation: "view_widget",
+			Subject: &v1beta1.SubjectReference{
+				Subject: &v1beta1.ObjectReference{
+					Type: simple_type("not_a_user"),
+					Id:   "charlie",
+				},
+			},
+		},
+	}
+	req := &v1beta1.CheckForUpdateBulkRequest{Items: items}
+	checkClient := v1beta1.NewKesselCheckServiceClient(conn)
+	resp, err := checkClient.CheckForUpdateBulk(context.Background(), req)
+	assert.NoError(t, err)
+	if !assert.Equal(t, 3, len(resp.GetPairs())) {
+		return
+	}
+
+	results := map[string]v1beta1.CheckBulkResponseItem_Allowed{}
+	errorSubjects := []string{}
+	for _, p := range resp.GetPairs() {
+		subjId := p.GetRequest().GetSubject().GetSubject().GetId()
+		if p.GetItem() != nil {
+			results[subjId] = p.GetItem().GetAllowed()
+		} else if p.GetError() != nil {
+			errorSubjects = append(errorSubjects, subjId)
+			assert.NotEqual(t, int32(codes.OK), p.GetError().GetCode())
+		} else {
+			assert.Fail(t, "pair has neither item nor error")
+		}
+	}
+	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_TRUE, results["bob"])
+	assert.Equal(t, v1beta1.CheckBulkResponseItem_ALLOWED_FALSE, results["alice"])
+	assert.Contains(t, errorSubjects, "charlie")
+	assert.NotNil(t, resp.GetConsistencyToken())
+	assert.NotEmpty(t, resp.GetConsistencyToken().GetToken())
+}
+
 func TestKesselAPIGRPC_BulkCheck_WithErrorPair(t *testing.T) {
 	t.Parallel()
 	kcurl := fmt.Sprintf("http://localhost:%s", localKesselContainer.KeycloakHTTPPort)

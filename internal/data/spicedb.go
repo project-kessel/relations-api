@@ -581,6 +581,7 @@ func toSpiceItem(item *apiV1beta1.CheckBulkRequestItem) *v1.CheckBulkPermissions
 	}
 }
 
+
 // helper to convert a SpiceDB pair to your API type
 func fromSpicePair(pair *v1.CheckBulkPermissionsPair, log *log.Helper) *apiV1beta1.CheckBulkResponsePair {
 	req := pair.GetRequest()
@@ -623,6 +624,35 @@ func fromSpicePair(pair *v1.CheckBulkPermissionsPair, log *log.Helper) *apiV1bet
 			Item: &apiV1beta1.CheckBulkResponseItem{Allowed: allowed},
 		},
 	}
+}
+
+// CheckForUpdateBulk runs N strongly-consistent checks (FullyConsistent). Reuses CheckBulkRequestItem and CheckBulkResponsePair; returns consistency_token like CheckBulkResponse.
+func (s *SpiceDbRepository) CheckForUpdateBulk(ctx context.Context, check *apiV1beta1.CheckForUpdateBulkRequest) (*apiV1beta1.CheckForUpdateBulkResponse, error) {
+	if err := s.initialize(); err != nil {
+		return nil, err
+	}
+	items := make([]*v1.CheckBulkPermissionsRequestItem, len(check.Items))
+	for i, it := range check.Items {
+		items[i] = toSpiceItem(it)
+	}
+	req := &v1.CheckBulkPermissionsRequest{
+		Consistency: &v1.Consistency{Requirement: &v1.Consistency_FullyConsistent{FullyConsistent: true}},
+		Items:       items,
+	}
+
+	resp, err := s.client.CheckBulkPermissions(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("error invoking CheckBulkPermissions in SpiceDB (CheckForUpdateBulk): %w", err)
+	}
+
+	pairs := make([]*apiV1beta1.CheckBulkResponsePair, len(resp.Pairs))
+	for i, p := range resp.Pairs {
+		pairs[i] = fromSpicePair(p, s.log)
+	}
+	return &apiV1beta1.CheckForUpdateBulkResponse{
+		Pairs:            pairs,
+		ConsistencyToken: &apiV1beta1.ConsistencyToken{Token: resp.GetCheckedAt().GetToken()},
+	}, nil
 }
 
 // simplified CheckBulk using the helpers

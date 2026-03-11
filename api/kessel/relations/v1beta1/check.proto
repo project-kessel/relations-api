@@ -36,7 +36,12 @@ service KesselCheckService {
 		};
 	};
 
-
+	rpc CheckForUpdateBulk (CheckForUpdateBulkRequest) returns (CheckForUpdateBulkResponse) {
+		option (google.api.http) = {
+			post: "/v1beta1/checkforupdatebulk"
+			body: "*"
+		};
+	};
 }
 
 message CheckRequest {
@@ -104,6 +109,15 @@ message CheckBulkRequest {
 }
 
 message CheckBulkResponse {
+	repeated CheckBulkResponsePair pairs = 1 [(buf.validate.field).repeated.min_items = 1];
+	ConsistencyToken consistency_token = 2;
+}
+
+message CheckForUpdateBulkRequest {
+	repeated CheckBulkRequestItem items = 1 [(buf.validate.field).repeated.min_items = 1];
+}
+
+message CheckForUpdateBulkResponse {
 	repeated CheckBulkResponsePair pairs = 1 [(buf.validate.field).repeated.min_items = 1];
 	ConsistencyToken consistency_token = 2;
 }

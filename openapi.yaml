@@ -103,6 +103,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateResponse'
+    /v1beta1/checkforupdatebulk:
+        post:
+            tags:
+                - KesselCheckService
+            operationId: KesselCheckService_CheckForUpdateBulk
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateBulkRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/kessel.relations.v1beta1.CheckForUpdateBulkResponse'
     /v1beta1/resources:
         get:
             tags:
@@ -474,6 +492,22 @@ components:
                     $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkResponseItem'
                 error:
                     $ref: '#/components/schemas/google.rpc.Status'
+        kessel.relations.v1beta1.CheckForUpdateBulkRequest:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkRequestItem'
+        kessel.relations.v1beta1.CheckForUpdateBulkResponse:
+            type: object
+            properties:
+                pairs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/kessel.relations.v1beta1.CheckBulkResponsePair'
+                consistencyToken:
+                    $ref: '#/components/schemas/kessel.relations.v1beta1.ConsistencyToken'
         kessel.relations.v1beta1.CheckForUpdateRequest:
             type: object
             properties:

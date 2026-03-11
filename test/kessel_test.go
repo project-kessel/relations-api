@@ -371,7 +371,6 @@ func TestKesselAPIGRPC_BulkCheck(t *testing.T) {
 	rels = append(rels, createRelations("principal", "*", "view_widget", "role", "rl1")...)
 
 	_, err = tupleClient.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{
-		Upsert: true,
 		Tuples: rels,
 	})
 	assert.NoError(t, err)
@@ -449,7 +448,6 @@ func TestKesselAPIGRPC_CheckForUpdateBulk(t *testing.T) {
 	rels = append(rels, createRelations("principal", "*", "view_widget", "role", "checkforupdatebulk_role")...)
 
 	_, err = tupleClient.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{
-		Upsert: true,
 		Tuples: rels,
 	})
 	assert.NoError(t, err)
@@ -527,7 +525,6 @@ func TestKesselAPIGRPC_CheckForUpdateBulk_WithErrorPair(t *testing.T) {
 	rels = append(rels, createRelations("principal", "*", "view_widget", "role", "checkforupdatebulk_error_role")...)
 
 	_, err = tupleClient.CreateTuples(context.Background(), &v1beta1.CreateTuplesRequest{
-		Upsert: true,
 		Tuples: rels,
 	})
 	assert.NoError(t, err)

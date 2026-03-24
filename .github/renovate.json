@@ -1,9 +1,20 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "packageRules": [
-    {
-      "matchManagers": ["gomod", "dockerfile"],
-      "schedule": ["* 0-1 * * 0"]
-    }
-  ]
+  "dockerfile": {
+    "schedule": ["* 0-7 * * 0"]
+  },
+  "gomod": {
+    "schedule": ["* 0-7 * * 0"],
+    "packageRules": [
+      {
+        "matchDatasources": ["go"],
+        "enabled": true,
+        "groupName": "Go updates",
+        "group": {
+          "branchTopic": "go-updates",
+          "commitMessageTopic": "go packages"
+        }
+      }
+    ]
+  }
 }

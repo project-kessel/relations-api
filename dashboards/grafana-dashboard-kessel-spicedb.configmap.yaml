@@ -22,7 +22,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
-      "id": 1267819,
+      "id": 1025852,
       "links": [],
       "liveNow": true,
       "panels": [
@@ -74,6 +74,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -85,7 +86,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -155,6 +156,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -166,7 +168,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -234,6 +236,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -246,7 +249,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -305,6 +308,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -316,7 +320,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -373,6 +377,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -385,7 +390,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -453,6 +458,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -465,7 +471,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -533,6 +539,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -545,7 +552,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -614,6 +621,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -626,7 +634,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -681,6 +689,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -693,7 +702,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -761,6 +770,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -773,7 +783,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -841,6 +851,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -853,7 +864,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -922,6 +933,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -934,7 +946,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -989,6 +1001,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -1001,7 +1014,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -1069,6 +1082,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -1081,7 +1095,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -1149,6 +1163,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -1161,7 +1176,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -1230,6 +1245,7 @@ data:
                 "graphMode": "area",
                 "justifyMode": "auto",
                 "orientation": "auto",
+                "percentChangeColorMode": "standard",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -1242,7 +1258,7 @@ data:
                 "textMode": "auto",
                 "wideLayout": true
               },
-              "pluginVersion": "10.4.1",
+              "pluginVersion": "11.6.3",
               "targets": [
                 {
                   "datasource": {
@@ -4454,11 +4470,10 @@ data:
               },
               "editorMode": "code",
               "expr": "sum by (pod) (rate(pgxpool_empty_acquire{job=\"$job\"}[$__rate_interval]))",
-              "hide": false,
               "instant": false,
               "legendFormat": "acquired: {{pod}}",
               "range": true,
-              "refId": "B"
+              "refId": "A"
             }
           ],
           "title": "Read Pool Empty Acquires/s",
@@ -4820,7 +4835,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum by (pod) (rate(go_memstats_alloc_bytes_total{job=\"$job\"}[$__interval]))",
+              "expr": "avg(rate(go_memstats_alloc_bytes_total{job=\"$job\"}[$__interval]))",
               "hide": false,
               "interval": "",
               "intervalFactor": 2,
@@ -4835,14 +4850,12 @@ data:
                 "type": "prometheus",
                 "uid": "${datasource}"
               },
-              "editorMode": "code",
               "exemplar": true,
-              "expr": "sum by (pod) (go_memstats_stack_inuse_bytes{job=\"$job\"})",
+              "expr": "avg(go_memstats_stack_inuse_bytes{job=\"$job\"})",
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "stack inuse",
               "metric": "go_memstats_stack_inuse_bytes",
-              "range": true,
               "refId": "C",
               "step": 4
             },
@@ -4851,7 +4864,6 @@ data:
                 "type": "prometheus",
                 "uid": "${datasource}"
               },
-              "editorMode": "code",
               "exemplar": true,
               "expr": "avg(go_memstats_heap_inuse_bytes{job=\"$job\"})",
               "hide": false,
@@ -4859,7 +4871,6 @@ data:
               "intervalFactor": 2,
               "legendFormat": "heap inuse",
               "metric": "go_memstats_heap_inuse_bytes",
-              "range": true,
               "refId": "D",
               "step": 4
             }
@@ -5067,13 +5078,12 @@ data:
               "exemplar": true,
               "expr": "sum by (pod) (rate(spicedb_datastore_gc_duration_seconds_sum{job=\"$job\"}[$__rate_interval]))",
               "format": "time_series",
-              "hide": false,
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "{{quantile}}",
               "metric": "go_gc_duration_seconds",
               "range": true,
-              "refId": "B",
+              "refId": "A",
               "step": 4
             }
           ],
@@ -5748,8 +5758,8 @@ data:
           },
           {
             "current": {
-              "text": "crcs02ue1-prometheus",
-              "value": "PDD8BE47D10408F45"
+              "text": "insights-perf-prometheus",
+              "value": "PAE149AA876DDB381"
             },
             "includeAll": false,
             "name": "datasource",

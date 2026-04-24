@@ -4469,14 +4469,14 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "sum by (pod) (rate(pgxpool_empty_acquire{job=\"$job\"}[$__rate_interval]))",
+              "expr": "sum by (pod, pool_usage) (rate(pgxpool_empty_acquire{job=\"$job\"}[$__rate_interval]))",
               "instant": false,
-              "legendFormat": "acquired: {{pod}}",
+              "legendFormat": "{{pool_usage}}: {{pod}}",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Read Pool Empty Acquires/s",
+          "title": "Pool Empty Acquires/s",
           "type": "timeseries"
         },
         {

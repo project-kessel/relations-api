@@ -204,6 +204,9 @@ objects:
                     curl -sSfL -o /etc/schema/schema.zed \
                       "https://raw.githubusercontent.com/${SPICEDB_SCHEMA_REPO}/${SPICEDB_SCHEMA_REF}/${SPICEDB_SCHEMA_PATH}"
                 inheritEnv: false
+                volumeMounts:
+                  - name: schema
+                    mountPath: /etc/schema
             env:
               - name: SPICEDB_PRESHARED
                 valueFrom:

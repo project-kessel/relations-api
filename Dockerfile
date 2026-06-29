@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8-1779809423 AS builder
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8-1782366411 AS builder
 
 ARG TARGETARCH
 USER root
@@ -12,7 +12,7 @@ ENV CGO_ENABLED 1
 RUN go mod vendor
 RUN make build
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8-1779809423
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8-1782366411
 
 RUN mkdir /config
 

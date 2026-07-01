@@ -15,8 +15,7 @@ make init
 ### Build
 
 ```shell
-# when building locally, use the local-build option as FIPS_ENABLED is set by default for builds
-make local-build
+make build
 ```
 
 (Configs must be specified to run binary, e.g. `./bin/kessel-relations -conf configs`, or run make target, below.)
@@ -208,27 +207,3 @@ Example:
 - Deploys rbac together with relationships application
   - Hardcoded image is used with grpc client for calling relationships
 
-## Validating FIPS
-Relations API is configured to build with FIPS capable libraries and produce FIPS capable binaries when running on FIPS enabled clusters.
-
-To validate the current running container is FIPS capable:
-
-```shell
-# exec or rsh into running pod
-# Reference the fips_enabled file that ubi9 creates for the host
-cat /proc/sys/crypto/fips_enabled
-# Expected output:
-1
-
-# Check go tool for the binary
-go tool nm /usr/local/bin/kessel-relations | grep FIPS
-# Expected output should reference openssl FIPS settings
-
-# Ensure openssl providers have a FIPS provider active
-openssl list -providers | grep -A 3 fips
-# Expected output
-  fips
-    name: Red Hat Enterprise Linux 9 - OpenSSL FIPS Provider
-    version: 3.0.7-395c1a240fbfffd8
-    status: active
-```

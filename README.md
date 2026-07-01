@@ -15,8 +15,7 @@ make init
 ### Build
 
 ```shell
-# when building locally, use the local-build option as FIPS_ENABLED is set by default for builds
-make local-build
+make build
 ```
 
 (Configs must be specified to run binary, e.g. `./bin/kessel-relations -conf configs`, or run make target, below.)

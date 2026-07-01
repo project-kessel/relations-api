@@ -1,23 +1,22 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8-1782366411 AS builder
-
-ARG TARGETARCH
-USER root
-RUN microdnf install -y tar gzip make which go-toolset
+# Build stage -- the Go toolchain embeds the validated FIPS module in all binaries automatically.
+FROM registry.access.redhat.com/hi/go:1.26.4-fips AS builder
 
 WORKDIR /workspace
 
 COPY . ./
 
-ENV CGO_ENABLED 1
 RUN go mod vendor
 RUN make build
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8-1782366411
+# Runtime stage -- set GODEBUG so the binary runs in FIPS mode.
+FROM registry.access.redhat.com/hi/core-runtime:2.42-openssl-fips
 
-RUN mkdir /config
+WORKDIR /
 
 COPY --from=builder /workspace/bin/kessel-relations /usr/local/bin/
-COPY --from=builder /workspace/configs/config.yaml /config
+COPY --from=builder /workspace/configs/config.yaml /config/config.yaml
+
+ENV GODEBUG=fips140=on
 
 EXPOSE 8000
 EXPOSE 9000

@@ -1,15 +1,12 @@
-FIPS_ENABLED?=true
-
 GOHOSTOS:=$(shell go env GOHOSTOS)
 GOPATH:=$(shell go env GOPATH)
 GOOS?=$(shell go env GOOS)
 GOARCH?=$(shell go env GOARCH)
 GOBIN?=$(shell go env GOBIN)
-GOFLAGS_MOD ?=
 VERSION=$(shell git describe --tags --always)
 DOCKER := $(shell type -P podman || type -P docker)
 
-GOENV=GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=1 GOFLAGS="${GOFLAGS_MOD}"
+GOENV=GOOS=${GOOS} GOARCH=${GOARCH}
 GOBUILDFLAGS=-gcflags="all=-trimpath=${GOPATH}" -asmflags="all=-trimpath=${GOPATH}"
 
 ifeq ($(GOHOSTOS), windows)
@@ -18,13 +15,6 @@ ifeq ($(GOHOSTOS), windows)
 	#changed to use git-bash.exe to run find cli or other cli friendly, caused of every developer has a Git.
 	#Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
 	Git_Bash=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell where git))))
-endif
-
-ifeq (${FIPS_ENABLED}, true)
-GOFLAGS_MOD+=-tags=fips_enabled
-GOFLAGS_MOD:=$(strip ${GOFLAGS_MOD})
-GOENV+=GOEXPERIMENT=strictfipsruntime,boringcrypto
-GOENV:=$(strip ${GOENV})
 endif
 
 .PHONY: init
@@ -66,13 +56,7 @@ api_breaking:
 .PHONY: build
 # build
 build:
-	$(warning Setting GOEXPERIMENT=strictfipsruntime,boringcrypto - this generally causes builds to fail unless building inside the provided Dockerfile. If building locally, run `make local-build`)
-	mkdir -p bin/ && ${GOENV} GOOS=${GOOS} go build ${GOBUILDFLAGS} -ldflags "-X cmd.Version=$(VERSION)" -o ./bin/ ./...
-
-.PHONY: local-build
-# local-build to ensure FIPS is not enabled which would likely result in a failed build locally
-local-build:
-	mkdir -p bin/ && go build -ldflags "-X cmd.Version=$(VERSION)" -o ./bin/ ./...
+	mkdir -p bin/ && ${GOENV} go build ${GOBUILDFLAGS} -ldflags "-X cmd.Version=$(VERSION)" -o ./bin/ ./...
 
 .PHONY: docker-build-push
 docker-build-push:
@@ -118,7 +102,7 @@ pr-check:
 	make generate;
 	make test;
 	make lint;
-	make local-build;
+	make build;
 
 spicedb-up:
 	./spicedb/start-spicedb.sh
@@ -151,7 +135,7 @@ kind/teardown:
 
 .PHONY: run
 # run api locally
-run: local-build
+run: build
 	 ./bin/kessel-relations -conf configs
 
 # show help

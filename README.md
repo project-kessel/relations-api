@@ -1,3 +1,5 @@
+# ⛔️ This repository will be decommisioned in the near future. Functionality will be combined into a monolith via [inventory-api](https://github.com/project-kessel/inventory-api) instead ⛔️
+
 # Kessel Relations API
 
 Kessel Relations API is a Zanzibar-inspired frontend for relationship-based access control (ReBAC).

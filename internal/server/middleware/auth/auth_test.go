@@ -3,13 +3,50 @@ package auth
 import (
 	"context"
 	"io"
+	"sync"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+type logEntry struct {
+	level   log.Level
+	keyvals []any
+}
+
+// captureLogger records every Log call for assertion in tests.
+type captureLogger struct {
+	mu      sync.Mutex
+	entries []logEntry
+}
+
+func (c *captureLogger) Log(level log.Level, keyvals ...any) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.entries = append(c.entries, logEntry{level: level, keyvals: keyvals})
+	return nil
+}
+
+func (c *captureLogger) all() []logEntry {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.entries
+}
+
+// keyvalMap converts a flat key-value slice into a map for field assertions.
+func keyvalMap(keyvals []any) map[string]any {
+	m := make(map[string]any, len(keyvals)/2)
+	for i := 0; i+1 < len(keyvals); i += 2 {
+		if k, ok := keyvals[i].(string); ok {
+			m[k] = keyvals[i+1]
+		}
+	}
+	return m
+}
 
 // mockTransporter satisfies transport.Transporter for injecting operation names in tests.
 type mockTransporter struct {
@@ -58,6 +95,8 @@ func TestAuthFailureLoggingMiddleware_PassesThroughNonJwtError(t *testing.T) {
 func TestAuthFailureLoggingMiddleware_LogsAndPassesThroughJwtErrors(t *testing.T) {
 	t.Parallel()
 
+	const operation = "/kessel.relations.v1beta1.KesselTupleService/CreateTuples"
+
 	jwtErrors := []error{
 		jwt.ErrMissingJwtToken,
 		jwt.ErrTokenInvalid,
@@ -67,19 +106,35 @@ func TestAuthFailureLoggingMiddleware_LogsAndPassesThroughJwtErrors(t *testing.T
 		jwt.ErrMissingKeyFunc,
 	}
 
-	logger := log.NewStdLogger(io.Discard)
-	m := AuthFailureLoggingMiddleware(logger)
-
 	for _, jwtErr := range jwtErrors {
 		t.Run(jwtErr.Error(), func(t *testing.T) {
 			t.Parallel()
+
+			cl := &captureLogger{}
+			m := AuthFailureLoggingMiddleware(cl)
 
 			handler := func(ctx context.Context, req any) (any, error) {
 				return nil, jwtErr
 			}
 
-			_, err := m(handler)(ctxWithOperation("/kessel.relations.v1beta1.KesselTupleService/CreateTuples"), nil)
+			_, err := m(handler)(ctxWithOperation(operation), nil)
+
+			// Error is passed through unchanged.
 			assert.Equal(t, jwtErr, err)
+
+			// Exactly one log entry must have been emitted.
+			entries := cl.all()
+			require.Len(t, entries, 1)
+
+			entry := entries[0]
+			assert.Equal(t, log.LevelWarn, entry.level)
+
+			fields := keyvalMap(entry.keyvals)
+			assert.Equal(t, "AUTHENTICATE", fields["action"])
+			assert.Equal(t, "api_endpoint", fields["resource_type"])
+			assert.Equal(t, operation, fields["resource_id"])
+			assert.Equal(t, "failure", fields["outcome"])
+			assert.Equal(t, jwtErrorReason(jwtErr), fields["reason"])
 		})
 	}
 }

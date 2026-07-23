@@ -175,18 +175,18 @@ func AuthFailureLoggingMiddleware(logger log.Logger) kratosMiddleware.Middleware
 }
 
 func jwtErrorReason(err error) string {
-	switch {
-	case jwt.ErrMissingKeyFunc.Is(err):
+	switch err {
+	case jwt.ErrMissingKeyFunc:
 		return "missing_key_func"
-	case jwt.ErrMissingJwtToken.Is(err):
+	case jwt.ErrMissingJwtToken:
 		return "missing_token"
-	case jwt.ErrTokenInvalid.Is(err):
+	case jwt.ErrTokenInvalid:
 		return "token_invalid"
-	case jwt.ErrTokenExpired.Is(err):
+	case jwt.ErrTokenExpired:
 		return "token_expired"
-	case jwt.ErrTokenParseFail.Is(err):
+	case jwt.ErrTokenParseFail:
 		return "token_parse_failed"
-	case jwt.ErrUnSupportSigningMethod.Is(err):
+	case jwt.ErrUnSupportSigningMethod:
 		return "unsupported_signing_method"
 	default:
 		return ""

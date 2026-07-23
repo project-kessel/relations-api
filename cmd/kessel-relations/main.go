@@ -84,11 +84,26 @@ func main() {
 	//	bc.Data.SpiceDb.Token = preshared
 	//}
 
-	app, cleanup, err := wireApp(bc.Server, bc.Data, createLogger(bc.Server))
+	logger := createLogger(bc.Server)
+
+	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
 	if err != nil {
 		panic(fmt.Errorf("error initializing application (via wire): %w", err))
 	}
 	defer cleanup()
+
+	// Service startup - SEC-MON-REQ-1 compliance (EOI-5 process_status)
+	log.NewHelper(logger).Infow(
+		"msg", "Service starting",
+		"action", "STARTUP",
+		"resource_type", "service",
+		"resource_id", Name,
+		"outcome", "success",
+		"service_version", Version,
+		"auth_enabled", bc.Server.Auth.EnableAuth,
+		"grpc_addr", bc.Server.Grpc.Addr,
+		"http_addr", bc.Server.Http.Addr,
+	)
 
 	// start and wait for stop signal
 	if err := app.Run(); err != nil {

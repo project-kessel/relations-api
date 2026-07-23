@@ -17,6 +17,7 @@ import (
 	v1beta1 "github.com/project-kessel/relations-api/api/kessel/relations/v1beta1"
 	"github.com/project-kessel/relations-api/internal/conf"
 	"github.com/project-kessel/relations-api/internal/server/middleware"
+	"github.com/project-kessel/relations-api/internal/server/middleware/auth"
 	"github.com/project-kessel/relations-api/internal/service"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -54,6 +55,7 @@ func NewHTTPServer(c *conf.Server, relationships *service.RelationshipsService, 
 			return nil, err
 		}
 		opts = append(opts, http.Middleware(
+			auth.AuthFailureLoggingMiddleware(logger),
 			selector.Server(
 				jwt.Server(
 					jwks.Keyfunc,

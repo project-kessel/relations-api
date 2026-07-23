@@ -66,12 +66,14 @@ func NewGRPCServer(c *conf.Server, relations *service.RelationshipsService, heal
 		}
 
 		unaryMiddleware = append(unaryMiddleware,
+			auth.AuthFailureLoggingMiddleware(logger),
 			selector.Server(jwt.Server(jwks.Keyfunc,
 				jwt.WithSigningMethod(jwtv5.SigningMethodRS256))).
 				Match(NewWhiteListMatcher).
 				Build(),
 		)
 		streamingMiddleware = append(streamingMiddleware, auth.StreamAuthInterceptor(
+			logger,
 			jwks.Keyfunc,
 			auth.WithSigningMethod(jwtv5.SigningMethodRS256)))
 	}

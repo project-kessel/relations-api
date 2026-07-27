@@ -14,6 +14,13 @@
           "branchTopic": "go-updates",
           "commitMessageTopic": "go packages"
         }
+      },
+      {
+        "description": "Disable go-kratos major updates",
+        "matchManagers": ["gomod"],
+        "matchPackageNames": ["github.com/go-kratos/**"],
+        "matchUpdateTypes": ["major"],
+        "enabled": false
       }
     ]
   }

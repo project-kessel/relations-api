@@ -10,6 +10,8 @@ objects:
     spec:
       config:
         logLevel: ${SPICEDB_LOG_LEVEL}
+        logFormat: json
+        grpcLogRequestsEnabled: "true"
         replicas: ${{SPICEDB_REPLICAS}}
         datastoreEngine: postgres
         image: ${SPICEDB_IMAGE}

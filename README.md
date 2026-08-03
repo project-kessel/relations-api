@@ -47,19 +47,16 @@ go build -o ./bin/ ./...
 
 ### Build Container Images
 
-By default, the quay repository is `quay.io/cloudservices/kessel-relations`. If you wish to use another for testing, set IMAGE value first
-```shell
-export IMAGE=your-quay-repo # if desired
-make docker-build-push
-```
+Log in to the required registries, then run the `docker-build-push` target with your image destination. The base image is pulled from `registry.access.redhat.com` during the build, so both logins are required.
 
-### Build Container Images (macOS)
-This is an alternative to the above command for macOS users, but should work for any arch
-```shell
-export QUAY_REPO_RELATIONS=your-quay-repo # required
-podman login quay.io # required, this target assumes you are already logged in
-make build-push-minimal
-```
+    podman login quay.io                     # or: docker login quay.io
+    podman login registry.access.redhat.com  # or: docker login registry.access.redhat.com
+
+    make docker-build-push IMAGE=quay.io/your-org/relations-api
+
+If the build fails with an authentication error mentioning `registry.access.redhat.com`, ensure you are logged in using your Red Hat Customer Portal credentials. See the [Red Hat Registry Authentication guide](https://access.redhat.com/RegistryAuthentication) for details.
+
+`podman` is used automatically if available, otherwise `docker` is used. Override with `DOCKER=docker make docker-build-push IMAGE=quay.io/your-org/relations-api`.
 
 ### Generate other auxiliary files by Makefile
 

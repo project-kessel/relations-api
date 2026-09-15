@@ -1,0 +1,97 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: relations
+objects:
+  - apiVersion: cloud.redhat.com/v1alpha1
+    kind: ClowdApp
+    metadata:
+      name: ${CLOWDAPP_NAME}
+    spec:
+      envName: ${ENV_NAME}
+      testing:
+        iqePlugin: relations_api
+      deployments:
+        - name: api
+          minReplicas: ${{RELATIONS_REPLICAS}}
+          podSpec:
+            image: ${RELATIONS_IMAGE}:${IMAGE_TAG}
+            livenessProbe:
+              httpGet:
+                path: /api/authz/livez
+                port: 8000
+            readinessProbe:
+              httpGet:
+                path: /api/authz/readyz
+                port: 8000
+            resources:
+              requests:
+                memory: ${RELATIONS_REQUESTS_MEMORY}
+                cpu: ${RELATIONS_REQUESTS_CPU}
+              limits:
+                memory: ${RELATIONS_LIMITS_MEMORY}
+                cpu: ${RELATIONS_LIMITS_CPU}
+            env:
+              - name: SPICEDB_PRESHARED
+                valueFrom:
+                  secretKeyRef:
+                    key: preshared_key
+                    name: spicedb-config
+              - name: SPICEDB_ENDPOINT
+                value: ${CLOWDAPP_NAME}-spicedb:50051
+              - name: SPICEDB_SCHEMA_FILE
+                value: /etc/schema/schema.zed
+            volumes:
+            - name: schema
+              configMap:
+                name: spicedb-schema
+            - name: relations-api-config
+              configMap:
+                name: relations-api-config
+            volumeMounts:
+              - name: schema
+                mountPath: /etc/schema
+              - name: relations-api-config
+                mountPath: /config
+          webServices:
+            public:
+              enabled: true
+              apiPath: authz
+  - kind: PodDisruptionBudget
+    apiVersion: policy/v1
+    metadata:
+      name: kessel-relations-api-pdb
+    spec:
+      minAvailable: 1
+      selector:
+        matchLabels:
+          app: kessel-relations
+parameters:
+  - description: Name of the ClowdApp
+    name: CLOWDAPP_NAME
+    value: kessel-relations
+  - description: ClowdEnvironment name (ephemeral, stage, prod)
+    name: ENV_NAME
+    required: true
+  - description: App Image
+    name: RELATIONS_IMAGE
+    value: quay.io/redhat-services-prod/project-kessel-tenant/kessel-relations/relations-api
+  - description: Image Tag
+    name: IMAGE_TAG
+    required: true
+    value: latest
+  - description: Number of pods for relations service
+    name: RELATIONS_REPLICAS
+    value: '1'
+  - description: Memory request for relations service
+    name: RELATIONS_REQUESTS_MEMORY
+    value: '512Mi'
+  - description: CPU request for relations service
+    name: RELATIONS_REQUESTS_CPU
+    value: '150m'
+  - description: Memory limit for relations service
+    name: RELATIONS_LIMITS_MEMORY
+    value: '1Gi'
+  - description: CPU limit for relations service
+    name: RELATIONS_LIMITS_CPU
+    value: '300m'

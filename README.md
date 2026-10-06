@@ -2,6 +2,8 @@
 
 # Kessel Relations API
 
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/project-kessel/relations-api/badge)](https://securityscorecards.dev/viewer/?uri=github.com/project-kessel/relations-api)
+
 Kessel Relations API is a Zanzibar-inspired frontend for relationship-based access control (ReBAC).
 
 ## Contributing

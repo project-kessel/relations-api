@@ -1,3 +1,5 @@
+# DEVELOPMENT ONLY — DO NOT USE IN PRODUCTION.
+# This configuration disables or weakens authentication, TLS, or related security controls.
 services:
   relations-api:
     image: "quay.io/cloudservices/kessel-relations:latest"

@@ -4,24 +4,24 @@
     "schedule": ["* 0-7 * * 0"]
   },
   "gomod": {
-    "schedule": ["* 0-7 * * 0"],
-    "packageRules": [
-      {
-        "matchDatasources": ["go"],
-        "enabled": true,
-        "groupName": "Go updates",
-        "group": {
-          "branchTopic": "go-updates",
-          "commitMessageTopic": "go packages"
-        }
-      },
-      {
-        "description": "Disable go-kratos major updates",
-        "matchManagers": ["gomod"],
-        "matchPackageNames": ["github.com/go-kratos/**"],
-        "matchUpdateTypes": ["major"],
-        "enabled": false
+    "schedule": ["* 0-7 * * 0"]
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["gomod", "github-actions"],
+      "enabled": true,
+      "groupName": "Dependency updates",
+      "group": {
+        "branchTopic": "dependency-updates",
+        "commitMessageTopic": "dependencies"
       }
-    ]
-  }
+    },
+    {
+      "description": "Disable go-kratos major updates",
+      "matchManagers": ["gomod"],
+      "matchPackageNames": ["github.com/go-kratos/**"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    }
+  ]
 }
